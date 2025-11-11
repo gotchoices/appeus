@@ -6,53 +6,53 @@ This document tracks the vision, options, and plan for Appeus—a design-to-app 
 Design and execution happen on the same surface. Stories expand into scenarios which immediately render as live React Native screens (device or simulator). Deep links from web scenario pages open the app into the exact screen and variant under review. An optional in-app overlay guides walkthroughs and captures feedback. When design is done, the app is materially done.
 
 ## Feasibility
-Feasible using today’s tools. Two primary tracks:
-- Runtime-rendered RN screens from a declarative schema (fastest design loop).
-- Codegen of RN screens and navigation from stories/scenarios (idiomatic source, more control).
-
-Both support deep links, wizard overlay, and external mock data with variants.
+Feasible using today’s tools. Chosen approach: codegen of React Native screens and navigation from stories/scenarios/specs (idiomatic source, full flexibility). Deep links, in-app overlay, and mock data variants are supported.
 
 ## Relationship to existing appgen/chat
 - `appgen/` provides content-first design flow: stories → scenarios → screens/specs with transforms and scripts.
 - `chat/app/design/` is a concrete instance: authored stories/scenarios, XML screens, specs, and generated HTML/SVG previews.
 - Appeus extends this by making the “rendered” asset a live RN app, not static images/pages.
+- As we build out appeus, use appgen as a reference.  It is working well in many respects (going from stories to renderings).  The main differences are:
+  - We want to go direct to react-native
+  - We want a way to review scenarios somehow integrated with the running prototype app
+- Don't re-invent the wheel.  If something is working right in appgen, adopt it.  If it needs to be adapted for our new approach, adapt it.  Ask the user if you're not sure.
 
 ## Current Decisions
-- Mock layer: Use a tiny Express server that serves local JSON files. Variant selection via `?variant=` query param or `X-Mock-Variant` header. Minimal/no validation during design; tunnels (Cloudflare Tunnel/ngrok) optional for device/team access.
-- Rendering strategy: Code generation of RN screens + navigation from stories/scenarios/specs (Option 2).
+- Mock layer: Use a tiny Express server that serves local JSON files. Variant selection via `?variant=` query param or `X-Mock-Variant` header. For example there might be multiple sets of mock files for a single screen (to test different conditions).
+- Minimal/no validation during design.
+- For team access, we will consider:
+  - Pushing json files to a public server
+  - Establishing an ssh tunnel to a public IP that will server local files
+- Rendering strategy: Code generation of RN screens + navigation from stories scenarios, specs.
 - Generation priority (appgen-style): Human specs > AI consolidation > inferred assumptions.
-- Generation governance (simplified): AI may generate app code; generation runs only when requested by the human; regular git commit discipline for reversibility; humans provide input via Markdown specs; Appeus supplies scripts that detect stale outputs by comparing spec modification times to generated artifacts and prompt regeneration.
-- Toolkit: Appeus-only (no appgen dependency). Port/replicate any needed scripts, rules, and resources under `appeus/`.
+- Generation governance (simplified): AI may generate app code; generation runs only when requested/triggered/authorized by the human; Appeus supplies scripts that detect stale outputs by comparing spec modification times to generated artifacts and prompt regeneration.
+- Encourage regular git commit discipline for reversibility, recovery
+- Humans provide input via Markdown specs
+- Toolkit: Appeus-only (no further appgen dependency). Port/replicate any needed scripts, rules, and resources under `appeus/`.
 
-## Architecture Options
-
-### A) Runtime schema-rendered UI (design-to-runtime)
-- Stories → scenarios → screen schema (JSON/MDX).
-- RN app has a renderer that maps schema → components; navigation is configured dynamically.
-- Pros: immediate changes, minimal regeneration, single source of truth.
-- Cons: limited by schema expressiveness; advanced UI may need escape hatches/custom components.
-
-### B) Code generation of RN screens (design-to-source)
+## Rendering Strategy
+### Code generation of RN screens (design-to-source)
 - Stories → scenarios → generated `.tsx` screens + navigation registry; scenario variants pre-wired into data providers.
 - Pros: idiomatic source, maximal flexibility and performance; easier to hand-tune per screen.
 - Cons: need robust idempotent generators; merge strategy for manual edits.
-
-Many teams adopt a hybrid: start in runtime for fast iteration, selectively “materialize” to code for complex screens.
+Note: A runtime schema-rendered approach exists conceptually but is out of scope for Appeus.
 
 ## Core Workflow
 1) Author stories with scenarios and named variants (happy/empty/error).
 2) Build artifacts:
    - Generate scenario pages (web) with “Open in App” deep links carrying `screen`, `scenario`, and `variant`.
-   - Update either the runtime schema or generate `.tsx` screens and navigation entries.
+   - Generate consolidations (how one would build screens, navigation, components) based on stories.
+   - Consider any human-generated specs (prioritize over consolidations)
+   - Generate `.tsx` screens and navigation entries.
 3) Run the app:
    - Linking config parses deep links and navigates to the target screen.
    - A global ScenarioRunner applies the scenario/variant, selecting mock data and toggling UI state.
    - Optional overlay guides steps and records notes.
 4) Iterate:
-   - Edit stories/specs → regenerate schema/code → hot reload.
+   - Edit stories/specs → regenerate code → hot reload.
    - Feedback from overlay feeds back into stories/specs.
 5) Transition to production:
-   - Swap mocks for real endpoints; keep shapes consistent to minimize churn.
+   - Swap mocks for real endpoints/model; keep shapes consistent to minimize churn.
    - Tighten types, tests, and remove unused variants.
 
 ## Deep Linking and Overlay
@@ -81,8 +81,8 @@ Notes (aligning with AppGen):
 - For screens referenced by multiple stories, create/maintain a consolidation file first, mirroring AppGen’s multi-story consolidation guidance.
 
 Typical file layout (optional, not strictly enforced):
-- Human specs (per-screen): `design/specs/<screen-id>.md` (Markdown; may include code blocks/slots)
-- Navigation specs (human-authored): `design/specs/navigation/*` (e.g., `sitemap.md`, rules)
+- Human specs (per-screen): `design/specs/screens/<screen-id>.md` (Markdown; may include code blocks/slots)
+- Navigation specs (human-authored): `design/specs/navigation.md`
 - Global specs (project-wide): `design/specs/global/*` (toolchain, UI, dependencies, etc.)
 - AI consolidation (screens): `design/generated/screens/<screen-id>.md` (or `.json`)
 - AI consolidation (navigation): `design/generated/navigation.md`
@@ -155,7 +155,8 @@ project-root/
 │   │   ├── components/
 │   └── specs/
 │       ├── AGENTS.md -> ../appeus/agent-rules/specs.md
-│       ├── navigation/             # human-authored sitemap and nav rules; agent can consolidate here too
+│       ├── navigation.md           # human-authored sitemap and nav rules
+│       ├── screens/                # human-authored screen specs
 │       └── global/                 # toolchain.md, ui.md, dependencies.md, etc.
 ├── mock/
 │   ├── data/                       # JSON by ns/screen/variant
@@ -182,7 +183,7 @@ Notes:
 - React Native via Expo (Dev Client, EAS Updates) and React Navigation or Expo Router.
 - Deep linking and universal links via Expo Linking.
 - State management for scenario/variant state (Zustand/Recoil).
-- For runtime rendering: JSON/MDX schema + RN component registry.
+/* runtime-schema path intentionally out of scope for Appeus */
 - For codegen: `ts-morph`, `plop`/`hygen` for idempotent generation of screens and navigation.
 - Mocking: tiny Express server for local JSON (default). Optional: `json-server` for quick datasets. Tunnels via Cloudflare Tunnel or ngrok for device/team access.
 - Scenario browsing: Markdown scenarios with deep-link buttons into the running app (device/simulator).
