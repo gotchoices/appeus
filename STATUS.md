@@ -176,14 +176,14 @@ project-root/
 
 Notes:
 - Keep all design artifacts under `design/`. Agents generate code into `src/` only when requested.
-- Navigation behaves like other specs: human writes `design/specs/navigation/*`; the agent may also produce/refresh consolidated navigation files there (e.g., `sitemap.md`, `routes.md`) derived from stories. Codegen consumes these to emit `src/navigation/generated.ts`.
+- Navigation behaves like other specs: human writes `design/specs/navigation.md`; the agent may also produce/refresh a consolidated navigation view under `design/generated/navigation.md` derived from stories. Codegen merges both (human takes precedence) to emit `src/navigation/*`.
 - `AGENTS.md` symlinks point to `appeus/agent-rules/*` to keep guidance centralized.
 
 ## Tooling Choices
 - React Native via Expo (Dev Client, EAS Updates) and React Navigation or Expo Router.
 - Deep linking and universal links via Expo Linking.
 - State management for scenario/variant state (Zustand/Recoil).
-/* runtime-schema path intentionally out of scope for Appeus */
+
 - For codegen: `ts-morph`, `plop`/`hygen` for idempotent generation of screens and navigation.
 - Mocking: tiny Express server for local JSON (default). Optional: `json-server` for quick datasets. Tunnels via Cloudflare Tunnel or ngrok for device/team access.
 - Scenario browsing: Markdown scenarios with deep-link buttons into the running app (device/simulator).
@@ -203,7 +203,7 @@ Phase 1 (Foundations):
  - Adopt human-triggered generation and commit discipline; add `check-stale` and `regenerate` scripts.
  - Port/replicate required assets from AppGen into Appeus (rules, templates, scripts).
  - Add AGENTS.md symlinks under `design/*` pointing to `appeus/agent-rules/*`.
- - Place global specs under `design/specs/global/` and navigation specs under `design/specs/navigation/`.
+ - Place global specs under `design/specs/global/` and navigation spec under `design/specs/navigation.md`.
  - Add initial global specs (toolchain/ui/dependencies) or accept defaults and proceed.
 
 Phase 2 (Rendering strategy):
@@ -223,7 +223,7 @@ Phase 3 (Hardening):
 - [ ] Stand up tiny Express JSON mock server (read/write, file-backed)
 - [ ] Support variant selection via `?variant=` param or `X-Mock-Variant` header
 - [ ] Add tunnel/hosting setup for device-accessible mocks
-- [ ] Generate scenario web pages with “Open in App” links
+- [ ] Generate scenario pages under `design/generated/scenarios/` with “Open in App” deep links
 - [ ] Implement codegen pipeline and idempotent generators (screens/navigation)
 - [ ] Define spec schema (frontmatter fields) and consolidation format
 - [ ] Add `appeus/scripts/check-stale` to compare spec/consolidation mtimes vs generated outputs
