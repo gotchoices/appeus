@@ -11,12 +11,12 @@ Focus
 Toolkit layout
 - agent-rules/: guidance for AI agents (linked via AGENTS.md in project folders)
 - scripts/: init-project, check-stale, regenerate
-- templates/: starter files for specs/consolidations/scenarios
-- reference/: workflows and codegen guidance
+- templates/: starter files for specs (screens/navigation/global/api), consolidations (screens/api), scenarios
+- reference/: workflows and codegen guidance (including API workflow)
 - user-guides/: quick guides for humans
 
 Start here
 - Read QUICKSTART to initialize a project
-- See STATUS for the current plan and roadmap
+- Reference docs replace STATUS over time; STATUS is transitional
 
 

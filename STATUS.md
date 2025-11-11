@@ -1,6 +1,6 @@
 # STATUS
 
-This document tracks the vision, options, and plan for Appeus—a design-to-app workflow that converts user stories into a running React Native app with live navigation and mockable data. It consolidates our current answers and outlines multiple viable paths, tools, and next steps.
+This document tracks the vision, options, and plan for Appeus—a design-to-app workflow that converts user stories into a running React Native app with live navigation and mockable data. As the Appeus toolkit matures, reference docs under `appeus/reference/` supersede this STATUS; consider this file transitional.
 
 ## Vision
 Design and execution happen on the same surface. Stories expand into scenarios which immediately render as live React Native screens (device or simulator). Deep links from web scenario pages open the app into the exact screen and variant under review. An optional in-app overlay guides walkthroughs and captures feedback. When design is done, the app is materially done.
@@ -152,11 +152,13 @@ project-root/
 │   │   ├── navigation.md
 │   │   ├── scenarios/
 │   │   ├── screens/
+│   │   ├── api/
 │   │   ├── components/
 │   └── specs/
 │       ├── AGENTS.md -> ../appeus/agent-rules/specs.md
 │       ├── navigation.md           # human-authored sitemap and nav rules
 │       ├── screens/                # human-authored screen specs
+│       ├── api/                    # human-authored API procedure specs
 │       └── global/                 # toolchain.md, ui.md, dependencies.md, etc.
 ├── mock/
 │   ├── data/                       # JSON by ns/screen/variant
@@ -176,7 +178,8 @@ project-root/
 
 Notes:
 - Keep all design artifacts under `design/`. Agents generate code into `src/` only when requested.
-- Navigation behaves like other specs: human writes `design/specs/navigation.md`; the agent may also produce/refresh a consolidated navigation view under `design/generated/navigation.md` derived from stories. Codegen merges both (human takes precedence) to emit `src/navigation/*`.
+- Navigation behaves like other specs: human writes `design/specs/navigation.md`; the agent may also produce/refresh a consolidated navigation view under `design/generated/navigation.md`. Codegen merges both (human precedence) to emit `src/navigation/*`.
+- API behaves like other specs: human writes `design/specs/api/*.md`; the agent may produce `design/generated/api/*.md`. Mock data keys/shapes should align with these docs.
 - `AGENTS.md` symlinks point to `appeus/agent-rules/*` to keep guidance centralized.
 
 ## Tooling Choices
