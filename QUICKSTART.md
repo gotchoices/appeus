@@ -1,33 +1,32 @@
 # Quickstart
 
-This quickstart helps you spin up the agent-guided scaffold so your stories become a running React Native app as you design it. Keep details light here—the agent will drive specifics and choices (runtime renderer vs codegen, mocks, navigation).
+This quickstart helps you spin up the agent-guided scaffold so your stories become a running React Native app as you design it.
 
-## Prerequisites
+Prerequisites
 - Node.js LTS and Yarn (or npm)
 - Expo tooling (CLI or Dev Client) and an iOS/Android simulator (or device)
 - A Git repo for your app (recommended)
 
-## 1) Start with your first story
-Create a short user story (e.g., “As a user, I can create a todo”). Keep it concrete; list a couple of scenarios and variants (happy/empty/error).
+1) Initialize design surface
+- From your project root: `./appeus/scripts/init-project.sh`
+- This creates `design/` folders and AGENTS.md links; seeds `design/specs/navigation.md` and `design/specs/global/*`
 
-## 2) Invoke the AI agent to scaffold
-In your editor/agent:
-- Ask it to “Initialize Appeus scaffold for React Native with live navigation, deep linking, and mock data.”
-- Provide your first story and scenarios. The agent will:
-  - Set up a minimal RN app (Expo) with navigation and deep link config
-  - Create a ScenarioRunner overlay to guide flows and toggle variants
-  - Configure a mock API source (local or hosted) with variant selection
-  - Choose a path: runtime schema-rendered UI or codegen RN screens
+2) Write your first story
+- Add `design/stories/01-first-story.md` with goal, sequence, acceptance, variants
 
-## 3) Open the app and iterate
-- Run the app in a simulator or on device
-- From a scenario page or overlay, deep-link into a screen with a variant
-- Tweak the story/specs; have the agent apply changes back into source
+3) Derive consolidations and specs
+- Ask the agent to create `design/generated/screens/<id>.md` and `design/specs/screens/<id>.md` as needed
+- Update `design/specs/navigation.md` with sitemap and deep links
 
-## 4) Evolve toward production
-- Replace mocks with real endpoints as they’re ready
-- Tighten types, tests, and any generated artifacts
+4) Generate RN code (on request)
+- Run `./appeus/scripts/check-stale` to see what’s out of date
+- Run `./appeus/scripts/regenerate` and have the agent generate/update `src/screens/*` and `src/navigation/*`
 
-If you want more detail on tool choices or workflows, see STATUS.
+5) Run and iterate
+- Launch the app (Expo or bare RN)
+- Use scenario pages (`design/generated/scenarios/*`) with “Open in App” links
+- Edit stories/specs and regenerate as needed
+
+See STATUS for workflows and roadmap.
 
 

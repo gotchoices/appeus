@@ -2,13 +2,21 @@
 
 Appeus is a design-to-app workflow that turns user stories into a running React Native app as you design it. Instead of generating static screens or diagrams, Appeus renders live screens with navigation, deep linking, and mock data so that what you review in the simulator is the actual app you ship.
 
-The project’s focus is on:
-- From stories and scenarios to working screens with live navigation
-- Deep-linking from web scenarios into the running app (device or simulator)
-- An optional in-app “wizard/overlay” to guide flows and capture feedback
-- Mock APIs with selectable variants to exercise states (happy, empty, error)
-- A choice of implementation paths: runtime schema-rendered UI or codegen screens
+Focus
+- Stories → consolidations/specs → codegen RN → run → iterate
+- Deep links into the app from scenario pages
+- Optional in-app overlay for guided reviews
+- Simple local JSON mock server; variants via query/header
 
-See QUICKSTART for how to get the agent-guided scaffold going, and STATUS for design options, tools, and the roadmap.
+Toolkit layout
+- agent-rules/: guidance for AI agents (linked via AGENTS.md in project folders)
+- scripts/: init-project, check-stale, regenerate
+- templates/: starter files for specs/consolidations/scenarios
+- reference/: workflows and codegen guidance
+- user-guides/: quick guides for humans
+
+Start here
+- Read QUICKSTART to initialize a project
+- See STATUS for the current plan and roadmap
 
 

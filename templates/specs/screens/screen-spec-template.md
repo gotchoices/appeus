@@ -1,0 +1,35 @@
+# Screen Spec: <screen-id>
+
+---
+id: <screen-id>
+route: <RouteName>
+title: <Title>
+variants: [happy, empty, error]
+dataRequirements:
+  - <key>: <type>
+actions:
+  - <actionName>(<params>)
+layoutHints:
+  - header:large
+acceptance:
+  - "User can <do X> and see <Y>"
+overrides:
+  slots: []  # e.g., [imports, component, styles]
+---
+
+## Notes
+- Add clarifications, wire references, and behaviors here.
+
+```ts slot=imports
+// Optional: custom imports
+```
+
+```tsx slot=component
+// Optional: custom component body
+```
+
+```ts slot=styles
+// Optional: styles
+```
+
+
