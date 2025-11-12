@@ -78,6 +78,11 @@ if [ ! -f "${DESIGN_DIR}/specs/api/README.md" ]; then
 EOF
 fi
 
+# Seed screens index plan if missing
+if [ ! -f "${DESIGN_DIR}/specs/screens/index.md" ]; then
+  cp -f "${APPEUS_DIR}/templates/specs/screens/index.md" "${DESIGN_DIR}/specs/screens/index.md"
+fi
+
 # Command symlinks for convenience
 ln -snf "appeus/scripts/regenerate.sh" "${ROOT_DIR}/regen"
 # (check-stale is primarily for agents; humans can run it via appeus/scripts/check-stale.sh if needed)
