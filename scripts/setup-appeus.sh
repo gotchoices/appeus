@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Idempotent Appeus setup: create project-root 'appeus' symlink, design tree, AGENTS.md links,
+# seed global specs, and create handy command symlinks (e.g., ./regen).
+
+PROJECT_DIR="$(pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_APPEUS_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+ROOT_DIR="${PROJECT_DIR}"
+DESIGN_DIR="${ROOT_DIR}/design"
+SRC_DIR="${ROOT_DIR}/src"
+
+# Always create (or refresh) a single project-root symlink to the Appeus toolkit being used
+APPEUS_DIR="${SCRIPT_APPEUS_DIR}"
+ln -snf "${APPEUS_DIR}" "${ROOT_DIR}/appeus"
+
+mkdir -p "${DESIGN_DIR}/stories"
+mkdir -p "${DESIGN_DIR}/generated/scenarios"
+mkdir -p "${DESIGN_DIR}/generated/screens"
+mkdir -p "${DESIGN_DIR}/generated/api"
+mkdir -p "${DESIGN_DIR}/specs/screens"
+mkdir -p "${DESIGN_DIR}/specs/global"
+mkdir -p "${DESIGN_DIR}/specs/api"
+mkdir -p "${SRC_DIR}" >/dev/null 2>&1 || true
+
+# AGENTS.md symlinks via project-root 'appeus' symlink
+ln -snf "../appeus/agent-rules/design-root.md" "${DESIGN_DIR}/AGENTS.md"
+ln -snf "../../appeus/agent-rules/stories.md" "${DESIGN_DIR}/stories/AGENTS.md"
+ln -snf "../../appeus/agent-rules/consolidations.md" "${DESIGN_DIR}/generated/AGENTS.md"
+ln -snf "../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
+ln -snf "../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
+# Only create src/AGENTS.md if src exists
+if [ -d "${SRC_DIR}" ]; then
+  ln -snf "../appeus/agent-rules/src.md" "${SRC_DIR}/AGENTS.md"
+fi
+
+# Seed navigation spec if missing
+if [ ! -f "${DESIGN_DIR}/specs/navigation.md" ]; then
+  mkdir -p "$(dirname "${DESIGN_DIR}/specs/navigation.md")"
+  cp -f "${APPEUS_DIR}/templates/specs/navigation.md" "${DESIGN_DIR}/specs/navigation.md"
+fi
+
+# Write toolchain with current choices (read from env if set; otherwise defaults)
+LANG_CHOICE="${APPEUS_LANG:-ts}"
+PM_CHOICE="${APPEUS_PM:-yarn}"
+RUNTIME_CHOICE="${APPEUS_RUNTIME:-bare}"
+cat > "${DESIGN_DIR}/specs/global/toolchain.md" <<EOF
+# Toolchain Spec
+
+language: ${LANG_CHOICE}
+runtime: ${RUNTIME_CHOICE}
+packageManager: ${PM_CHOICE}
+navigation: react-navigation
+state: zustand
+http: fetch
+
+notes:
+- Adjust as needed; regenerate to apply.
+EOF
+
+if [ ! -f "${DESIGN_DIR}/specs/global/ui.md" ]; then
+  cp -f "${APPEUS_DIR}/templates/specs/global/ui.md" "${DESIGN_DIR}/specs/global/ui.md"
+fi
+if [ ! -f "${DESIGN_DIR}/specs/global/dependencies.md" ]; then
+  cp -f "${APPEUS_DIR}/templates/specs/global/dependencies.md" "${DESIGN_DIR}/specs/global/dependencies.md"
+fi
+if [ ! -f "${DESIGN_DIR}/specs/api/README.md" ]; then
+  cat > "${DESIGN_DIR}/specs/api/README.md" <<'EOF'
+# API Specs
+- Add files per procedure using the template in appeus/templates/specs/api/procedure-template.md
+- Human-authored specs override AI consolidations in design/generated/api/*
+EOF
+fi
+
+# Command symlinks for convenience
+ln -snf "appeus/scripts/regenerate.sh" "${ROOT_DIR}/regen"
+# (check-stale is primarily for agents; humans can run it via appeus/scripts/check-stale.sh if needed)
+
+echo "Appeus: setup complete."
+echo "Next: write your first story in design/stories/01-first-story.md, then run ./regen"
+echo "Commit tip: git add -A && git commit -m \"appeus setup\""
+
+
