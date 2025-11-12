@@ -31,6 +31,8 @@ ln -snf "../../appeus/agent-rules/stories.md" "${DESIGN_DIR}/stories/AGENTS.md"
 ln -snf "../../appeus/agent-rules/consolidations.md" "${DESIGN_DIR}/generated/AGENTS.md"
 ln -snf "../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
 ln -snf "../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
+# Human-facing README symlink in stories (like appgen)
+ln -snf "../../appeus/user-guides/stories.md" "${DESIGN_DIR}/stories/README.md"
 # Only create src/AGENTS.md if src exists
 if [ -d "${SRC_DIR}" ]; then
   ln -snf "../appeus/agent-rules/src.md" "${SRC_DIR}/AGENTS.md"
@@ -46,7 +48,8 @@ fi
 LANG_CHOICE="${APPEUS_LANG:-ts}"
 PM_CHOICE="${APPEUS_PM:-yarn}"
 RUNTIME_CHOICE="${APPEUS_RUNTIME:-bare}"
-cat > "${DESIGN_DIR}/specs/global/toolchain.md" <<EOF
+if [ ! -f "${DESIGN_DIR}/specs/global/toolchain.md" ]; then
+  cat > "${DESIGN_DIR}/specs/global/toolchain.md" <<EOF
 # Toolchain Spec
 
 language: ${LANG_CHOICE}
@@ -59,6 +62,7 @@ http: fetch
 notes:
 - Adjust as needed; regenerate to apply.
 EOF
+fi
 
 if [ ! -f "${DESIGN_DIR}/specs/global/ui.md" ]; then
   cp -f "${APPEUS_DIR}/templates/specs/global/ui.md" "${DESIGN_DIR}/specs/global/ui.md"
