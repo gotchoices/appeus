@@ -12,6 +12,8 @@ Rules
 - Human specs override consolidations
 - Idempotent writes; only change files when inputs change
 - Don’t write unless user requests regeneration
+ - Embed AppeusMeta header with dependsOn/depHashes in generated files
+ - Follow vertical slicing when possible (see scripts/generate-next.sh)
 
 Mapping (example)
 - screen-id: chat-interface -> screen file: ChatInterface.tsx, route: ChatInterface

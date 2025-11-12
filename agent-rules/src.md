@@ -7,6 +7,7 @@ When regenerating
 - Navigation: write/update `src/navigation/*` routes and options
 - Ensure deep linking is configured and route params include `scenario` and `variant` when present
 - Keep imports organized; prefer TypeScript when project language is TS
+ - Add an AppeusMeta header at top of generated files including dependsOn and depHashes (see GENERATION.md)
 
 Out of scope
 - Runtime schema rendering; Appeus uses code generation to produce RN code

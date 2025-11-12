@@ -11,6 +11,7 @@ Principles
 - Derive capabilities from stories and screen specs
 - Keep shapes stable; prefer versioned changes
 - Human specs override generated consolidations
+ - Record dependency metadata in consolidations (provides, dependsOn, depHashes, usedBy where known)
 
 When asked to regenerate
 - Ensure mock data keys/shapes match the API docs

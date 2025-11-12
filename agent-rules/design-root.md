@@ -4,10 +4,14 @@ You are in the project’s design root. This is the human-facing surface where s
 
 Core flow
 1) Human writes stories in `design/stories/`
-2) You derive consolidations in `design/generated/` (screens, navigation, scenarios) where helpful
+2) You derive consolidations in `design/generated/` (screens, navigation, api, scenarios) where helpful, with explicit dependency metadata (dependsOn/depHashes/provides/needs)
 3) Human writes/edits specs in `design/specs/` (screens, navigation.md, global/*)
 4) When asked, generate/update RN code in `src/screens/*` and `src/navigation/*`
 5) Run the app and validate via scenarios (deep links), iterate
+
+Vertical mode (preferred)
+- Use `appeus/scripts/check-stale.sh` → `generate-next.sh` to pick the next screen (reachable from root) and produce a step-by-step plan.
+- For each slice: consolidate → api → mocks → engine stubs → RN code → scenarios. Update status (staleness) afterward.
 
 Precedence
 - Human specs override AI consolidations; consolidations override defaults.
@@ -19,8 +23,9 @@ Where things live
 - App code (outputs): `src/screens/*`, `src/navigation/*`
 
 Commands
-- `appeus/scripts/check-stale` to list stale outputs
-- `appeus/scripts/regenerate` to perform codegen when requested
+- `appeus/scripts/check-stale` to list per-screen staleness (JSON + summary)
+- `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
+- `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
 
 Do
 - Read stories and existing specs before proposing changes

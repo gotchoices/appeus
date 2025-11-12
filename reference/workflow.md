@@ -5,15 +5,18 @@ Overview
 
 Phases
 1) Story authoring (design/stories)
-2) Consolidations (design/generated) when multiple stories touch a screen/nav
-3) Specs (design/specs) add precision and overrides
-4) Regenerate RN code (src/screens, src/navigation) when requested
-5) Validate via scenarios (design/generated/scenarios with deep links)
+2) Consolidations (design/generated) with dependency metadata (dependsOn/depHashes/provides/needs)
+3) Specs (design/specs) add precision and overrides (human precedence)
+4) Vertical slice generation (screens/navigation/API/mocks/engine stubs) on request
+5) Validate via scenarios (design/generated/scenarios with deep links), update status
 
 Precedence
 - Specs > Consolidations > Defaults
 
 Regeneration
-- Human-triggered only. Use appeus/scripts/check-stale and appeus/scripts/regenerate.
+- Human-triggered only. Use:
+  - appeus/scripts/check-stale (per-screen summary + JSON)
+  - appeus/scripts/generate-next.sh (pick next stale screen and print plan)
+  - appeus/scripts/regenerate --screen <Route> (print per-slice steps)
 
 
