@@ -30,6 +30,9 @@ Commands
 Mock variants
 - For mock/demo-only data selection via deep links (e.g., `?variant=empty`), follow the guidance in `appeus/reference/mock-variants.md`.
 
+Testing
+- See `appeus/reference/testing.md` for the recommended multi-layer testing strategy (unit, component, e2e). Advise the user when to add tests (before/after) and keep selectors platform-agnostic.
+
 Do
 - Read stories and existing specs before proposing changes
 - Consolidate requirements for multi-story screens in `design/generated/screens/*`
