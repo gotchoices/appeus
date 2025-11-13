@@ -9,6 +9,9 @@ When regenerating
 - Keep imports organized; prefer TypeScript when project language is TS
  - Add an AppeusMeta header at top of generated files including dependsOn and depHashes (see GENERATION.md)
 
+Mock variants
+- Do not hard-code variants into production logic. Mock/demo variants are supplied via deep links and handled through a small context under `src/mock/*`. See `appeus/reference/mock-variants.md`.
+
 Out of scope
 - Runtime schema rendering; Appeus uses code generation to produce RN code
 

@@ -8,6 +8,9 @@ Guidelines
 - Cover happy, empty, and error paths at minimum
 - Keep references in sync with current screens and navigation
 
+Mock variants
+- Prefer `?variant=` query in deep links for demo data selection. See `appeus/reference/mock-variants.md`.
+
 When to regenerate
 - After screens or navigation change
 - After specs alter flows

@@ -27,6 +27,9 @@ Commands
 - `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
 - `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
 
+Mock variants
+- For mock/demo-only data selection via deep links (e.g., `?variant=empty`), follow the guidance in `appeus/reference/mock-variants.md`.
+
 Do
 - Read stories and existing specs before proposing changes
 - Consolidate requirements for multi-story screens in `design/generated/screens/*`
