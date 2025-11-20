@@ -2,6 +2,10 @@
 
 Specs clarify “how” for complex screens and navigation. They are free-form Markdown and can include code blocks (slots) that override generator defaults.
 
+See also
+- Spec schema: `appeus/reference/spec-schema.md`
+- Generation precedence & staleness: `appeus/reference/generation.md`
+
 Precedence
 1) Specs (human) → authoritative
 2) Consolidations (AI) → facts gathered from stories
@@ -19,5 +23,11 @@ Workflow
 
 Regeneration
 - Only on human request. Use `appeus/scripts/check-stale` to list what’s out-of-date and `appeus/scripts/regenerate` to perform updates.
+
+Consolidate before codegen
+- If the screen’s dependencies (stories/specs/navigation/global/index) are newer, refresh the corresponding consolidation first. Generators should prefer: specs > consolidations > defaults.
+
+Naming
+- Screen spec filenames use kebab-case (e.g., `chat-interface.md`). Code routes/components use PascalCase (e.g., `ChatInterface`). Maintain the mapping in `design/specs/screens/index.md`.
 
 

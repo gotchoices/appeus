@@ -2,6 +2,10 @@
 
 Scenarios are narrative walkthroughs that deep-link into the running app (device/simulator). They live under `design/generated/scenarios/` and are fully regenerable.
 
+Image workflow
+- Source of truth is Markdown scenarios; HTML is a publish artifact.
+- Use screenshot builders (Android: `appeus/scripts/android-screenshot.sh`) to capture PNGs for each screen/variant/locale. See `appeus/reference/scenarios.md`.
+
 Guidelines
 - Use concrete personas and contexts
 - Include “Open in App” links with `myapp://` or web universal links carrying `screen`, `scenario`, `variant`
@@ -18,5 +22,8 @@ When to regenerate
 Do not
 - Don’t reference non-existent screens or routes
 - Don’t hand-edit generated scenarios; update stories/specs then regenerate
+
+Deep-link patterns
+- Prefer `app://<route>?variant=<name>&locale=<tag>&scenario=<id>`; keep parameters stable and documented.
 
 

@@ -2,6 +2,9 @@
 
 Consolidations capture what multiple stories imply about a screen, navigation, or components. They are AI-authored and regenerateable.
 
+Before codegen
+- If a target screen is stale per `check-stale`, refresh its consolidation first, then proceed to RN code generation. This preserves precedence and traceability.
+
 Locations
 - Screens: `design/generated/screens/<screen-id>.md` (or `.json`)
 - Navigation: `design/generated/navigation.md`
@@ -21,5 +24,8 @@ Dependency metadata (required)
   - needs / usedBy: list related namespaces/screens when relevant
   - dependsOn: exact file paths read (stories/specs/navigation/global/screens/index)
   - depHashes: sha256(content) per dependsOn file
+
+Where used
+- Scripts use these fields to compute staleness and dependency graphs. RN generated files should embed AppeusMeta with dependsOn/depHashes for end-to-end tracking.
 
 
