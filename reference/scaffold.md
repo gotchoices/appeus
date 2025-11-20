@@ -4,6 +4,7 @@ Canonical project structure for RN-first Appeus projects.
 
 ```
 project-root/
+├── AGENTS.md -> appeus/agent-rules/root.md
 ├── appeus -> /some/path/to/appeus
 ├── design/
 │   ├── AGENTS.md -> ../appeus/agent-rules/design-root.md

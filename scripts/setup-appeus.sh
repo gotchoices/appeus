@@ -5,8 +5,9 @@ set -euo pipefail
 # seed global specs, and create handy command symlinks (e.g., ./regen).
 
 PROJECT_DIR="$(pwd)"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_APPEUS_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Resolve physical paths to avoid recursive symlink targets
+SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 
 ROOT_DIR="${PROJECT_DIR}"
 DESIGN_DIR="${ROOT_DIR}/design"
@@ -15,6 +16,8 @@ SRC_DIR="${ROOT_DIR}/src"
 # Always create (or refresh) a single project-root symlink to the Appeus toolkit being used
 APPEUS_DIR="${SCRIPT_APPEUS_DIR}"
 ln -snf "${APPEUS_DIR}" "${ROOT_DIR}/appeus"
+# Optional: root-level AGENTS.md for quick orientation
+ln -snf "appeus/agent-rules/root.md" "${ROOT_DIR}/AGENTS.md"
 
 mkdir -p "${DESIGN_DIR}/stories"
 mkdir -p "${DESIGN_DIR}/generated/scenarios"
