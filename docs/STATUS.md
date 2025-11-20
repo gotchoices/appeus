@@ -28,18 +28,18 @@ Tracker only. Design decisions live in `appeus/DESIGN.md`. Operational docs live
 - Contribution workflow doc
 
 ## New TODOs (workflows, rules, and docs audit)
-- [ ] Document two separate workflows clearly:
-  - [ ] Generate code (stories/specs → RN app)
-  - [ ] Generate scenarios (screenshots → scenario docs with deep-link anchors)
-- [ ] Verify AGENTS.md coverage: do symlinks steer the agent to both workflows with clear next-actions?
-- [ ] Audit agent-rules for organization and brevity; remove duplication; ensure stepwise guidance
-- [ ] Check linking from agent-rules → reference files; add missing cross-links
-- [ ] Reference completeness audit: do reference/*.md files contain all details needed for both workflows?
+- [x] Document two separate workflows clearly:
+  - [x] Generate code (stories/specs → RN app)
+  - [x] Generate scenarios (screenshots → scenario docs with deep-link anchors)
+- [x] Verify AGENTS.md coverage: do symlinks steer the agent to both workflows with clear next-actions?
+- [x] Audit agent-rules for organization and brevity; remove duplication; ensure stepwise guidance
+- [x] Check linking from agent-rules → reference files; add missing cross-links
+- [x] Reference completeness audit: do reference/*.md files contain all details needed for both workflows?
 - [ ] Consolidation step parity check:
   - [ ] Confirm why `ChatInterface` code was generated without refreshing `design/generated/screens/ChatInterface.md`
-  - [ ] Clarify rules: when to regenerate consolidations vs proceed directly from specs
-  - [ ] Update rules/scripts so consolidation precedence is enforced or explicitly skipped with rationale
+  - [x] Clarify rules: when to regenerate consolidations vs proceed directly from specs
+  - [ ] Update scripts so consolidation precedence is enforced or an explicit skip is recorded
 - [ ] Naming consistency review:
-  - [ ] Decide on canonical case for `design/specs/screens/*` filenames (kebab vs Pascal/Camel)
-  - [ ] Update agent-rules to prompt humans to normalize names; provide rename guidance
+  - [x] Decide on canonical case for `design/specs/screens/*` filenames (kebab vs Pascal/Camel)
+  - [x] Update agent-rules to prompt humans to normalize names; provide rename guidance
 

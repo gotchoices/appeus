@@ -32,6 +32,10 @@ Commands
 - `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
 - `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
 
+Triggers
+- If the human says “generate” or “generate code”, run the code workflow, slice-by-slice.
+- If the human says “generate scenarios”, run the scenario workflow (build images, write Markdown).
+
 Naming
 - Screen specs filenames: kebab-case under `design/specs/screens/*`. Routes/components in code: PascalCase (e.g., `ChatInterface`). Maintain mapping in `design/specs/screens/index.md`.
 
