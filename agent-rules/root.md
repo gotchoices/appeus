@@ -10,6 +10,9 @@ Workflows
 - Generate code (stories/specs → RN code): see `design/AGENTS.md` and scripts under `appeus/scripts/` (`check-stale.sh`, `generate-next.sh`, `regenerate.sh`).
 - Generate scenarios (screenshots → docs with deep links): see `appeus/scripts/android-screenshot.sh` and planned `build-images.sh`/`generate-scenarios.sh`.
 
+Cadence
+- Agents should run `check-stale.sh` first to refresh status, then proceed with `generate-next.sh` or target a specific route with `regenerate`.
+
 References
 - See `appeus/reference/` for complete guidance (generation precedence, staleness, testing, mock variants).
 

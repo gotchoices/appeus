@@ -16,6 +16,9 @@ Two workflows
    - Scripts: `appeus/scripts/check-stale.sh`, `appeus/scripts/generate-next.sh`, `appeus/scripts/regenerate.sh`
    - Trigger phrases (examples): “generate”, “generate code”, “regenerate next slice”
 
+Agent cadence
+- Before any generation step, the agent should run `appeus/scripts/check-stale.sh` to refresh the staleness graph, then select the next slice with `appeus/scripts/generate-next.sh` (or target a specific route with `regenerate`).
+
 2) Generate scenarios (screenshots → narrative Markdown)
    - Inputs: current RN app + deep links for target screens/variants/locales
    - Steps:

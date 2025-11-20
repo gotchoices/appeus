@@ -32,6 +32,9 @@ Commands
 - `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
 - `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
 
+Agent cadence
+- Always run `check-stale` first to refresh status, then choose the next slice with `generate-next.sh` (or a specific `regenerate` target).
+
 Triggers
 - If the human says “generate” or “generate code”, run the code workflow, slice-by-slice.
 - If the human says “generate scenarios”, run the scenario workflow (build images, write Markdown).
