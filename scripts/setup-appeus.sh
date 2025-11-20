@@ -37,6 +37,10 @@ ln -snf "../../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
 ln -snf "../../../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
 # Human-facing README symlink in stories (like appgen)
 ln -snf "../../appeus/user-guides/stories.md" "${DESIGN_DIR}/stories/README.md"
+# Seed a starter story from template if none exist yet (excluding README/AGENTS)
+if [ "$(find "${DESIGN_DIR}/stories" -maxdepth 1 -type f -name "*.md" ! -name "README.md" ! -name "AGENTS.md" | wc -l | tr -d ' ')" = "0" ]; then
+  cp -n "${APPEUS_DIR}/templates/stories/story-template.md" "${DESIGN_DIR}/stories/01-first-story.md"
+fi
 # Only create src/AGENTS.md if src exists
 if [ -d "${SRC_DIR}" ]; then
   ln -snf "../appeus/agent-rules/src.md" "${SRC_DIR}/AGENTS.md"
