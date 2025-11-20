@@ -13,6 +13,7 @@ When regenerating
 - Ensure deep linking is configured and route params include `scenario` and `variant` when present
 - Keep imports organized; prefer TypeScript when project language is TS
  - Write dependency metadata to `design/generated/meta/outputs.json` (preferred), including dependsOn/depHashes. You may also add an optional `AppeusMeta` header comment in files for human readability.
+ - After updating an output for a route, run `appeus/scripts/update-dep-hashes.sh --route <Route>` to refresh `depHashes`, then `appeus/scripts/check-stale.sh` to confirm it’s fresh.
 
 Mock variants
 - Do not hard-code variants into production logic. Mock/demo variants are supplied via deep links and handled through a small context under `src/mock/*`. See `appeus/reference/mock-variants.md`.

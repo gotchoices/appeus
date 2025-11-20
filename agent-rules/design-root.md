@@ -31,6 +31,9 @@ Commands
 - `appeus/scripts/check-stale` to list per-screen staleness (JSON + summary)
 - `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
 - `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
+- After writing outputs for a route, run:
+  - `appeus/scripts/update-dep-hashes.sh --route <Route>` to refresh `depHashes` in `design/generated/meta/outputs.json`
+  - then `appeus/scripts/check-stale.sh` to verify freshness
 
 Agent cadence
 - Always run `check-stale` first to refresh status, then choose the next slice with `generate-next.sh` (or a specific `regenerate` target).

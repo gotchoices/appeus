@@ -11,7 +11,9 @@ Two workflows
      2. API consolidations (if needed)
      3. Mocks and engine adapters
      4. RN outputs: `src/screens/*`, `src/navigation/*`
-     5. Update staleness graph
+     5. Update staleness graph:
+        - Run `appeus/scripts/update-dep-hashes.sh --route <Route>` to recompute `depHashes` for that output in `design/generated/meta/outputs.json`
+        - Then run `appeus/scripts/check-stale.sh` to confirm freshness
    - Precedence: human specs > AI consolidations > defaults
    - Scripts: `appeus/scripts/check-stale.sh`, `appeus/scripts/generate-next.sh`, `appeus/scripts/regenerate.sh`
    - Trigger phrases (examples): “generate”, “generate code”, “regenerate next slice”
