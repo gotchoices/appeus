@@ -10,7 +10,11 @@ Source of truth
 Images
 - Location: `design/generated/images/<Route>[-<variant>[-<locale>]].png`
 - Built by deep-linking the running app and capturing a PNG.
-  - Android helper: `appeus/scripts/android-screenshot.sh`
+  - Android helper: `appeus/scripts/android-screenshot.sh` (the agent generates and runs these commands)
+    - Example:  
+      `appeus/scripts/android-screenshot.sh --deeplink "chat://connections?variant=happy&locale=en" --output "design/generated/images/connections-list-happy.png" --reuse`
+    - Defaults via env: `APPEUS_ANDROID_AVD` (emulator AVD), `APPEUS_APP_ID` (bundle id), `APPEUS_SCREEN_DELAY` (seconds)
+  - iOS (manual): `xcrun simctl openurl booted "<deeplink>"; xcrun simctl io booted screenshot "<output.png>"`
 - Staleness: image is stale if missing or older than its screen code, relevant mocks, or navigation/global specs.
 
 Deep links

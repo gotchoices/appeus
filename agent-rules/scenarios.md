@@ -16,6 +16,21 @@ Guidelines
 - Cover at least: happy, empty, and error paths
 - Keep in sync with current screens, navigation and i18n strings
 
+How to capture screenshots (Android)
+- Use the helper: `appeus/scripts/android-screenshot.sh`
+- Example:
+  - `appeus/scripts/android-screenshot.sh --deeplink "chat://connections?variant=happy&locale=en" --output "design/generated/images/connections-list-happy.png" --reuse`
+- Defaults:
+  - AVD: `APPEUS_ANDROID_AVD` (default Medium_Phone_API_34)
+  - App ID: `APPEUS_APP_ID` (default org.sereus.chat)
+  - Delay: `APPEUS_SCREEN_DELAY` (default 3s before capture)
+- File naming: `design/generated/images/<route>[-<variant>[-<locale>]].png`
+
+Agent actions (explicit)
+- You generate the exact screenshot commands for each scenario step and execute them.
+- You ensure the PNGs are written to `design/generated/images/` with the expected filenames.
+- After images are captured, you update/verify the scenario docs and `index.md` links.
+
 Mock variants
 - Prefer `?variant=` query in deep links for demo data selection. See `appeus/reference/mock-variants.md`.
 
