@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scenarios Preview</title>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .layout { display: flex; height: 100vh; }
+    nav { width: 300px; border-right: 1px solid #eee; padding: 16px; overflow: auto; }
+    main { flex: 1; padding: 16px; overflow: auto; }
+    a { color: #0066cc; text-decoration: none; }
+    pre { background: #f7f7f7; padding: 12px; overflow: auto; }
+    img { width: 360px; max-width: 100%; height: auto; display: block; margin: 12px auto; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <h3>Scenarios</h3>
+      <ul id="nav"></ul>
+    </nav>
+    <main>
+      <article id="content">Loading scenarios/index.md…</article>
+    </main>
+  </div>
+  <script>
+    const SCENARIOS_DIR = 'scenarios';
+    const IMAGES_DIR = 'images';
+    async function fetchText(path) {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error('Failed to load ' + path);
+      return await res.text();
+    }
+    function renderMarkdown(md) {
+      document.getElementById('content').innerHTML = marked.parse(md);
+    }
+    async function loadIndex() {
+      try {
+        const md = await fetchText(`${SCENARIOS_DIR}/index.md`);
+        renderMarkdown(md);
+      } catch (e) {
+        document.getElementById('content').textContent = e.message;
+      }
+    }
+    async function listScenarios() {
+      // Static list (edit as needed); or generate server-side
+      const files = [
+        'connections-list-empty.md',
+        'invitation-generator.md',
+        'invitation-acceptance.md',
+        'connections-list-happy.md',
+        'chat-interface-empty.md',
+        'chat-interface-happy.md',
+        'search-interface.md',
+        'qr-scanner.md',
+        'profile-setup.md'
+      ];
+      const nav = document.getElementById('nav');
+      files.forEach(f => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = f.replace('.md', '').replace(/-/g, ' ');
+        a.onclick = async (e) => {
+          e.preventDefault();
+          const md = await fetchText(`${SCENARIOS_DIR}/${f}`);
+          renderMarkdown(md);
+        };
+        li.appendChild(a);
+        nav.appendChild(li);
+      });
+    }
+    loadIndex();
+    listScenarios();
+  </script>
+</body>
+</html>
+
+

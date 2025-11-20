@@ -10,7 +10,8 @@ Preconditions: <locale/variant/login/etc.>
 - Deep link: `app://<route>?variant=<name>&locale=<tag>&scenario=<id>`
 - Narrative:
   - <1–3 sentences describing what they see/do>
-- Screenshot: `design/generated/images/<route>[-<variant>[-<locale>]].png`
+- Screenshot:
+- `![<alt>](../images/<route>[-<variant>[-<locale>]].png)`
 
 ## Scenario 2: <name>
 - Intent: <...>

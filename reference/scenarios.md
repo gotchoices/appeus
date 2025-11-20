@@ -34,7 +34,13 @@ Workflow
      - Screenshot embed (PNG path under `design/generated/images/…`)
    - Alternates and Error paths
    - Notes on data/API if relevant
-5) (Optional) Generate HTML for preview/publish
+5) Generate HTML for preview/publish
+   - Preview locally: `appeus/scripts/preview-scenarios.sh --port 8080` (serves a viewer that renders Markdown with screenshots)
+   - Publish: `appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/scenarios` (or set `APPEUS_PUBLISH_DEST`)
+   - Artifact layout:
+     - `design/generated/site/index.html` (viewer)
+     - `design/generated/site/scenarios/*.md`
+     - `design/generated/site/images/*.png`
 
 Future scripts
 - `compute-image-stale.sh`: list stale targets as JSON
