@@ -29,8 +29,9 @@ mkdir -p "${SRC_DIR}" >/dev/null 2>&1 || true
 ln -snf "../appeus/agent-rules/design-root.md" "${DESIGN_DIR}/AGENTS.md"
 ln -snf "../../appeus/agent-rules/stories.md" "${DESIGN_DIR}/stories/AGENTS.md"
 ln -snf "../../appeus/agent-rules/consolidations.md" "${DESIGN_DIR}/generated/AGENTS.md"
-ln -snf "../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
-ln -snf "../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
+ln -snf "../../../appeus/agent-rules/scenarios.md" "${DESIGN_DIR}/generated/scenarios/AGENTS.md"
+ln -snf "../../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
+ln -snf "../../../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
 # Human-facing README symlink in stories (like appgen)
 ln -snf "../../appeus/user-guides/stories.md" "${DESIGN_DIR}/stories/README.md"
 # Only create src/AGENTS.md if src exists

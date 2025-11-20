@@ -13,14 +13,16 @@ project-root/
 │   │   ├── AGENTS.md -> ../../appeus/agent-rules/consolidations.md
 │   │   ├── navigation.md
 │   │   ├── scenarios/
+│   │   │   └── AGENTS.md -> ../../../appeus/agent-rules/scenarios.md
 │   │   ├── screens/
 │   │   ├── api/
 │   │   └── components/
 │   └── specs/
-│       ├── AGENTS.md -> ../appeus/agent-rules/specs.md
+│       ├── AGENTS.md -> ../../appeus/agent-rules/specs.md
 │       ├── navigation.md
 │       ├── screens/
 │       ├── api/
+│       │   └── AGENTS.md -> ../../../appeus/agent-rules/api.md
 │       └── global/
 ├── mock/
 │   ├── data/
