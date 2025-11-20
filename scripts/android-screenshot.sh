@@ -148,14 +148,14 @@ main() {
   if [[ -n "$serial" ]]; then
     wait_for_boot
     echo "Deep-linking on $serial: $DEEPLINK"
-    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" "$APP_ID" >/dev/null
+    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" >/dev/null
     sleep "$DELAY"
     echo "Capturing screenshot to $OUTPUT"
     adb_target exec-out screencap -p > "$OUTPUT"
   else
     wait_for_boot
     echo "Deep-linking: $DEEPLINK"
-    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" "$APP_ID" >/dev/null
+    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" >/dev/null
     sleep "$DELAY"
     echo "Capturing screenshot to $OUTPUT"
     adb_target exec-out screencap -p > "$OUTPUT"
