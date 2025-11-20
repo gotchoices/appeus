@@ -19,17 +19,28 @@ Deep links
 
 Workflow
 1) Ensure RN app is up-to-date (generate code workflow)
-2) Build images for stale/missing targets (per screen/variant/locale)
-3) Write Markdown narrative:
-   - Explain persona, context, and intent
-   - Embed the PNG for each step
-   - Wrap each image (or a caption link) with the deep link so reviewers can click through
-4) (Optional) Generate HTML for preview/publish
+2) Build or refresh images for stale/missing targets (per screen/variant/locale)
+3) Create/maintain `design/generated/scenarios/index.md` with a logical review order
+4) For each scenario doc (use the template in `appeus/templates/generated/scenario-template.md`):
+   - Header: Title; “Based on” link(s) to `design/stories/*`
+   - Persona & Preconditions
+   - Steps (repeat for each screen):
+     - Short narrative of intent and observation
+     - Deep link: `app://<route>?variant=<name>&locale=<tag>&scenario=<id>`
+     - Screenshot embed (PNG path under `design/generated/images/…`)
+   - Alternates and Error paths
+   - Notes on data/API if relevant
+5) (Optional) Generate HTML for preview/publish
 
 Future scripts
 - `compute-image-stale.sh`: list stale targets as JSON
 - `build-images.sh`: capture missing/stale images using screenshot helper
-- `generate-scenarios.sh`: write scenario Markdown linking images and deep links, preserving human edits around generated blocks
+- `generate-scenarios.sh`: assist in writing scenario Markdown by expanding a template with human-editable narrative sections
 - `preview-scenarios.sh` / `publish-scenarios.sh`: local server / static export
+
+Index
+- Purpose: provide a simple, linear path for stakeholders to review the app end-to-end
+- Location: `design/generated/scenarios/index.md`
+- Contents: scenario titles with links to docs and their deep links; group by flow when useful (onboarding, invite/accept, chat, search, profile)
 
 
