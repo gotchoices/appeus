@@ -13,7 +13,7 @@ variants: [happy, empty]     # optional; demo/mock variants considered
 Optional fields
 - description: short purpose text
 - provides: ["screen:ChatInterface"] (helps cross-referencing)
-- needs: ["api:Threads"] (hints dependencies)
+- needs: ["api:Strands"] (hints dependencies)
 - tags: [search, messaging]
 
 Body

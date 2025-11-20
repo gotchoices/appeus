@@ -20,7 +20,7 @@ Trigger
 
 Dependency metadata (required)
 - Add frontmatter fields:
-  - provides: e.g., ["screen:ChatInterface"] or ["api:Threads"]
+  - provides: e.g., ["screen:ChatInterface"] or ["api:Strands"]
   - needs / usedBy: list related namespaces/screens when relevant
   - dependsOn: exact file paths read (stories/specs/navigation/global/screens/index)
   - depHashes: sha256(content) per dependsOn file
