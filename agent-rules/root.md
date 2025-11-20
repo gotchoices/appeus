@@ -11,7 +11,7 @@ Workflows
 - Generate scenarios (screenshots → docs with deep links): see `appeus/scripts/android-screenshot.sh` and planned `build-images.sh`/`generate-scenarios.sh`.
 
 References
-- See `appeus/docs/` and `appeus/reference/` for complete guidance (generation precedence, staleness, testing, mock variants).
+- See `appeus/reference/` for complete guidance (generation precedence, staleness, testing, mock variants).
 
 Conventions
 - Precedence: human specs > AI consolidations > defaults.

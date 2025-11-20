@@ -36,7 +36,6 @@ Tracker only. Design decisions live in `appeus/DESIGN.md`. Operational docs live
 - [x] Check linking from agent-rules → reference files; add missing cross-links
 - [x] Reference completeness audit: do reference/*.md files contain all details needed for both workflows?
 - [ ] Consolidation step parity check:
-  - [ ] Confirm why `ChatInterface` code was generated without refreshing `design/generated/screens/ChatInterface.md`
   - [x] Clarify rules: when to regenerate consolidations vs proceed directly from specs
   - [ ] Update scripts so consolidation precedence is enforced or an explicit skip is recorded
 - [ ] Naming consistency review:
