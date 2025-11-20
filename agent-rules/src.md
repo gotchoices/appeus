@@ -12,7 +12,7 @@ When regenerating
 - Navigation: write/update `src/navigation/*` routes and options
 - Ensure deep linking is configured and route params include `scenario` and `variant` when present
 - Keep imports organized; prefer TypeScript when project language is TS
- - Add an AppeusMeta header at top of generated files including dependsOn and depHashes (see GENERATION.md)
+ - Write dependency metadata to `design/generated/meta/outputs.json` (preferred), including dependsOn/depHashes. You may also add an optional `AppeusMeta` header comment in files for human readability.
 
 Mock variants
 - Do not hard-code variants into production logic. Mock/demo variants are supplied via deep links and handled through a small context under `src/mock/*`. See `appeus/reference/mock-variants.md`.

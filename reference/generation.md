@@ -32,7 +32,24 @@ Two workflows
 
 Staleness and dependencies
 - Consolidations include frontmatter: provides/needs/dependsOn/depHashes
-- Generated RN files include an AppeusMeta header with dependsOn/depHashes
+- Dependency registry (preferred): for each output, write an entry to `design/generated/meta/outputs.json`:
+  ```json
+  {
+    "outputs": [
+      {
+        "route": "ConnectionsList",
+        "output": "src/screens/ConnectionsList.tsx",
+        "dependsOn": [
+          "design/generated/screens/ConnectionsList.md",
+          "design/specs/screens/connections-list.md",
+          "design/specs/navigation.md"
+        ],
+        "depHashes": { "design/specs/screens/connections-list.md": "sha256:..." }
+      }
+    ]
+  }
+  ```
+- Inline headers (optional): you may also include an `AppeusMeta` comment in generated files for human readers, but the registry governs staleness.
 - A screen or image is stale if missing or older than any of its dependencies (specs/stories/navigation/global or mocks)
 
 Conventions

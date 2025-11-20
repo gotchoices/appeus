@@ -10,6 +10,8 @@ DESIGN_DIR="${ROOT_DIR}/design"
 SRC_DIR="${ROOT_DIR}/src"
 STATUS_DIR="${DESIGN_DIR}/generated"
 STATUS_FILE="${STATUS_DIR}/status.json"
+META_DIR="${STATUS_DIR}/meta"
+META_FILE="${META_DIR}/outputs.json"
 
 [ -d "${DESIGN_DIR}" ] || { echo "No design/ directory."; exit 1; }
 mkdir -p "${STATUS_DIR}"
@@ -42,15 +44,22 @@ JSON_ENTRIES=()
 STALE_COUNT=0
 
 for ROUTE in "${SCREENS[@]}"; do
-  # Inputs: stories, nav, global, spec for this screen if present
+  # Inputs: prefer precise registry from meta/outputs.json; fallback to heuristic (stories/specs/global/nav)
   INPUTS=()
-  while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/stories" -type f -name "*.md" -print0 2>/dev/null || true)
-  [ -f "${DESIGN_DIR}/specs/navigation.md" ] && INPUTS+=("${DESIGN_DIR}/specs/navigation.md")
-  while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/global" -type f -print0 2>/dev/null || true)
-  # Per-screen spec (id matches route or kebab-case)
-  KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
-  [ -f "${DESIGN_DIR}/specs/screens/${KEBAB}.md" ] && INPUTS+=("${DESIGN_DIR}/specs/screens/${KEBAB}.md")
-  [ -f "${DESIGN_DIR}/specs/screens/${ROUTE}.md" ] && INPUTS+=("${DESIGN_DIR}/specs/screens/${ROUTE}.md")
+  if [ -f "${META_FILE}" ] && command -v jq >/dev/null 2>&1; then
+    while IFS= read -r dep; do
+      [ -n "$dep" ] && INPUTS+=("$dep")
+    done < <(jq -r --arg r "$ROUTE" '.outputs[] | select(.route==$r) | .dependsOn[]?' "${META_FILE}" 2>/dev/null || true)
+  fi
+  if [ "${#INPUTS[@]:-0}" -eq 0 ]; then
+    while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/stories" -type f -name "*.md" -print0 2>/dev/null || true)
+    [ -f "${DESIGN_DIR}/specs/navigation.md" ] && INPUTS+=("${DESIGN_DIR}/specs/navigation.md")
+    while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/global" -type f -print0 2>/dev/null || true)
+    # Per-screen spec (id matches route or kebab-case)
+    KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+    [ -f "${DESIGN_DIR}/specs/screens/${KEBAB}.md" ] && INPUTS+=("${DESIGN_DIR}/specs/screens/${KEBAB}.md")
+    [ -f "${DESIGN_DIR}/specs/screens/${ROUTE}.md" ] && INPUTS+=("${DESIGN_DIR}/specs/screens/${ROUTE}.md")
+  fi
 
   # Outputs: generated screen file
   OUTPUTS=()
