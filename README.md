@@ -5,18 +5,20 @@ Appeus is a design-to-app workflow that turns user stories into a running React 
 Focus
 - Stories → consolidations/specs → codegen RN → run → iterate
 - Deep links into the app from scenario pages
+- Narrative scenarios (human-friendly) with clickable, phone-sized screenshots
+- Preview and publish flows for scenarios (local markserv preview; static HTML publish)
 - Optional in-app overlay for guided reviews
-- Simple local JSON mock server; variants via query/header
+- Simple mock data with variants via deep-link query
 
 Toolkit layout
 - agent-rules/: guidance for AI agents (linked via AGENTS.md in project folders)
-- scripts/: init-project, check-stale, regenerate
+- scripts/: rn-init, setup-appeus, check-stale, regenerate, update-dep-hashes, android-screenshot, build-images, preview-scenarios, publish-scenarios
 - templates/: starter files for specs (screens/navigation/global/api), consolidations (screens/api), scenarios
 - reference/: workflows and codegen guidance (including API workflow)
 - user-guides/: quick guides for humans
 
 Start here
 - Read QUICKSTART to initialize a project
-- Reference docs replace STATUS over time; STATUS is transitional
+- See `reference/scenarios.md` for scenario workflow (images, preview, publish)
 
 

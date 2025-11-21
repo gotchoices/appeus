@@ -48,12 +48,22 @@ Defaults and choices (you can override via env vars)
 - Define API procedures in `design/specs/api/*.md` (agent can seed from the template)
 
 5) Generate RN code (on request)
-- Run `./regen` to generate/update `src/screens/*` and `src/navigation/*`
+- Ask the agent to “generate code” for the next slice. It will create/update `src/screens/*` and `src/navigation/*`, and keep internal staleness tracking up to date.
 
-6) Run and iterate
-- Launch the app (Expo or bare RN)
-- Use scenario pages (`design/generated/scenarios/*`) with “Open in App” links
-- Edit stories/specs and regenerate as needed
+6) Scenario images
+- Ask the agent to “generate scenarios” (or “refresh scenarios”). It will capture screenshots for any stale/missing targets and update the narrative Markdown files. If you prefer to do it yourself later, see Preview/Publish below.
+
+7) Preview scenarios locally (appgen-style)
+- `./appeus/scripts/preview-scenarios.sh --port 8080`
+- Opens `design/generated/scenarios/index.md` rendered via markserv; images appear inline and are clickable deep links
+
+8) Publish scenarios (static HTML)
+- `./appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/your-site/path`
+- Generates `design/generated/site/` with `scenarios/*.html` and `images/*.png` and rsyncs to the destination
+
+9) Run and iterate
+- Launch the app (Expo or bare RN). Use scenario pages to deep-link into the app.
+- Edit stories/specs; ask the agent to regenerate code and refresh scenarios. The agent will handle staleness checks and bookkeeping for you.
 
 There are AGENTS.md files in the various folders that should help your AI agent guide you through the process of building your app.  Ask questions about what you need to do next.
 
