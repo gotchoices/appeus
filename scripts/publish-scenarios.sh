@@ -25,12 +25,44 @@ GEN_DIR="${ROOT}/design/generated"
 SCEN_DIR="${GEN_DIR}/scenarios"
 IMG_DIR="${GEN_DIR}/images"
 SITE_DIR="${GEN_DIR}/site"
-VIEWER_SRC="${ROOT}/appeus/templates/scenarios/viewer.html"
+TPL_PAGE="${ROOT}/appeus/templates/scenarios/page.html"
 
 mkdir -p "${SITE_DIR}/scenarios" "${SITE_DIR}/images"
-cp -f "${VIEWER_SRC}" "${SITE_DIR}/index.html"
-cp -f "${SCEN_DIR}"/*.md "${SITE_DIR}/scenarios/" 2>/dev/null || true
 cp -f "${IMG_DIR}"/*.png "${SITE_DIR}/images/" 2>/dev/null || true
+
+# If marked is available, export Markdown → HTML; otherwise copy Markdown as-is
+if command -v npx >/dev/null 2>&1; then
+  echo "Rendering Markdown to HTML..."
+  for f in "${SCEN_DIR}"/*.md; do
+    [[ -f "$f" ]] || continue
+    name="$(basename "$f" .md)"
+    html_content="$(npx --yes marked -i "$f")"
+    if [[ -f "${TPL_PAGE}" ]]; then
+      # Wrap with template
+      page="$(cat "${TPL_PAGE}")"
+      page="${page//'{{title}}'/${name}}"
+      # Use printf %s to preserve newlines properly
+      printf "%s" "${page//'{{content}}'/${html_content}}" > "${SITE_DIR}/scenarios/${name}.html"
+    else
+      printf "<!doctype html><meta charset=\"utf-8\"><title>%s</title>%s" "${name}" "${html_content}" > "${SITE_DIR}/scenarios/${name}.html"
+    fi
+  done
+  # Root index redirect to rendered scenarios index
+  echo "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=scenarios/index.html\">" > "${SITE_DIR}/index.html"
+  # Fix links in all rendered pages from .md → .html
+  for html in "${SITE_DIR}/scenarios/"*.html; do
+    [[ -f "$html" ]] || continue
+    if command -v perl >/dev/null 2>&1; then
+      perl -0777 -pe 's/href="([^"]+)\.md"/href="$1.html"/g' -i "$html"
+    else
+      sed -i '' -e 's/href=\"\\([^"]*\\)\\.md\"/href=\"\\1.html\"/g' "$html" 2>/dev/null || sed -i -e 's/href=\"\([^"]*\)\.md\"/href=\"\1.html\"/g' "$html"
+    fi
+  done
+else
+  echo "npx not found; publishing raw Markdown."
+  cp -f "${SCEN_DIR}"/*.md "${SITE_DIR}/scenarios/" 2>/dev/null || true
+  echo "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=scenarios/index.md\">" > "${SITE_DIR}/index.html"
+fi
 
 echo "Packaged site at ${SITE_DIR}"
 

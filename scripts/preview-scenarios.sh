@@ -2,8 +2,11 @@
 set -euo pipefail
 
 # preview-scenarios.sh
-# Serve the scenarios and images locally for review.
+# Serve the scenarios folder like appgen did (Markdown rendered by markserv).
 # Usage: appeus/scripts/preview-scenarios.sh [--port 8080]
+#
+# Requires node + npx. Installs/uses markserv to render Markdown in-place.
+# Falls back to a plain static server if markserv is unavailable (MD not rendered).
 
 PORT=8080
 while [[ $# -gt 0 ]]; do
@@ -17,20 +20,34 @@ ROOT="$(pwd)"
 GEN_DIR="${ROOT}/design/generated"
 SCEN_DIR="${GEN_DIR}/scenarios"
 IMG_DIR="${GEN_DIR}/images"
-SITE_DIR="${GEN_DIR}/site"
-VIEWER_SRC="${ROOT}/appeus/templates/scenarios/viewer.html"
+if [[ ! -d "${SCEN_DIR}" || ! -d "${IMG_DIR}" ]]; then
+  echo "Scenarios or images directory not found under ${GEN_DIR}"
+  exit 1
+fi
 
-mkdir -p "${SITE_DIR}/scenarios" "${SITE_DIR}/images"
-cp -f "${VIEWER_SRC}" "${SITE_DIR}/index.html"
-cp -f "${SCEN_DIR}"/*.md "${SITE_DIR}/scenarios/" 2>/dev/null || true
-cp -f "${IMG_DIR}"/*.png "${SITE_DIR}/images/" 2>/dev/null || true
-
-echo "Serving ${SITE_DIR} on http://localhost:${PORT}"
-cd "${SITE_DIR}"
-if command -v python3 >/dev/null 2>&1; then
-  python3 -m http.server "${PORT}"
+echo "Previewing scenarios from ${GEN_DIR}"
+if command -v npx >/dev/null 2>&1; then
+  echo "Starting markserv on http://localhost:${PORT}"
+  cd "${GEN_DIR}"
+  # Serve the generated root so /scenarios and /images resolve correctly
+  # Try to open the index automatically
+  (
+    sleep 1
+    if command -v open >/dev/null 2>&1; then
+      open "http://localhost:${PORT}/scenarios/index.md" >/dev/null 2>&1 || true
+    elif command -v xdg-open >/dev/null 2>&1; then
+      xdg-open "http://localhost:${PORT}/scenarios/index.md" >/dev/null 2>&1 || true
+    fi
+  ) &
+  npx --yes markserv "." --port "${PORT}"
 else
-  python -m SimpleHTTPServer "${PORT}"
+  echo "npx not found. Falling back to a simple HTTP server (Markdown will not be rendered)."
+  cd "${GEN_DIR}"
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -m http.server "${PORT}"
+  else
+    python -m SimpleHTTPServer "${PORT}"
+  fi
 fi
 
 

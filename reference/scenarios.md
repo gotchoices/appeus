@@ -27,20 +27,20 @@ Workflow
 3) Create/maintain `design/generated/scenarios/index.md` with a logical review order
 4) For each scenario doc (use the template in `appeus/templates/generated/scenario-template.md`):
    - Header: Title; “Based on” link(s) to `design/stories/*`
-   - Persona & Preconditions
-   - Steps (repeat for each screen):
-     - Short narrative of intent and observation
-     - Deep link: `app://<route>?variant=<name>&locale=<tag>&scenario=<id>`
-     - Screenshot embed (PNG path under `design/generated/images/…`)
-   - Alternates and Error paths
-   - Notes on data/API if relevant
-5) Generate HTML for preview/publish
-   - Preview locally: `appeus/scripts/preview-scenarios.sh --port 8080` (serves a viewer that renders Markdown with screenshots)
-   - Publish: `appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/scenarios` (or set `APPEUS_PUBLISH_DEST`)
-   - Artifact layout:
-     - `design/generated/site/index.html` (viewer)
-     - `design/generated/site/scenarios/*.md`
-     - `design/generated/site/images/*.png`
+   - Persona (name/role) & Preconditions (short)
+   - Steps (repeat for each screen; 4–8 typical):
+     - 1–3 sentences narrative (persona intent + observation)
+     - Clickable image linking to the deep link for that step:
+       - `[![alt](../images/<file>.png)](app://<route>?variant=<name>&locale=<tag>&scenario=<id>)`
+   - Alternates and Error paths (if relevant)
+   - Keep narrative human-friendly; avoid technical jargon
+5) Preview/publish (appgen-style)
+   - Preview: `appeus/scripts/preview-scenarios.sh --port 8080`
+     - Uses markserv to render Markdown directly from `design/generated/scenarios/`
+     - Open `http://localhost:8080/index.md` (which links to other docs)
+   - Publish: `appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/scenarios`
+     - Copies `design/generated/scenarios/*.md` + `images/*.png` to `design/generated/site/` and rsyncs
+     - Remote can serve Markdown (e.g., with markserv) or a static site generator
 
 Future scripts
 - `compute-image-stale.sh`: list stale targets as JSON
