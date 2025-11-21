@@ -20,5 +20,6 @@ Conventions
 - Precedence: human specs > AI consolidations > defaults.
 - `design/generated/*` is regenerable; don’t hand‑edit.
 - Use deep links for mock variants (`?variant=`) and optional `?locale=`.
+- Do not modify Appeus toolkit files under `appeus/*` or any `*/AGENTS.md` symlinks. If toolkit behavior needs change, propose an upstream edit to the Appeus toolkit; do not alter a project’s symlinked copies.
 
 
