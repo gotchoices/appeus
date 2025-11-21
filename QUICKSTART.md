@@ -11,6 +11,7 @@ Defaults and choices (you can override via env vars)
 - Runtime: bare (set APPEUS_RUNTIME=expo for Expo)
 - Language: ts (set APPEUS_LANG=js for JavaScript)
 - Package manager: yarn (set APPEUS_PM=npm or pnpm)
+- React Native version (bare): 0.82.1 (set APPEUS_RN_VERSION=0.82.1 to override)
 - App name: sanitized folder name (set APPEUS_APP_NAME=YourAppName to override)
 - Git init: on (set APPEUS_GIT=0 to skip)
 
@@ -23,8 +24,13 @@ Defaults and choices (you can override via env vars)
   - Relative path (from your new app folder): `../relative/path/to/appeus/scripts/rn-init.sh`
 - Example:
   ```bash
-  APPEUS_RUNTIME=expo APPEUS_LANG=ts APPEUS_PM=yarn APPEUS_GIT=1 APPEUS_APP_NAME=ChatApp /absolute/path/to/appeus/scripts/rn-init.sh
+  APPEUS_RUNTIME=bare APPEUS_LANG=ts APPEUS_PM=yarn APPEUS_RN_VERSION=0.82.1 APPEUS_GIT=1 APPEUS_APP_NAME=ChatApp /absolute/path/to/appeus/scripts/rn-init.sh
   ```
+- Re-run init in an existing folder:
+  - Either delete the RN scaffold (including `package.json`) and run again, or
+  - Set `APPEUS_FORCE_RN_INIT=1` to force re-initialization (will refresh RN scaffold files; your `design/` stays intact)
+- Note: rn-init prefers `@react-native-community/cli init` (no deprecation warnings) and falls back to `react-native init` only if needed.
+- Note: For bare RN + TypeScript, rn-init does TS setup after init (adds TypeScript deps and `tsconfig.json`) to avoid outdated TS templates that can pin older RN versions.
 
 2) Set up Appeus scaffold (idempotent)
 - Run setup (absolute or relative path):

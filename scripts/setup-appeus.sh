@@ -92,7 +92,7 @@ if [ ! -f "${DESIGN_DIR}/specs/screens/index.md" ]; then
 fi
 
 # Command symlinks for convenience
-ln -snf "appeus/scripts/regenerate.sh" "${ROOT_DIR}/regen"
+#ln -snf "appeus/scripts/regenerate.sh" "${ROOT_DIR}/regen"
 # (check-stale is primarily for agents; humans can run it via appeus/scripts/check-stale.sh if needed)
 
 echo "Appeus: setup complete."
