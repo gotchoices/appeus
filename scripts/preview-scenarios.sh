@@ -39,7 +39,7 @@ if command -v npx >/dev/null 2>&1; then
       xdg-open "http://localhost:${PORT}/scenarios/index.md" >/dev/null 2>&1 || true
     fi
   ) &
-  npx --yes markserv "." --port "${PORT}"
+  npx --prefix="${GEN_DIR}" --yes markserv "scenarios/index.md" --port "${PORT}"
 else
   echo "npx not found. Falling back to a simple HTTP server (Markdown will not be rendered)."
   cd "${GEN_DIR}"
