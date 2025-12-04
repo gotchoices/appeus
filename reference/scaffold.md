@@ -12,7 +12,10 @@ project-root/
 │   │   └── AGENTS.md -> ../../appeus/agent-rules/stories.md
 │   ├── generated/
 │   │   ├── AGENTS.md -> ../../appeus/agent-rules/consolidations.md
-│   │   ├── navigation.md
+│   │   ├── images/
+│   │   │   └── index.md           # Screenshot config + browsable index
+│   │   ├── meta/
+│   │   │   └── outputs.json       # Screen dependency tracking
 │   │   ├── scenarios/
 │   │   │   └── AGENTS.md -> ../../../appeus/agent-rules/scenarios.md
 │   │   ├── screens/

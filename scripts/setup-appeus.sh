@@ -22,7 +22,9 @@ ln -snf "appeus/agent-rules/root.md" "${ROOT_DIR}/AGENTS.md"
 mkdir -p "${DESIGN_DIR}/stories"
 mkdir -p "${DESIGN_DIR}/generated/scenarios"
 mkdir -p "${DESIGN_DIR}/generated/screens"
+mkdir -p "${DESIGN_DIR}/generated/images"
 mkdir -p "${DESIGN_DIR}/generated/api"
+mkdir -p "${DESIGN_DIR}/generated/meta"
 mkdir -p "${DESIGN_DIR}/specs/screens"
 mkdir -p "${DESIGN_DIR}/specs/global"
 mkdir -p "${DESIGN_DIR}/specs/api"
@@ -35,6 +37,11 @@ ln -snf "../../appeus/agent-rules/consolidations.md" "${DESIGN_DIR}/generated/AG
 ln -snf "../../../appeus/agent-rules/scenarios.md" "${DESIGN_DIR}/generated/scenarios/AGENTS.md"
 ln -snf "../../appeus/agent-rules/specs.md" "${DESIGN_DIR}/specs/AGENTS.md"
 ln -snf "../../../appeus/agent-rules/api.md" "${DESIGN_DIR}/specs/api/AGENTS.md"
+
+# Seed images index if missing
+if [ ! -f "${DESIGN_DIR}/generated/images/index.md" ]; then
+  cp -f "${APPEUS_DIR}/templates/generated/images-index.md" "${DESIGN_DIR}/generated/images/index.md"
+fi
 # Human-facing README symlink in stories (like appgen)
 ln -snf "../../appeus/user-guides/stories.md" "${DESIGN_DIR}/stories/README.md"
 # Seed a starter story from template if none exist yet (excluding README/AGENTS)
