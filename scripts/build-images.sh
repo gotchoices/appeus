@@ -121,8 +121,13 @@ for i in $(seq 0 $((screenshot_count - 1))); do
     fi
   fi
   # Add any extra params from frontmatter
-  extra_params=$(echo "$frontmatter" | yq -r ".screenshots[$i].params // {} | to_entries | map(\"\(.key)=\(.value)\") | join(\"&\")")
-  if [[ -n "$extra_params" && "$extra_params" != "" ]]; then
+  params_obj=$(echo "$frontmatter" | yq -r ".screenshots[$i].params // {}")
+  if [[ "$params_obj" != "{}" && "$params_obj" != "null" ]]; then
+    extra_params=$(echo "$params_obj" | yq -r 'to_entries | .[] | .key + "=" + .value' | paste -sd'&' -)
+  else
+    extra_params=""
+  fi
+  if [[ -n "$extra_params" ]]; then
     if [[ -n "$params" ]]; then
       params="${params}&${extra_params}"
     else
@@ -136,13 +141,17 @@ for i in $(seq 0 $((screenshot_count - 1))); do
   output="${outdir}/${file}"
   
   # Read deps array
-  deps_json=$(echo "$frontmatter" | yq -r ".screenshots[$i].deps // []")
-  deps_count=$(echo "$deps_json" | yq -r 'length')
   dep_array=()
-  for j in $(seq 0 $((deps_count - 1))); do
-    dep=$(echo "$deps_json" | yq -r ".[$j]")
-    dep_array+=("${root}/${dep}")
-  done
+  deps_json=$(echo "$frontmatter" | yq -r ".screenshots[$i].deps // []")
+  if [[ "$deps_json" != "[]" && "$deps_json" != "null" ]]; then
+    deps_count=$(echo "$deps_json" | yq -r 'length')
+    if [[ "$deps_count" -gt 0 ]]; then
+      for j in $(seq 0 $((deps_count - 1))); do
+        dep=$(echo "$deps_json" | yq -r ".[$j]")
+        dep_array+=("${root}/${dep}")
+      done
+    fi
+  fi
   # Always include the screen source as a dep if it exists
   screen_file="${root}/src/screens/${route}.tsx"
   if [[ -f "$screen_file" ]]; then
