@@ -43,10 +43,16 @@ while [[ $# -gt 0 ]]; do
       echo "  --framework  Framework to use"
       echo ""
       echo "Supported frameworks:"
-      echo "  react-native      React Native (Expo or bare)"
-      echo "  sveltekit         SvelteKit web framework"
-      echo "  nativescript-vue  NativeScript with Vue (stub)"
-      echo "  nativescript-svelte  NativeScript with Svelte (stub)"
+      echo "  react-native         React Native (Expo or bare)"
+      echo "  sveltekit            SvelteKit web framework"
+      echo "  nativescript-svelte  NativeScript with Svelte"
+      echo ""
+      echo "Planned (stubs exist):"
+      echo "  nativescript-vue     NativeScript with Vue"
+      echo "  nuxt                 Nuxt (Vue web framework)"
+      echo "  nextjs               Next.js (React web framework)"
+      echo "  tauri                Tauri (desktop apps)"
+      echo "  capacitor            Capacitor (hybrid mobile)"
       echo ""
       echo "Environment variables (framework-specific):"
       echo "  APPEUS_LANG=ts|js         Language (default: ts)"
@@ -83,7 +89,8 @@ fi
 FRAMEWORK_SCRIPT="${SCRIPT_DIR}/frameworks/${FRAMEWORK}.sh"
 if [ ! -f "$FRAMEWORK_SCRIPT" ]; then
   echo "Error: Unknown framework '$FRAMEWORK'" >&2
-  echo "Supported frameworks: react-native, sveltekit, nativescript-vue, nativescript-svelte" >&2
+  echo "Supported: react-native, sveltekit, nativescript-svelte" >&2
+  echo "Planned (stubs): nativescript-vue, nuxt, nextjs, tauri, capacitor" >&2
   exit 1
 fi
 

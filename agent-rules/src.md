@@ -10,6 +10,7 @@ Read `design/specs/project.md` for the framework, then see the appropriate refer
 |-----------|-----------|
 | React Native | [frameworks/react-native.md](../reference/frameworks/react-native.md) |
 | SvelteKit | [frameworks/sveltekit.md](../reference/frameworks/sveltekit.md) |
+| NativeScript Svelte | [frameworks/nativescript-svelte.md](../reference/frameworks/nativescript-svelte.md) |
 
 ## Universal Rules
 
@@ -65,6 +66,7 @@ Shared UI components used across screens.
 
 - React Native: `src/navigation/` with React Navigation
 - SvelteKit: `src/routes/` with file-based routing
+- NativeScript Svelte: `app/pages/` with frame-based navigation
 
 ## References
 

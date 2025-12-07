@@ -125,10 +125,19 @@ These items were completed in v1 and carry forward:
 - [x] `templates/specs/global/ui.md` — Framework-agnostic notes
 - [x] `templates/specs/navigation.md` — Generic route examples
 
+## Framework Adapters Implemented
+
+- [x] `scripts/frameworks/react-native.sh` — React Native (Expo or bare)
+- [x] `scripts/frameworks/sveltekit.sh` — SvelteKit web apps
+- [x] `scripts/frameworks/nativescript-svelte.sh` — NativeScript with Svelte
+
 ## Framework Stubs (Not Yet Implemented)
 
-- [ ] `scripts/frameworks/nativescript-vue.sh` — Stub exists, needs implementation
-- [ ] `scripts/frameworks/nativescript-svelte.sh` — Stub exists, needs implementation
+- [ ] `scripts/frameworks/nativescript-vue.sh` — NativeScript with Vue (stub exists)
+- [ ] `scripts/frameworks/nuxt.sh` — Nuxt (Vue web framework)
+- [ ] `scripts/frameworks/nextjs.sh` — Next.js (React web framework)
+- [ ] `scripts/frameworks/tauri.sh` — Tauri (desktop apps)
+- [ ] `scripts/frameworks/capacitor.sh` — Capacitor (hybrid mobile)
 
 ## Cleanup (When Stable)
 

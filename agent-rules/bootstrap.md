@@ -29,11 +29,17 @@ Guide the user through completing `design/specs/project.md`.
 
 **Mobile options:**
 - React Native (Expo or bare) — supported
-- NativeScript (Vue or Svelte) — planned, not yet implemented
+- NativeScript Svelte — supported
+- NativeScript Vue — planned
+- Capacitor — planned (wrap web apps as mobile)
 
 **Web options:**
 - SvelteKit — supported
-- Nuxt, Next.js — planned, not yet implemented
+- Nuxt (Vue) — planned
+- Next.js (React) — planned
+
+**Desktop options:**
+- Tauri — planned (lightweight desktop using web tech)
 
 ### 4. Data Strategy
 
