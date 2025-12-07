@@ -51,9 +51,22 @@ PROJECT_NAME="$(basename "$APP_DIR")"
 
 echo "Creating NativeScript Svelte app..."
 
+# Workaround: svelte-native has peer dependency conflicts with NativeScript 9
+# Set npm to use legacy-peer-deps to avoid ERESOLVE errors
+export npm_config_legacy_peer_deps=true
+
 # Create the project
 if ! ( cd "${TMP_PARENT_DIR}" && $NS_CMD create "${PROJECT_NAME}" --svelte ); then
+  echo "" >&2
   echo "Error: NativeScript project creation failed." >&2
+  echo "" >&2
+  echo "If you see peer dependency errors, this is a known issue with" >&2
+  echo "@nativescript-community/svelte-native and NativeScript 9." >&2
+  echo "" >&2
+  echo "Try running manually with:" >&2
+  echo "  npm config set legacy-peer-deps true" >&2
+  echo "  npx nativescript create ${PROJECT_NAME} --svelte" >&2
+  echo "" >&2
   rm -rf "${TMP_PARENT_DIR}"
   exit 1
 fi
