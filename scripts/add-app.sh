@@ -275,6 +275,16 @@ if bash "$FRAMEWORK_SCRIPT" "${PROJECT_DIR}/apps/${APP_NAME}" "$APP_NAME"; then
 else
   echo ""
   echo "Error: Framework scaffold failed" >&2
+  echo ""
+  echo "The following were created before the failure:"
+  echo "  - design/stories/${APP_NAME}/"
+  echo "  - design/specs/${APP_NAME}/"
+  echo "  - design/generated/${APP_NAME}/"
+  echo "  - apps/${APP_NAME}/"
+  echo ""
+  echo "If you want to clean up, run:"
+  echo "  rm -rf design/stories/${APP_NAME} design/specs/${APP_NAME} design/generated/${APP_NAME} apps/${APP_NAME}"
+  echo ""
   exit 1
 fi
 

@@ -26,14 +26,22 @@ echo "  Language: ${LANG_CHOICE}"
 echo "  Package manager: ${PM_CHOICE}"
 echo ""
 
-# Check for NativeScript CLI
-if ! command -v ns &> /dev/null; then
-  echo "Error: NativeScript CLI not found." >&2
+# Determine how to run NativeScript CLI
+# Prefer npx (no install required), fall back to global ns
+NS_CMD=""
+if command -v npx &> /dev/null; then
+  NS_CMD="npx nativescript"
+  echo "Using npx to run NativeScript (no global install required)"
+elif command -v ns &> /dev/null; then
+  NS_CMD="ns"
+  echo "Using globally installed NativeScript CLI"
+else
+  echo "Error: Cannot run NativeScript CLI." >&2
   echo "" >&2
-  echo "Install it with:" >&2
-  echo "  npm install -g nativescript" >&2
+  echo "Options:" >&2
+  echo "  1. Install Node.js/npm (includes npx) - recommended" >&2
+  echo "  2. Install NativeScript globally: npm install -g nativescript" >&2
   echo "" >&2
-  echo "Then run this command again." >&2
   exit 1
 fi
 
@@ -44,7 +52,7 @@ PROJECT_NAME="$(basename "$APP_DIR")"
 echo "Creating NativeScript Svelte app..."
 
 # Create the project
-if ! ( cd "${TMP_PARENT_DIR}" && ns create "${PROJECT_NAME}" --svelte ); then
+if ! ( cd "${TMP_PARENT_DIR}" && $NS_CMD create "${PROJECT_NAME}" --svelte ); then
   echo "Error: NativeScript project creation failed." >&2
   rm -rf "${TMP_PARENT_DIR}"
   exit 1
@@ -143,10 +151,18 @@ echo "NativeScript Svelte scaffold complete."
 echo "  App location: ${APP_DIR}"
 echo "  Source: ${APP_DIR}/app/"
 echo ""
-echo "To run:"
-echo "  cd apps/${APP_NAME}"
-echo "  ns preview    # Preview on device via QR code"
-echo "  ns run ios    # Run on iOS simulator"
-echo "  ns run android  # Run on Android emulator"
+echo "To run (choose one):"
+echo ""
+echo "  Using npx (no install):"
+echo "    cd apps/${APP_NAME}"
+echo "    npx nativescript preview"
+echo "    npx nativescript run ios"
+echo "    npx nativescript run android"
+echo ""
+echo "  Or install globally for shorter commands:"
+echo "    npm install -g nativescript"
+echo "    cd apps/${APP_NAME}"
+echo "    ns preview"
+echo "    ns run ios"
 echo ""
 echo "Documentation: https://svelte.nativescript.org/"
