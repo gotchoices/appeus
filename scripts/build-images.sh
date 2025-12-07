@@ -3,11 +3,12 @@ set -euo pipefail
 
 # build-images.sh
 # Capture screenshots for stale/missing scenario images (Android).
-# Reads configuration from design/generated/images/index.md frontmatter.
-# Requires a running emulator or the ability to start one.
+# Supports both single-app and multi-app project structures.
 #
 # Usage:
-#   appeus/scripts/build-images.sh [--reuse] [--window] [--force]
+#   appeus/scripts/build-images.sh [--target <name>] [--reuse] [--window] [--force]
+#
+# In multi-app projects, --target is required.
 #
 # Env overrides:
 #   APPEUS_ANDROID_AVD   (default: Medium_Phone_API_34)
@@ -15,16 +16,24 @@ set -euo pipefail
 #
 # The appId and scheme are read from images/index.md frontmatter.
 
+SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DESIGN_DIR="${PROJECT_DIR}/design"
+
+TARGET=""
 REUSE_FLAG=""
 WINDOW_FLAG=""
 FORCE=0
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --target) TARGET="$2"; shift 2 ;;
     --reuse) REUSE_FLAG="--reuse"; shift ;;
     --window) WINDOW_FLAG="--window"; shift ;;
     --force) FORCE=1; shift ;;
     -h|--help)
-      echo "Usage: $0 [--reuse] [--window] [--force]"
+      echo "Usage: $0 [--target <name>] [--reuse] [--window] [--force]"
+      echo "  --target  App target (required for multi-app projects)"
       echo "  --reuse   Reuse running emulator (fail if none)"
       echo "  --window  Show emulator window (not headless)"
       echo "  --force   Recapture all screenshots, even if fresh"
@@ -34,11 +43,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-root="$(pwd)"
-helper="${root}/appeus/scripts/android-screenshot.sh"
-outdir="${root}/design/generated/images"
-index_file="${outdir}/index.md"
-
 # Check for required tools
 if ! command -v yq &>/dev/null; then
   echo "Error: yq is required to parse YAML frontmatter."
@@ -46,10 +50,49 @@ if ! command -v yq &>/dev/null; then
   exit 1
 fi
 
+# Detect single-app vs multi-app mode
+is_single_app_mode() {
+  if [ -d "${DESIGN_DIR}/specs/screens" ]; then
+    local target_count
+    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$target_count" = "0" ]; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# Determine paths based on mode
+if is_single_app_mode; then
+  GENERATED_DIR="${DESIGN_DIR}/generated"
+  
+  # Find the app directory
+  APP_DIR=$(find "${PROJECT_DIR}/apps" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
+  if [ -z "$APP_DIR" ]; then
+    SRC_DIR="${PROJECT_DIR}/src"
+  else
+    SRC_DIR="${APP_DIR}/src"
+  fi
+else
+  if [ -z "$TARGET" ]; then
+    echo "Error: Multi-app project detected. --target is required." >&2
+    echo ""
+    echo "Available targets:"
+    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" -exec basename {} \; 2>/dev/null
+    exit 1
+  fi
+  GENERATED_DIR="${DESIGN_DIR}/generated/${TARGET}"
+  SRC_DIR="${PROJECT_DIR}/apps/${TARGET}/src"
+fi
+
+helper="${SCRIPT_DIR}/android-screenshot.sh"
+outdir="${GENERATED_DIR}/images"
+index_file="${outdir}/index.md"
+
 # Check for index.md
 if [[ ! -f "$index_file" ]]; then
   echo "Error: No images/index.md found at $index_file"
-  echo "Run setup-appeus.sh or create one from the template."
+  echo "Run init-project.sh and add-app.sh first, then add screenshot definitions."
   exit 1
 fi
 
@@ -148,12 +191,12 @@ for i in $(seq 0 $((screenshot_count - 1))); do
     if [[ "$deps_count" -gt 0 ]]; then
       for j in $(seq 0 $((deps_count - 1))); do
         dep=$(echo "$deps_json" | yq -r ".[$j]")
-        dep_array+=("${root}/${dep}")
+        dep_array+=("${PROJECT_DIR}/${dep}")
       done
     fi
   fi
   # Always include the screen source as a dep if it exists
-  screen_file="${root}/src/screens/${route}.tsx"
+  screen_file="${SRC_DIR}/screens/${route}.tsx"
   if [[ -f "$screen_file" ]]; then
     dep_array+=("$screen_file")
   fi

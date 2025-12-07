@@ -18,7 +18,7 @@ set -euo pipefail
 #
 # Environment defaults (can be overridden by flags):
 #   APPEUS_ANDROID_AVD   (default: Medium_Phone_API_34)
-#   APPEUS_APP_ID        (required, or use --app-id flag)
+#   APPEUS_APP_ID        (optional, currently unused but accepted for compatibility)
 #   APPEUS_SCREEN_DELAY  (default: 3)
 #
 

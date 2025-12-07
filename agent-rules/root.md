@@ -10,6 +10,19 @@ This is an Appeus v2 project.
 | Design surface | `design/AGENTS.md` | Stories, specs, consolidations |
 | App source | `apps/<name>/AGENTS.md` | Screen code, navigation |
 
+## User Commands
+
+When the user says... do this:
+
+| User Says | Action |
+|-----------|--------|
+| "generate" / "next slice" | `cd design/` and follow design-root rules |
+| "what's next" / "what do I need" | Run `check-stale.sh`, summarize, suggest action |
+| "add an app" / "add [framework]" | Run `add-app.sh --name <name> --framework <framework>` |
+| "generate scenarios/images" | `cd design/` and follow scenario workflow |
+
+For multi-app projects, add `--target <name>` to scripts.
+
 ## Key Workflows
 
 ### Code Generation

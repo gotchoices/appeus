@@ -48,8 +48,8 @@ These items were completed in v1 and carry forward:
 
 - [x] `agent-rules/project.md` — Post-discovery project rules
 - [x] `agent-rules/bootstrap.md` — Discovery phase guidance
-- [x] `agent-rules/root.md` — Updated for v2
-- [x] `agent-rules/design-root.md` — Updated for v2
+- [x] `agent-rules/root.md` — Updated for v2, user command mapping
+- [x] `agent-rules/design-root.md` — Updated for v2, user command mapping
 - [x] `agent-rules/stories.md` — Multi-target paths
 - [x] `agent-rules/specs.md` — Updated with v2 paths
 - [x] `agent-rules/consolidations.md` — Updated
@@ -86,30 +86,54 @@ These items were completed in v1 and carry forward:
 - [x] `reference/spec-schema.md` — Generic examples
 - [x] `agent-rules/specs.md` — Generic examples
 
-## v2 Phase 1: Core Infrastructure (TODO)
+## v2 Phase 1: Core Infrastructure (COMPLETE)
 
-Bootstrap and multi-target foundation (scripts):
+- [x] `init-project.sh` — Create project folder with bootstrap AGENTS.md and project.md template
+- [x] Non-destructive setup: detect existing content, add only what's missing
+- [x] Idempotent linking: re-running init refreshes symlinks without overwriting
+- [x] Report output: print what was added vs skipped
+- [x] gitignore template: add appeus symlinks to .gitignore
 
-- [ ] `init-project.sh` — Create project folder with bootstrap AGENTS.md and project.md template
-- [ ] Non-destructive setup: detect existing content, add only what's missing
-- [ ] Idempotent linking: re-running init refreshes symlinks without overwriting
-- [ ] Report output: print what was added vs skipped
-- [ ] gitignore template: add appeus symlinks to .gitignore
+## v2 Phase 2: Add-App Framework (COMPLETE)
 
-## v2 Phase 2: Add-App Framework (TODO)
+- [x] `add-app.sh` — Generic app scaffold command with `--name` and `--framework`
+- [x] Dispatcher pattern: add-app.sh calls `frameworks/<name>.sh`
+- [x] React Native adapter: `scripts/frameworks/react-native.sh`
+- [x] Single-to-multi migration: `add-app.sh` auto-reorganizes when adding second app
+- [x] Path detection: detect single-app vs multi-app mode
 
-Framework adapter system (scripts):
+## v2 Phase 4: Web Adapter (COMPLETE)
 
-- [ ] `add-app.sh` — Generic app scaffold command with `--name` and `--framework`
-- [ ] React Native adapter (extract from v1's `rn-init.sh` + `setup-appeus.sh`)
-- [ ] Single-to-multi migration: `add-app.sh` auto-reorganizes when adding second app
-- [ ] Path detection in scripts: detect single-app vs multi-app mode
+- [x] SvelteKit scaffold: `scripts/frameworks/sveltekit.sh`
 
-## v2 Phase 4: Web Adapter (TODO)
+## v2 Phase 5: Existing Scripts Updated
 
-SvelteKit support (scripts):
+- [x] `check-stale.sh` — Multi-app support (`--target`), single-app detection
+- [x] `regenerate.sh` — Multi-app support, updated paths
+- [x] `generate-next.sh` — Multi-app support
+- [x] `generate-all.sh` — Deleted (redundant with generate-next.sh)
+- [x] `update-dep-hashes.sh` — Multi-app support, relative path handling
+- [x] `build-images.sh` — Multi-app support (`--target`)
+- [x] `preview-scenarios.sh` — Multi-app support (`--target`)
+- [x] `publish-scenarios.sh` — Multi-app support (`--target`)
+- [x] `android-screenshot.sh` — Documentation fix (APP_ID unused)
 
-- [ ] SvelteKit scaffold initialization in `add-app.sh`
+## v2 Templates Updated
+
+- [x] `templates/generated/images-index.md` — Updated deps path comment
+- [x] `templates/specs/global/dependencies.md` — Framework-agnostic examples
+- [x] `templates/specs/global/ui.md` — Framework-agnostic notes
+- [x] `templates/specs/navigation.md` — Generic route examples
+
+## Framework Stubs (Not Yet Implemented)
+
+- [ ] `scripts/frameworks/nativescript-vue.sh` — Stub exists, needs implementation
+- [ ] `scripts/frameworks/nativescript-svelte.sh` — Stub exists, needs implementation
+
+## Cleanup (When Stable)
+
+- [ ] Delete `scripts/rn-init.sh` — Obsolete, replaced by `frameworks/react-native.sh`
+- [ ] Delete `scripts/setup-appeus.sh` — Obsolete, replaced by `init-project.sh` + `add-app.sh`
 
 ## Backlog / Future Enhancements
 
@@ -132,4 +156,6 @@ SvelteKit support (scripts):
 - v1 remains available on the `v1` branch for existing projects (chat, health)
 - v2 development happens on `master` branch
 - First v2 project: bonum (mobile + web)
-- Documentation and agent-rules are complete; scripts need implementation
+- v2 core infrastructure complete: init-project, add-app, framework adapters (RN, SvelteKit)
+- All scripts updated for multi-app support
+- Ready for testing with bonum
