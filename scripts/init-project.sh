@@ -5,7 +5,13 @@ set -euo pipefail
 # Run this in an empty or existing project folder.
 #
 # Usage:
-#   /path/to/appeus/scripts/init-project.sh
+#   /path/to/appeus/scripts/init-project.sh [--no-git]
+#
+# Options:
+#   --no-git    Skip git initialization
+#
+# Environment:
+#   APPEUS_GIT=0    Same as --no-git
 #
 # This script is:
 #   - Non-destructive: won't overwrite existing files
@@ -13,6 +19,30 @@ set -euo pipefail
 #
 # After running, complete the discovery phase by filling out design/specs/project.md,
 # then use add-app.sh to scaffold your first app.
+
+# Parse arguments
+INIT_GIT="${APPEUS_GIT:-1}"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-git) INIT_GIT=0; shift ;;
+    -h|--help)
+      echo "Usage: $0 [--no-git]"
+      echo ""
+      echo "Initialize an Appeus v2 project in the current directory."
+      echo ""
+      echo "Options:"
+      echo "  --no-git    Skip git initialization"
+      echo ""
+      echo "Environment:"
+      echo "  APPEUS_GIT=0    Same as --no-git"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 PROJECT_DIR="$(pwd)"
 SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -176,7 +206,7 @@ else
 fi
 
 # 13. Initialize git if not already initialized and not disabled
-if [ "${APPEUS_GIT:-1}" != "0" ]; then
+if [ "${INIT_GIT}" != "0" ]; then
   if [ ! -d "${PROJECT_DIR}/.git" ]; then
     git init >/dev/null 2>&1 || true
     log_added ".git/ (initialized)"

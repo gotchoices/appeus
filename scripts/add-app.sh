@@ -47,6 +47,17 @@ while [[ $# -gt 0 ]]; do
       echo "  sveltekit         SvelteKit web framework"
       echo "  nativescript-vue  NativeScript with Vue (stub)"
       echo "  nativescript-svelte  NativeScript with Svelte (stub)"
+      echo ""
+      echo "Environment variables (framework-specific):"
+      echo "  APPEUS_LANG=ts|js         Language (default: ts)"
+      echo "  APPEUS_PM=yarn|npm|pnpm   Package manager (default: yarn)"
+      echo "  APPEUS_RUNTIME=expo|bare  RN runtime (default: bare, RN only)"
+      echo "  APPEUS_RN_VERSION=X.Y.Z   RN version (default: 0.82.1, RN only)"
+      echo ""
+      echo "Examples:"
+      echo "  $0 --name mobile --framework react-native"
+      echo "  APPEUS_RUNTIME=expo $0 --name mobile --framework react-native"
+      echo "  APPEUS_PM=pnpm $0 --name web --framework sveltekit"
       exit 0
       ;;
     *)
