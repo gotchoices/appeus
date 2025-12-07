@@ -4,17 +4,21 @@ set -euo pipefail
 # Appeus v2: Add an app to the project.
 #
 # Usage:
-#   ./appeus/scripts/add-app.sh --name <name> --framework <framework>
+#   ./appeus/scripts/add-app.sh --name <name> --framework <framework> [--refresh]
 #
 # Examples:
 #   ./appeus/scripts/add-app.sh --name mobile --framework react-native
 #   ./appeus/scripts/add-app.sh --name web --framework sveltekit
+#   ./appeus/scripts/add-app.sh --name mobile --framework react-native --refresh
+#
+# Options:
+#   --refresh   Idempotent mode: refresh symlinks and add missing templates
+#               without re-running framework scaffold
 #
 # Supported frameworks:
 #   - react-native (implemented)
 #   - sveltekit (implemented)
-#   - nativescript-vue (stub)
-#   - nativescript-svelte (stub)
+#   - nativescript-svelte (implemented)
 #
 # This script:
 #   - Detects single-app vs multi-app mode
@@ -29,18 +33,22 @@ APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 # Defaults
 APP_NAME=""
 FRAMEWORK=""
+REFRESH_MODE=0
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --name) APP_NAME="$2"; shift 2 ;;
     --framework) FRAMEWORK="$2"; shift 2 ;;
+    --refresh) REFRESH_MODE=1; shift ;;
     -h|--help)
-      echo "Usage: $0 --name <name> --framework <framework>"
+      echo "Usage: $0 --name <name> --framework <framework> [--refresh]"
       echo ""
       echo "Options:"
       echo "  --name       App name (e.g., mobile, web)"
       echo "  --framework  Framework to use"
+      echo "  --refresh    Idempotent mode: refresh symlinks, add missing templates,"
+      echo "               skip framework scaffold if app already exists"
       echo ""
       echo "Supported frameworks:"
       echo "  react-native         React Native (Expo or bare)"
@@ -62,8 +70,8 @@ while [[ $# -gt 0 ]]; do
       echo ""
       echo "Examples:"
       echo "  $0 --name mobile --framework react-native"
+      echo "  $0 --name mobile --framework react-native --refresh"
       echo "  APPEUS_RUNTIME=expo $0 --name mobile --framework react-native"
-      echo "  APPEUS_PM=pnpm $0 --name web --framework sveltekit"
       exit 0
       ;;
     *)
@@ -95,9 +103,18 @@ if [ ! -f "$FRAMEWORK_SCRIPT" ]; then
 fi
 
 # Check if app already exists
+APP_EXISTS=0
 if [ -d "${PROJECT_DIR}/apps/${APP_NAME}" ]; then
-  echo "Error: App '${APP_NAME}' already exists at apps/${APP_NAME}/" >&2
-  exit 1
+  APP_EXISTS=1
+  if [ "$REFRESH_MODE" = "0" ]; then
+    echo "Error: App '${APP_NAME}' already exists at apps/${APP_NAME}/" >&2
+    echo "" >&2
+    echo "To refresh symlinks and add missing templates without re-scaffolding:" >&2
+    echo "  $0 --name ${APP_NAME} --framework ${FRAMEWORK} --refresh" >&2
+    exit 1
+  else
+    echo "Refresh mode: App '${APP_NAME}' exists, will refresh symlinks and templates"
+  fi
 fi
 
 echo "Appeus v2: Adding app '${APP_NAME}' with framework '${FRAMEWORK}'"
@@ -213,7 +230,11 @@ if [ "$EXISTING_APPS" = "1" ] && is_single_app_mode; then
 fi
 
 # Create design folders for the new app
-echo "Creating design folders for '${APP_NAME}'..."
+if [ "$REFRESH_MODE" = "1" ]; then
+  echo "Refreshing design folders for '${APP_NAME}'..."
+else
+  echo "Creating design folders for '${APP_NAME}'..."
+fi
 
 mkdir -p "${PROJECT_DIR}/design/stories/${APP_NAME}"
 mkdir -p "${PROJECT_DIR}/design/specs/${APP_NAME}/screens"
@@ -247,7 +268,11 @@ if [ ! -f "${PROJECT_DIR}/design/generated/${APP_NAME}/images/index.md" ]; then
   cp "${APPEUS_DIR}/templates/generated/images-index.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/images/index.md"
 fi
 
-echo "  Created design folders for ${APP_NAME}"
+if [ "$REFRESH_MODE" = "1" ]; then
+  echo "  Refreshed design folders for ${APP_NAME}"
+else
+  echo "  Created design folders for ${APP_NAME}"
+fi
 echo ""
 
 # Create app directory
@@ -259,32 +284,43 @@ ln -snf "../../appeus/agent-rules/src.md" "${PROJECT_DIR}/apps/${APP_NAME}/AGENT
 # Update root AGENTS.md to point to project.md (post-discovery)
 ln -snf "appeus/agent-rules/project.md" "${PROJECT_DIR}/AGENTS.md"
 
-echo "Dispatching to framework scaffold: ${FRAMEWORK}"
-echo ""
-
-# Dispatch to framework-specific script
-if bash "$FRAMEWORK_SCRIPT" "${PROJECT_DIR}/apps/${APP_NAME}" "$APP_NAME"; then
+# Dispatch to framework-specific script (skip if refresh mode and app exists)
+if [ "$REFRESH_MODE" = "1" ] && [ "$APP_EXISTS" = "1" ]; then
+  echo "Refresh mode: Skipping framework scaffold (app already exists)"
   echo ""
-  echo "=== App '${APP_NAME}' created successfully ==="
+  echo "=== App '${APP_NAME}' refreshed successfully ==="
   echo ""
-  echo "Next steps:"
-  echo "  1. Edit design/stories/${APP_NAME}/01-first-story.md"
-  echo "  2. Ask the agent to derive specs and generate code"
-  echo "  3. Run the app from apps/${APP_NAME}/"
+  echo "Refreshed:"
+  echo "  - Symlinks in design/ and apps/${APP_NAME}/"
+  echo "  - Added any missing templates"
   echo ""
 else
+  echo "Dispatching to framework scaffold: ${FRAMEWORK}"
   echo ""
-  echo "Error: Framework scaffold failed" >&2
-  echo ""
-  echo "The following were created before the failure:"
-  echo "  - design/stories/${APP_NAME}/"
-  echo "  - design/specs/${APP_NAME}/"
-  echo "  - design/generated/${APP_NAME}/"
-  echo "  - apps/${APP_NAME}/"
-  echo ""
-  echo "If you want to clean up, run:"
-  echo "  rm -rf design/stories/${APP_NAME} design/specs/${APP_NAME} design/generated/${APP_NAME} apps/${APP_NAME}"
-  echo ""
-  exit 1
+
+  if bash "$FRAMEWORK_SCRIPT" "${PROJECT_DIR}/apps/${APP_NAME}" "$APP_NAME"; then
+    echo ""
+    echo "=== App '${APP_NAME}' created successfully ==="
+    echo ""
+    echo "Next steps:"
+    echo "  1. Edit design/stories/${APP_NAME}/01-first-story.md"
+    echo "  2. Ask the agent to derive specs and generate code"
+    echo "  3. Run the app from apps/${APP_NAME}/"
+    echo ""
+  else
+    echo ""
+    echo "Error: Framework scaffold failed" >&2
+    echo ""
+    echo "The following were created before the failure:"
+    echo "  - design/stories/${APP_NAME}/"
+    echo "  - design/specs/${APP_NAME}/"
+    echo "  - design/generated/${APP_NAME}/"
+    echo "  - apps/${APP_NAME}/"
+    echo ""
+    echo "To clean up, run:"
+    echo "  rm -rf design/stories/${APP_NAME} design/specs/${APP_NAME} design/generated/${APP_NAME} apps/${APP_NAME}"
+    echo ""
+    exit 1
+  fi
 fi
 
