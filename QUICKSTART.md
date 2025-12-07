@@ -1,75 +1,169 @@
 # Quickstart
 
-This quickstart helps you spin up the agent-guided scaffold so your stories become a running React Native app as you design it.
+This guide walks you through creating a new project with Appeus v2.
 
-Prerequisites
-- Node.js LTS and Yarn (or npm)
-- Expo tooling (CLI or Dev Client) and an iOS/Android simulator (or device)
-- A Git repo for your app (recommended)
+## Prerequisites
 
-Defaults and choices (you can override via env vars)
-- Runtime: bare (set APPEUS_RUNTIME=expo for Expo)
-- Language: ts (set APPEUS_LANG=js for JavaScript)
-- Package manager: yarn (set APPEUS_PM=npm or pnpm)
-- React Native version (bare): 0.82.1 (set APPEUS_RN_VERSION=0.82.1 to override)
-- App name: sanitized folder name (set APPEUS_APP_NAME=YourAppName to override)
-- Git init: on (set APPEUS_GIT=0 to skip)
+- Node.js LTS
+- Git
+- For mobile apps: Expo CLI or React Native CLI, iOS/Android simulator
+- For web apps: Node.js (framework-specific tooling installed by add-app)
 
-1) Initialize React Native app
-- Create and enter your app folder:
-  - `mkdir <your-new-app-name> && cd <your-new-app-name>`
-- Optionally set overrides (see choices above)
-- Run RN init (choose one):
-  - Absolute path: `/absolute/path/to/appeus/scripts/rn-init.sh`
-  - Relative path (from your new app folder): `../relative/path/to/appeus/scripts/rn-init.sh`
-- Example:
-  ```bash
-  APPEUS_RUNTIME=bare APPEUS_LANG=ts APPEUS_PM=yarn APPEUS_RN_VERSION=0.82.1 APPEUS_GIT=1 APPEUS_APP_NAME=ChatApp /absolute/path/to/appeus/scripts/rn-init.sh
-  ```
-- Re-run init in an existing folder:
-  - Either delete the RN scaffold (including `package.json`) and run again, or
-  - Set `APPEUS_FORCE_RN_INIT=1` to force re-initialization (will refresh RN scaffold files; your `design/` stays intact)
-- Note: rn-init prefers `@react-native-community/cli init` (no deprecation warnings) and falls back to `react-native init` only if needed.
-- Note: For bare RN + TypeScript, rn-init does TS setup after init (adds TypeScript deps and `tsconfig.json`) to avoid outdated TS templates that can pin older RN versions.
+## Step 1: Initialize Project
 
-2) Set up Appeus scaffold (idempotent)
-- Run setup (absolute or relative path):
-  - `/absolute/path/to/appeus/scripts/setup-appeus.sh`
-  - `../relative/path/to/appeus/scripts/setup-appeus.sh`
-- Example:
-  ```bash
-  /absolute/path/to/appeus/scripts/setup-appeus.sh
-  ```
-- The setup uses the current directory as the project root and will:
-  - Create `design/` folders and AGENTS.md links
-  - Seed `design/specs/navigation.md`, `design/specs/global/*`, and `design/specs/api/README.md`
-  - Create a convenient `./regen` symlink to `appeus/scripts/regenerate.sh`
+Create your project folder and run init:
 
-3) Write your first story
-- Add `design/stories/01-first-story.md` with goal, sequence, acceptance, variants
+```bash
+mkdir myproject && cd myproject
+/path/to/appeus/scripts/init-project.sh
+```
 
-4) Derive consolidations and specs
-- Ask the agent to create `design/generated/screens/<id>.md` and `design/specs/screens/<id>.md` as needed
-- Update `design/specs/navigation.md` with sitemap and deep links
-- Define API procedures in `design/specs/api/*.md` (agent can seed from the template)
+This creates:
+- `AGENTS.md` — Bootstrap rules for the agent
+- `appeus` symlink — Points to your appeus installation
+- `design/specs/project.md` — Decision document template
+- `.gitignore` — Ignores appeus symlinks
 
-5) Generate RN code (on request)
-- Ask the agent to “generate code” for the next slice. It will create/update `src/screens/*` and `src/navigation/*`, and keep internal staleness tracking up to date.
+## Step 2: Discovery Phase
 
-6) Scenario images
-- Ask the agent to “generate scenarios” (or “refresh scenarios”). It will capture screenshots for any stale/missing targets and update the narrative Markdown files. If you prefer to do it yourself later, see Preview/Publish below.
+Open the project in your IDE with an AI agent. The agent will guide you through completing `design/specs/project.md`:
 
-7) Preview scenarios locally (appgen-style)
-- `./appeus/scripts/preview-scenarios.sh --port 8080`
-- Opens `design/generated/scenarios/index.md` rendered via markserv; images appear inline and are clickable deep links
+- **Purpose** — What problem does this project solve?
+- **Platforms** — Mobile (iOS/Android)? Web? Both?
+- **Toolchain** — React Native, SvelteKit, etc.
+- **Data strategy** — Local-first, cloud sync, backend API?
 
-8) Publish scenarios (static HTML)
-- `./appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/your-site/path`
-- Generates `design/generated/site/` with `scenarios/*.html` and `images/*.png` and rsyncs to the destination
+Take your time here. These decisions shape the project structure.
 
-9) Run and iterate
-- Launch the app (Expo or bare RN). Use scenario pages to deep-link into the app.
-- Edit stories/specs; ask the agent to regenerate code and refresh scenarios. The agent will handle staleness checks and bookkeeping for you.
+## Step 3: Add Your First App
 
-There are AGENTS.md files in the various folders that should help your AI agent guide you through the process of building your app.  Ask questions about what you need to do next.
+Once decisions are documented, add an app scaffold:
 
+```bash
+# For React Native mobile app
+./appeus/scripts/add-app.sh --name mobile --framework react-native
+
+# For SvelteKit web app
+./appeus/scripts/add-app.sh --name web --framework sveltekit
+```
+
+This creates:
+- `apps/<name>/` — Framework scaffold with AGENTS.md
+- `design/stories/` — Folder for user stories
+- `design/specs/screens/` — Folder for screen specs
+- `design/specs/navigation.md` — Navigation structure
+
+## Step 4: Write Stories
+
+Create your first story in `design/stories/`:
+
+```markdown
+# 01-first-feature.md
+
+## Goal
+As a user, I want to see a list of items so that I can browse available options.
+
+## Sequence
+1. User opens the app
+2. App displays a list of items with name and description
+3. User taps an item to see details
+
+## Acceptance
+- List shows at least item name and description
+- Tapping navigates to detail screen
+- Empty state shown when no items exist
+
+## Variants
+- happy: Several items displayed
+- empty: No items, empty state shown
+- error: Failed to load, error message shown
+```
+
+## Step 5: Derive Schema and Specs
+
+Ask the agent to:
+1. Read your stories and propose a data schema
+2. Create screen consolidations in `design/generated/screens/`
+3. Draft screen specs in `design/specs/screens/`
+4. Update `design/specs/navigation.md` with routes
+
+Review and refine the specs. Your specs take precedence over AI consolidations.
+
+## Step 6: Generate Code
+
+Ask the agent to generate code for the next vertical slice:
+
+```
+"Generate code for the ItemList screen"
+```
+
+The agent will:
+1. Check staleness (`check-stale.sh`)
+2. Refresh consolidations if needed
+3. Generate screen code in `apps/<name>/src/`
+4. Update navigation
+5. Generate mock data in `mock/data/`
+
+## Step 7: Run and Test
+
+For React Native:
+```bash
+cd apps/mobile
+yarn install
+yarn start
+```
+
+For SvelteKit:
+```bash
+cd apps/web
+npm install
+npm run dev
+```
+
+Use deep links to test specific screens with mock variants.
+
+## Step 8: Iterate
+
+- Edit stories or specs
+- Ask agent to regenerate affected screens
+- For mobile: Generate scenarios (screenshots) for stakeholder review
+- Commit working slices regularly
+
+## Adding More Apps Later
+
+To add a second app (e.g., web after mobile):
+
+```bash
+./appeus/scripts/add-app.sh --name web --framework sveltekit
+```
+
+The script automatically reorganizes the folder structure from single-app to multi-app layout.
+
+## Environment Variables
+
+For React Native apps, you can customize the scaffold:
+
+| Variable | Default | Options |
+|----------|---------|---------|
+| `APPEUS_RUNTIME` | `bare` | `bare`, `expo` |
+| `APPEUS_LANG` | `ts` | `ts`, `js` |
+| `APPEUS_PM` | `yarn` | `yarn`, `npm`, `pnpm` |
+| `APPEUS_RN_VERSION` | `0.82.1` | Any RN version |
+| `APPEUS_GIT` | `1` | `1` (init git), `0` (skip) |
+
+## Re-running Setup
+
+Init and add-app are idempotent:
+- Symlinks are refreshed
+- New folders/templates are added if missing
+- Existing user files are never overwritten
+
+Re-run after updating appeus to pick up new features.
+
+## Next Steps
+
+- Read `reference/scenarios.md` for screenshot workflow
+- See `docs/DESIGN.md` for architecture details
+- Check `docs/STATUS.md` for what's implemented
+
+The AGENTS.md files throughout the project guide your AI agent. When in doubt, ask the agent "What should I do next?"

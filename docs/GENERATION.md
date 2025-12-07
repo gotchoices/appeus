@@ -1,153 +1,244 @@
-# Appeus Generation Strategy (Design Intent)
+# GENERATION
 
-Purpose
-- Define how Appeus tracks dependencies, detects staleness, chooses the next vertical slice, and regenerates outputs incrementally.
-- This is a design-intent document. Agents will follow the operative rules in `appeus/agent-rules/*` and `appeus/reference/*` linked via `AGENTS.md` files.
+How Appeus tracks dependencies, detects staleness, and generates outputs. This is a design-intent document; agents follow operative rules in `agent-rules/` and `reference/`.
 
-Scope
-- Inputs: stories, human specs (screens, navigation, api, global), screens plan
-- Intermediates: screen consolidations, api consolidations, scenarios, status registry
-- Outputs: RN code (screens, navigation), mock data, engine stubs/adapters
+## Overview
 
-Core principles
-1) Human-first precedence: specs > consolidations > defaults
-2) Vertical slicing: implement one navigable screen at a time, top-to-bottom
-3) Deterministic, idempotent generation: consolidate → api → mocks → engine → RN code → scenarios
-4) Accurate dependency tracking: hash-based, embedded metadata + a status registry
+Generation in Appeus v2 operates at two levels:
 
+1. **Shared layer** — Schema and API specs derived from stories across all targets
+2. **Per-target layer** — Screens/pages, navigation, and scenarios specific to each app
 
-Dependency model
+## Inputs and Outputs
 
-Nodes
-- Screen consolidation (`design/generated/screens/<Screen>.md|.json`)
-  - provides: ["screen:<Screen>"]
-  - needs: ["api:<Namespace>", ...] (optional)
-  - dependsOn: explicit file paths (stories, specs/screens/<Screen>.md if any, specs/navigation.md, screens/index.md, global/*)
-  - depHashes: { filePath: sha256(content) }
-- API consolidation (`design/generated/api/<Namespace>.md|.json`)
-  - provides: ["api:<Namespace>"]
-  - usedBy: ["screen:<Screen>", ...] (optional)
-  - dependsOn: stories, specs/api/*.md, specs/screens/* (when screens dictate shape), global/*
-  - depHashes: { filePath: sha256(content) }
-- RN code (`src/screens/<Screen>.tsx`, `src/navigation/*`)
-  - AppeusMeta header (JSON) with dependsOn (consolidations + specs) and depHashes snapshot
-- Mock data (`mock/data/<Namespace or Screen>/<variant>.json` + `.meta.json`)
-  - .meta.json: dependsOn (API consolidation) and depHashes
-- Scenarios (`design/generated/scenarios/<story-id>.md`)
-  - frontmatter: dependsOn (stories + screens/routes referenced) and depHashes
+### Shared (Cross-Target)
 
-Status registry
-- `design/generated/status.json` records a graph of nodes with:
-  - id, type, outputs, dependsOn, depHashes, lastBuiltAt, stale (bool), reason (text)
-- Scripts update this registry after each generation step and use it for fast checks.
+| Type | Location | Description |
+|------|----------|-------------|
+| Schema specs | `design/specs/schema/*.md` | Data model definitions |
+| API specs | `design/specs/api/*.md` | Endpoint/procedure definitions |
+| Mock data | `mock/data/` | Shared mock JSON with variants |
 
+### Per-Target
 
-Staleness detection
-1) Consolidations first
-  - Recompute sha256 for each dependsOn file; compare to saved depHashes → mismatch = stale
-  - If no depHashes yet, compare mtimes of inputs vs consolidation file
-2) Outputs next
-  - RN code: if AppeusMeta depHashes don’t match current hashes, stale
-  - Mocks: if `.meta.json` depHashes don’t match API consolidation hash, stale
-  - Scenarios: if any referenced story/screen hash differs from saved depHashes, stale
-3) Fallback
-  - When metadata missing, conservatively mark stale if any likely input mtime > output mtime
+| Type | Location | Description |
+|------|----------|-------------|
+| Stories | `design/stories/<target>/` | User stories for this target |
+| Screen/page specs | `design/specs/<target>/screens/` | Human-authored specs |
+| Navigation/routing | `design/specs/<target>/navigation.md` | Nav structure, deep links |
+| Consolidations | `design/generated/<target>/screens/` | AI-derived from stories |
+| Scenarios | `design/generated/<target>/scenarios/` | Screenshots + deep links |
+| App code | `apps/<target>/src/` | Generated screens, routes, etc. |
 
+## Core Principles
 
-Vertical slice selection
-- Build a navigation graph from `design/specs/navigation.md` and `design/specs/screens/index.md`
-- Selection order:
-  1) First stale screen reachable from root ( ConnectionsList or declared root )
-  2) Then stale neighbors (screens that can be navigated to from fresh screens)
-  3) Remaining stale screens
-- A “screen is stale” if its consolidation or any of its outputs are stale or missing.
+1. **Human-first precedence:** specs > consolidations > defaults
+2. **Schema-first for multi-target:** Derive shared schema before per-target generation
+3. **Vertical slicing:** Implement one navigable screen/page at a time
+4. **Deterministic generation:** consolidate → schema → api → mocks → app code → scenarios
+5. **Accurate dependency tracking:** Hash-based metadata for staleness detection
 
+## Dependency Model
 
-Generation flow (per slice)
-1) Screen consolidation: refresh `design/generated/screens/<Screen>.md` with complete dependsOn and depHashes; record provides/needs
-2) API consolidations: refresh needed namespaces first (from screen needs or inferred from stories/specs)
-3) Mocks: generate/refresh mock/data sets for required namespaces with `.meta.json`
-4) Engine stubs: minimal adapters/stubs in `src/data/*` and `src/engine/*` to read mocks; plumb variant
-5) RN code: generate/update `src/screens/<Screen>.tsx` and `src/navigation/*`; embed AppeusMeta header (dependsOn/depHashes snapshot)
-6) Scenarios: generate/update `design/generated/scenarios/<story-id>.md` with deep links for the slice
-7) Update `design/generated/status.json`; print a concise report
+### Nodes and Relationships
 
+**Schema consolidation** (`design/specs/schema/<entity>.md`)
+- dependsOn: stories from ALL targets that reference the entity
+- Shared across targets
 
-Commands
-- `appeus/scripts/check-stale.sh` (agent-oriented)
-  - Output: human-readable summary + JSON staleness report
-  - Strategy: use status.json and metadata; fallback to mtime
-- `appeus/scripts/regenerate.sh [--screen <Screen> | --api <Namespace>]` (prompt-only)
-  - Prints an AI-facing plan for the specific target; agents perform actions accordingly
-  - Use this to scope prompts to a single slice
-- `appeus/scripts/generate-next.sh` (agent-oriented)
-  - Picks next stale screen (vertical), prints plan, and invokes `regenerate.sh` with the target
-  - Updates status.json after the agent completes steps (agent reruns check-stale)
-- `appeus/scripts/generate-all.sh` (agent-oriented)
-  - Iterates generate-next until clean (agents apply changes per step)
+**Screen consolidation** (`design/generated/<target>/screens/<Screen>.md`)
+- provides: `["screen:<target>:<Screen>"]`
+- needs: `["api:<Namespace>", "schema:<Entity>"]`
+- dependsOn: stories, specs, navigation, schema specs
 
+**API consolidation** (`design/generated/api/<Namespace>.md`)
+- provides: `["api:<Namespace>"]`
+- dependsOn: schema specs, stories, screen specs that dictate shape
 
-File metadata formats
-- Consolidations frontmatter (YAML):
+**App code** (`apps/<target>/src/screens/<Screen>.tsx` or equivalent)
+- AppeusMeta header with dependsOn and depHashes
+
+**Scenarios** (`design/generated/<target>/scenarios/<story-id>.md`)
+- dependsOn: stories + screens referenced
+
+### Status Registry
+
+`design/generated/<target>/status.json` tracks per-target staleness:
+```json
+{
+  "screens": [
+    {
+      "route": "LogHistory",
+      "stale": false,
+      "reason": ""
+    }
+  ],
+  "timestamp": "2025-12-07T...",
+  "staleCount": 0
+}
+```
+
+## Generation Flow
+
+### Phase 1: Schema Derivation (Multi-Target)
+
+When multiple targets exist:
+
+1. Agent reads stories from ALL targets (`design/stories/*/`)
+2. Identifies entities and relationships mentioned across stories
+3. Proposes schema specs in `design/specs/schema/`
+4. Human reviews and refines
+
+This ensures the data model supports all target experiences.
+
+### Phase 2: Per-Target Generation (Vertical Slice)
+
+For each target, the standard flow applies:
+
+1. **Screen consolidation** — Refresh `design/generated/<target>/screens/<Screen>.md`
+2. **API consolidations** — Refresh needed namespaces
+3. **Mocks** — Generate/refresh mock data for required namespaces
+4. **App code** — Generate screen/page and update navigation
+5. **Scenarios** — Capture screenshots, generate scenario docs (mobile targets)
+6. **Update status** — Write to `status.json`, print report
+
+### Slice Selection
+
+Build navigation graph from `design/specs/<target>/navigation.md` and screens index.
+
+Selection order:
+1. First stale screen reachable from root
+2. Then stale neighbors (navigable from fresh screens)
+3. Remaining stale screens
+
+## Staleness Detection
+
+### Hash-Based (Preferred)
+
+1. Compute sha256 for each dependsOn file
+2. Compare to saved depHashes in consolidation/output
+3. Mismatch = stale
+
+### Fallback (mtime-Based)
+
+When metadata missing:
+- Inputs: stories, specs, navigation, schema
+- Outputs: generated consolidations, app code
+- stale = any input mtime > output mtime
+
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `check-stale.sh` | Per-screen staleness report + JSON |
+| `regenerate.sh --screen <Route>` | Print plan for specific slice |
+| `generate-next.sh` | Pick next stale screen, print plan |
+| `generate-all.sh` | Iterate until clean |
+| `update-dep-hashes.sh --route <Route>` | Refresh depHashes after generation |
+
+Scripts operate per-target; pass `--target <name>` when project has multiple apps.
+
+## File Metadata Formats
+
+### Consolidation Frontmatter (YAML)
+
   ```yaml
-  provides: ["screen:ChatInterface"]
-  needs: ["api:Threads"]
+---
+provides: ["screen:mobile:LogHistory"]
+needs: ["api:LogEntries", "schema:Entry"]
   dependsOn:
-    - design/stories/01-first-story.md
-    - design/specs/screens/chat-interface.md
-    - design/specs/navigation.md
+  - design/stories/mobile/02-daily.md
+  - design/specs/mobile/screens/log-history.md
+  - design/specs/mobile/navigation.md
+  - design/specs/schema/entry.md
   depHashes:
-    design/specs/navigation.md: "sha256:..."
-    design/specs/screens/chat-interface.md: "sha256:..."
+  design/specs/mobile/screens/log-history.md: "sha256:..."
+  design/specs/schema/entry.md: "sha256:..."
+---
   ```
 
-- Generated RN code header (JS/TS comment, JSON inside):
-  ```
+### Generated Code Header
+
+```typescript
   /* AppeusMeta:
   {
+  "target": "mobile",
     "dependsOn": [
-      "design/generated/screens/ChatInterface.md",
-      "design/generated/api/Threads.md",
-      "design/specs/navigation.md"
+    "design/generated/mobile/screens/LogHistory.md",
+    "design/specs/mobile/navigation.md"
     ],
     "depHashes": {
-      "design/generated/screens/ChatInterface.md": "sha256:...",
-      "design/specs/navigation.md": "sha256:..."
+    "design/generated/mobile/screens/LogHistory.md": "sha256:..."
     },
-    "generatedAt": "2025-11-12T12:34:56Z"
+  "generatedAt": "2025-12-07T12:34:56Z"
   }
   */
   ```
 
-- Mock dataset meta (JSON in `mock/data/<Namespace>/meta.json` or alongside per-variant):
+### Mock Meta
+
   ```json
   {
-    "namespace": "Threads",
-    "dependsOn": ["design/generated/api/Threads.md"],
-    "depHashes": { "design/generated/api/Threads.md": "sha256:..." },
-    "variants": ["happy","empty","error"]
-  }
-  ```
+  "namespace": "LogEntries",
+  "dependsOn": ["design/specs/api/log-entries.md"],
+  "depHashes": { "design/specs/api/log-entries.md": "sha256:..." },
+  "variants": ["happy", "empty", "error"]
+}
+```
 
+## Agent Guidance
 
-Agent guidance (operational)
-- Always refresh consolidations first; ensure frontmatter is complete.
-- Never overwrite human specs; only write consolidations and generated outputs.
-- After each slice, re-run `check-stale.sh` and update status.json; stop when clean or on user request.
+- Always refresh consolidations first when dependencies changed
+- Never overwrite human specs; only write consolidations and generated outputs
+- For multi-target projects, derive schema before per-target generation
+- After each slice, re-run `check-stale.sh` and update status
+- Stop when clean or on user request
 
+## Testing
 
-Testing
-- For each slice: add a basic render test for the screen; add a smoke test to open it via deep link with a variant.
-- Defer E2E until several slices are ready.
+Per slice:
+- Add basic render test for the screen/page
+- Add smoke test to open via deep link with variant (mobile)
+- Defer E2E until several slices are ready
 
+## Appendix: Progressive Structure
 
-Appendix: Minimal staleness (initial implementation)
-- Until all metadata is embedded, scripts use:
-  - Screens list: from `design/specs/screens/index.md`
-  - For each screen:
-    - Inputs mtimes: stories/*, specs/screens/<Screen>.md?, specs/navigation.md, specs/global/*
-    - Outputs mtimes: src/screens/<Screen>.tsx?
-    - stale = outputs missing or any input newer than outputs
-- JSON report is written to `design/generated/status.json` and printed to stdout
+Appeus uses a progressive structure that starts simple and scales:
 
+### Single-App Projects
 
+For projects with only one app, paths are flat:
+
+| Content | Path |
+|---------|------|
+| Stories | `design/stories/*.md` |
+| Screen specs | `design/specs/screens/*.md` |
+| Navigation | `design/specs/navigation.md` |
+| Consolidations | `design/generated/screens/*.md` |
+| Scenarios | `design/generated/scenarios/*.md` |
+| Status | `design/generated/status.json` |
+
+### Multi-App Projects
+
+For projects with multiple apps, paths include target subdirectories:
+
+| Content | Path |
+|---------|------|
+| Stories | `design/stories/<target>/*.md` |
+| Screen specs | `design/specs/<target>/screens/*.md` |
+| Navigation | `design/specs/<target>/navigation.md` |
+| Consolidations | `design/generated/<target>/screens/*.md` |
+| Scenarios | `design/generated/<target>/scenarios/*.md` |
+| Status | `design/generated/<target>/status.json` |
+
+Shared content (schema, API) remains at the top level in both modes.
+
+### Path Detection
+
+Scripts detect mode by checking for:
+- Single-app: `design/specs/screens/` exists, no `design/specs/<target>/` subdirectories
+- Multi-app: `design/specs/<target>/screens/` directories exist
+
+### Adding Apps Later
+
+When `add-app.sh` is run on a single-app project, it automatically reorganizes the folder structure to multi-app layout before creating the new app scaffold.
