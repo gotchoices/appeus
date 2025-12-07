@@ -4,70 +4,33 @@
 > Agent rules, references, and scripts are provided by the `appeus/` folder.
 > See `appeus/README.md` for toolkit overview.
 
-This is an Appeus v2 project. Start here for orientation.
+## Orientation
 
-## Quick Links
+| Area | AGENTS.md | Purpose |
+|------|-----------|---------|
+| Design surface | `design/AGENTS.md` | Stories, specs, consolidations |
+| App source | `apps/<name>/AGENTS.md` | Generated code |
 
-| Area | AGENTS.md | Reference |
-|------|-----------|-----------|
-| Design surface | `design/AGENTS.md` | [workflow.md](../reference/workflow.md) |
-| App source | `apps/<name>/AGENTS.md` | [codegen.md](../reference/codegen.md) |
-| Scenarios | `design/generated/scenarios/AGENTS.md` | [scenarios.md](../reference/scenarios.md) |
+Project config: `design/specs/project.md`
 
-## Project Structure
+## Precedence (Global)
 
-Check `design/specs/project.md` for:
-- Target platforms and apps
-- Toolchain choices
-- Data strategy
+1. **Human specs** — authoritative
+2. **AI consolidations** — regenerable
+3. **Framework defaults** — fill gaps
 
-See [scaffold.md](../reference/scaffold.md) for folder layout.
+## User Commands
 
-## Workflows
+| User Says | Action |
+|-----------|--------|
+| "generate" / "next slice" | `generate-next.sh`, then generate code |
+| "what's next" | `check-stale.sh`, summarize, suggest |
+| "generate scenarios/images" | See `design/AGENTS.md` |
 
-### Generate Code
+For multi-app: add `--target <name>` to scripts.
 
-Stories/specs → app code. See [generation.md](../reference/generation.md).
+## Key References
 
-Scripts:
-- `appeus/scripts/check-stale.sh` — Per-screen staleness
-- `appeus/scripts/generate-next.sh` — Pick next slice
-- `appeus/scripts/regenerate.sh --screen <Route>` — Target specific screen
-
-### Generate Scenarios
-
-App → screenshots → scenario docs. See [scenarios.md](../reference/scenarios.md).
-
-Scripts:
-- `appeus/scripts/build-images.sh` — Capture screenshots
-- `appeus/scripts/preview-scenarios.sh` — Local preview
-
-## Cadence
-
-1. Run `check-stale.sh` to refresh status
-2. Use `generate-next.sh` to pick next slice
-3. Generate code for that slice
-4. Run `check-stale.sh` again to verify
-
-## Precedence
-
-1. Human specs (authoritative)
-2. AI consolidations (regenerable)
-3. Framework defaults
-
-## Conventions
-
-- `design/generated/*` is regenerable — don't hand-edit
-- Use deep links for variants: `?variant=happy`
-- Don't modify `appeus/*` or `AGENTS.md` symlinks
-
-## Multi-App Projects
-
-For projects with multiple apps:
-- Check `design/specs/project.md` for target list
-- Paths include `<target>/` subdirectories
-- Schema and API specs are shared
-- Scripts accept `--target <name>`
-
-See [scaffold.md](../reference/scaffold.md) for single-app vs multi-app layouts.
-
+- [Workflow](appeus/reference/workflow.md)
+- [Generation](appeus/reference/generation.md)
+- [Scaffold](appeus/reference/scaffold.md)

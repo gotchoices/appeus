@@ -1,10 +1,9 @@
-# Agent Rules: Bootstrap (Discovery Phase)
+# Agent Rules: Bootstrap
 
 > This project uses **Appeus**, a design-first workflow for building apps.
-> AGENT rules, references, and scripts are provided by the `appeus/` folder.
 > See `appeus/README.md` for toolkit overview.
 
-This project has not yet completed its discovery phase.
+This project has not yet completed discovery.
 
 ## Your Task
 
@@ -12,70 +11,28 @@ Guide the user through completing `design/specs/project.md`.
 
 ## Discovery Questions
 
-### 1. Purpose
+1. **Purpose** — What problem? Who are users?
+2. **Platforms** — Mobile? Web? Both?
+3. **Toolchain** — Which frameworks per target?
+4. **Data Strategy** — Local-first? Cloud API? Offline?
 
-- What problem does this project solve?
-- Who are the target users?
-- What are the key goals?
+## Supported Frameworks
 
-### 2. Platforms
-
-- Mobile (iOS/Android)?
-- Web (desktop browsers)?
-- Both?
-- Different experiences per platform, or same UI?
-
-### 3. Toolchain (per target)
-
-**Mobile options:**
-- React Native (Expo or bare) — supported
-- NativeScript Svelte — supported
-- NativeScript Vue — planned
-- Capacitor — planned (wrap web apps as mobile)
-
-**Web options:**
-- SvelteKit — supported
-- Nuxt (Vue) — planned
-- Next.js (React) — planned
-
-**Desktop options:**
-- Tauri — planned (lightweight desktop using web tech)
-
-### 4. Data Strategy
-
-- Local-first with sync?
-- Cloud-only with backend API?
-- Offline support needed?
-
-### 5. Shared Resources
-
-- Shared schema across targets?
-- Shared API?
-- Shared component library?
+| Type | Supported | Planned |
+|------|-----------|---------|
+| Mobile | react-native, nativescript-svelte | nativescript-vue, capacitor |
+| Web | sveltekit | nuxt, nextjs |
+| Desktop | — | tauri |
 
 ## After Discovery
 
-Once `project.md` is complete:
+```bash
+./appeus/scripts/add-app.sh --name mobile --framework react-native
+./appeus/scripts/add-app.sh --name web --framework sveltekit
+```
 
-1. Run `add-app.sh` for each target:
-   ```bash
-   ./appeus/scripts/add-app.sh --name mobile --framework react-native
-   ./appeus/scripts/add-app.sh --name web --framework sveltekit
-   ```
-
-2. The root `AGENTS.md` will be updated to point to `project.md` rules
-
-3. Proceed to story authoring in `design/stories/`
-
-## Do Not Proceed Until
-
-- Project purpose is documented
-- Target platforms are decided
-- Toolchain choices are recorded
-- Data strategy is defined
+Then proceed to story authoring in `design/stories/`.
 
 ## Reference
 
-- [Workflow Overview](../reference/workflow.md)
-- [Scaffold Structure](../reference/scaffold.md)
-
+- [Workflow](appeus/reference/workflow.md)

@@ -1,59 +1,41 @@
 # Agent Rules: Consolidations
 
-You are in `design/generated/`. AI-derived consolidations live here.
-
-## Paths
-
-| Type | Single-App | Multi-App |
-|------|------------|-----------|
-| Screens | `generated/screens/*.md` | `generated/<target>/screens/*.md` |
-| API | `generated/api/*.md` | `generated/api/*.md` (shared) |
-| Scenarios | `generated/scenarios/*.md` | `generated/<target>/scenarios/*.md` |
-| Status | `generated/status.json` | `generated/<target>/status.json` |
+You are in `design/generated/`. AI-generated content lives here.
 
 ## Purpose
 
-Consolidations capture facts from multiple stories about a screen. They are regenerable and should not be hand-edited.
+Consolidations gather facts from stories into per-screen summaries. They are **regenerable** — human specs take precedence.
 
-## Dependency Metadata
+## Paths
 
-Include frontmatter:
+- Single-app: `generated/screens/*.md`
+- Multi-app: `generated/<target>/screens/*.md`
+
+## Metadata
+
+Include dependency tracking in each consolidation:
 
 ```yaml
 ---
-provides: ["screen:ItemList"]
-needs: ["api:Items", "schema:Item"]
 dependsOn:
   - design/stories/01-browsing.md
   - design/specs/screens/item-list.md
 depHashes:
-  design/specs/screens/item-list.md: "sha256:..."
+  design/stories/01-browsing.md: abc123...
 ---
 ```
 
-## Workflow
+## Do
 
-1. Read stories that reference this screen
-2. Read spec if exists (spec takes precedence)
-3. Write consolidation with complete metadata
-4. Before codegen, ensure consolidation is fresh
+- Refresh when dependencies change
+- Include all relevant facts from stories
+- Note conflicts for human resolution
 
-Reference: [generation.md](../reference/generation.md)
+## Don't
 
-## Regeneration Trigger
+- Don't prioritize over human specs
+- Don't hand-edit (regenerate instead)
 
-Create/refresh consolidations when:
-- Stories are added or edited
-- Specs clarify behavior
-- Dependencies change
+## Reference
 
-## Rules
-
-- Never override human specs
-- Keep metadata accurate
-- Be explicit about variants and data requirements
-
-## References
-
-- [Generation](../reference/generation.md)
-- [Staleness](../reference/generation.md#staleness-and-dependencies)
+- [Generation](appeus/reference/generation.md)
