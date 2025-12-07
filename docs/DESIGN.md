@@ -158,18 +158,19 @@ When a project has multiple targets (e.g., mobile + web):
 
 Appeus v2 supports multiple frameworks via adapters:
 
-| Framework | Scaffold Command | Agent Rules | Output Path |
-|-----------|------------------|-------------|-------------|
-| React Native | `add-app.sh --framework react-native` | `agent-rules/rn-src.md` | `apps/<name>/src/screens/` |
-| NativeScript Vue | `add-app.sh --framework nativescript-vue` | `agent-rules/ns-vue-src.md` | `apps/<name>/app/components/` |
-| SvelteKit | `add-app.sh --framework sveltekit` | `agent-rules/sveltekit-src.md` | `apps/<name>/src/routes/` |
-| (others) | TBD | TBD | TBD |
+| Framework | Scaffold Command | Reference | Output Path |
+|-----------|------------------|-----------|-------------|
+| React Native | `add-app.sh --framework react-native` | `reference/frameworks/react-native.md` | `apps/<name>/src/screens/` |
+| SvelteKit | `add-app.sh --framework sveltekit` | `reference/frameworks/sveltekit.md` | `apps/<name>/src/routes/` |
+| NativeScript Vue | `add-app.sh --framework nativescript-vue` | TBD | TBD |
 
 Each adapter provides:
 - Scaffold initialization script
-- Framework-specific agent rules
+- Framework-specific reference doc
 - Codegen templates and conventions
 - Navigation/routing patterns
+
+All apps use the same `agent-rules/src.md` which links to the appropriate framework reference.
 
 ## Scope Boundaries
 

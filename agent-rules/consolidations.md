@@ -1,31 +1,59 @@
-# AI Agent Rules: Consolidations (Appeus)
+# Agent Rules: Consolidations
 
-Consolidations capture what multiple stories imply about a screen, navigation, or components. They are AI-authored and regenerateable.
+You are in `design/generated/`. AI-derived consolidations live here.
 
-Before codegen
-- If a target screen is stale per `check-stale`, refresh its consolidation first, then proceed to RN code generation. This preserves precedence and traceability.
+## Paths
 
-Locations
-- Screens: `design/generated/screens/<screen-id>.md` (or `.json`)
-- Navigation: `design/generated/navigation.md`
-- Scenarios: `design/generated/scenarios/*.md`
+| Type | Single-App | Multi-App |
+|------|------------|-----------|
+| Screens | `generated/screens/*.md` | `generated/<target>/screens/*.md` |
+| API | `generated/api/*.md` | `generated/api/*.md` (shared) |
+| Scenarios | `generated/scenarios/*.md` | `generated/<target>/scenarios/*.md` |
+| Status | `generated/status.json` | `generated/<target>/status.json` |
 
-Rules
-- Never override human specs; use them as the source of truth
-- Keep consolidations up to date with story/spec changes and record dependency metadata
+## Purpose
+
+Consolidations capture facts from multiple stories about a screen. They are regenerable and should not be hand-edited.
+
+## Dependency Metadata
+
+Include frontmatter:
+
+```yaml
+---
+provides: ["screen:ItemList"]
+needs: ["api:Items", "schema:Item"]
+dependsOn:
+  - design/stories/01-browsing.md
+  - design/specs/screens/item-list.md
+depHashes:
+  design/specs/screens/item-list.md: "sha256:..."
+---
+```
+
+## Workflow
+
+1. Read stories that reference this screen
+2. Read spec if exists (spec takes precedence)
+3. Write consolidation with complete metadata
+4. Before codegen, ensure consolidation is fresh
+
+Reference: [generation.md](../reference/generation.md)
+
+## Regeneration Trigger
+
+Create/refresh consolidations when:
+- Stories are added or edited
+- Specs clarify behavior
+- Dependencies change
+
+## Rules
+
+- Never override human specs
+- Keep metadata accurate
 - Be explicit about variants and data requirements
 
-Trigger
-- Create/refresh consolidations when stories are added/edited or when specs clarify behavior
+## References
 
-Dependency metadata (required)
-- Add frontmatter fields:
-  - provides: e.g., ["screen:ChatInterface"] or ["api:Strands"]
-  - needs / usedBy: list related namespaces/screens when relevant
-  - dependsOn: exact file paths read (stories/specs/navigation/global/screens/index)
-  - depHashes: sha256(content) per dependsOn file
-
-Where used
-- Scripts use these fields to compute staleness and dependency graphs. RN generated files should embed AppeusMeta with dependsOn/depHashes for end-to-end tracking.
-
-
+- [Generation](../reference/generation.md)
+- [Staleness](../reference/generation.md#staleness-and-dependencies)

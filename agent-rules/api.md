@@ -1,20 +1,62 @@
-# AI Agent Rules: API (Appeus)
+# Agent Rules: API
 
-Purpose
-- Infer and document the engine-facing API (procedures, data shapes) required by screens and stories.
+You are in `design/specs/api/`. API specs define data endpoints.
 
-Locations
-- Human API specs: design/specs/api/*.md (or design/specs/api.md)
-- Generated API consolidations: design/generated/api/*.md
+## Paths
 
-Principles
-- Derive capabilities from stories and screen specs
-- Keep shapes stable; prefer versioned changes
-- Human specs override generated consolidations
- - Record dependency metadata in consolidations (provides, dependsOn, depHashes, usedBy where known)
+- Specs: `design/specs/api/*.md` (shared across targets)
+- Consolidations: `design/generated/api/*.md`
+- Mock data: `mock/data/*`
 
-When asked to regenerate
-- Ensure mock data keys/shapes match the API docs
-- Update client adapters in src/data/* as needed
+## Purpose
 
+Define engine-facing procedures and data shapes needed by screens.
 
+## Workflow
+
+1. Analyze stories and screen specs for data needs
+2. Reference schema specs for entity shapes
+3. Create/update API consolidation
+4. Generate mock data matching shapes
+5. Update client adapters in `apps/<name>/src/data/`
+
+Reference: [api-agent-workflow.md](../reference/api-agent-workflow.md)
+
+## API Spec Format
+
+```yaml
+---
+id: items
+namespace: Items
+---
+
+## Endpoints
+
+### GET /items
+List items with optional filtering.
+
+**Response:**
+{ items: Item[], total: number }
+```
+
+## Rules
+
+- Human API specs override consolidations
+- Keep mock data aligned with spec shapes
+- API is shared across all targets
+
+## Mock Data
+
+```
+mock/data/
+├── items.happy.json
+├── items.empty.json
+├── items.error.json
+└── items.meta.json
+```
+
+## References
+
+- [API Workflow](../reference/api-agent-workflow.md)
+- [Mocking](../reference/mocking.md)
+- [Spec Schema - API](../reference/spec-schema.md#api-spec-format)

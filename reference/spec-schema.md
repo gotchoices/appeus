@@ -1,31 +1,231 @@
-# Spec Schema (Appeus)
+# Spec Schema
 
-Purpose
-- Define minimal, consistent frontmatter and structure for human-authored specs under `design/specs/*`.
+Structure and conventions for human-authored specs.
 
-Frontmatter (minimum)
+## Overview
+
+Specs live in `design/specs/` and provide authoritative details that override AI consolidations.
+
+## Spec Types
+
+| Type | Single-App Path | Multi-App Path |
+|------|-----------------|----------------|
+| Project | `design/specs/project.md` | `design/specs/project.md` |
+| Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
+| API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
+| Screen | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
+| Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
+| Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
+
+## Screen Spec Format
+
+### Frontmatter (Minimum)
+
 ```yaml
-id: ChatInterface            # human-friendly identifier (kebab or Pascal ok)
-route: ChatInterface         # RN route/component name (PascalCase)
-variants: [happy, empty]     # optional; demo/mock variants considered
+---
+id: item-list                 # kebab-case identifier (matches filename)
+route: ItemList               # PascalCase route/component name
+variants: [happy, empty, error]  # Mock variants for testing
+---
 ```
 
-Optional fields
-- description: short purpose text
-- provides: ["screen:ChatInterface"] (helps cross-referencing)
-- needs: ["api:Strands"] (hints dependencies)
-- tags: [search, messaging]
+### Optional Frontmatter
 
-Body
-- Free-form Markdown describing layout, behaviors, and edge cases.
-- May include code blocks with “generation slots” the generator should honor.
+```yaml
+---
+id: item-list
+route: ItemList
+description: Displays a list of items with search and filter
+provides: ["screen:ItemList"]
+needs: ["api:Items", "schema:Item"]
+tags: [browsing, list]
+dataRequirements:
+  - items: Item[]
+  - isLoading: boolean
+actions:
+  - selectItem(id: string)
+  - refreshList()
+layoutHints:
+  - header:large
+  - list:virtualized
+acceptance:
+  - "User can see item names and descriptions"
+  - "User can tap to view details"
+  - "Empty state shown when no items"
+---
+```
 
-Conventions
-- Screen spec filenames: kebab-case (e.g., `chat-interface.md`)
-- Maintain mapping from filenames → route in `design/specs/screens/index.md`
+### Body
 
-Precedence and updates
-- Specs override consolidations; consolidations override defaults.
-- After spec changes, refresh corresponding consolidations before RN codegen.
+Free-form Markdown describing:
+- Layout and behavior
+- Edge cases and error handling
+- Accessibility considerations
+- References to related screens
 
+### Code Slots
 
+Override generator defaults with code blocks:
+
+```markdown
+## Implementation Notes
+
+```ts slot=imports
+import { VirtualizedList } from 'react-native';
+import { ItemCard } from '../components/ItemCard';
+```
+
+```tsx slot=component
+// Custom component implementation
+export function ItemList() {
+  // ...
+}
+```
+
+```ts slot=styles
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  // ...
+});
+```
+```
+
+## Schema Spec Format
+
+For shared data model definitions:
+
+```yaml
+---
+id: item
+name: Item
+description: A product or service item
+---
+
+## Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | string | yes | Unique identifier |
+| name | string | yes | Display name |
+| description | string | no | Long description |
+| price | number | yes | Price in cents |
+| category | string | yes | Category slug |
+| createdAt | ISO8601 | yes | Creation timestamp |
+
+## Relationships
+
+- Item belongs to Category
+- Item has many Reviews
+
+## Validation
+
+- name: 1-100 characters
+- price: >= 0
+- category: must exist in categories
+```
+
+## API Spec Format
+
+For endpoint/procedure definitions:
+
+```yaml
+---
+id: items
+namespace: Items
+description: Item management endpoints
+---
+
+## Endpoints
+
+### GET /items
+
+List all items with optional filtering.
+
+**Parameters:**
+- category (string, optional): Filter by category
+- search (string, optional): Search in name/description
+
+**Response:**
+```json
+{
+  "items": [{ "id": "...", "name": "...", ... }],
+  "total": 42
+}
+```
+
+### GET /items/:id
+
+Get single item by ID.
+
+**Response:** Item object or 404
+```
+
+## Navigation Spec Format
+
+```markdown
+# Navigation
+
+## Sitemap
+
+- **Main Tab** (root)
+  - ItemList (tab root)
+  - ItemDetail (push from ItemList)
+  - Cart (modal)
+- **Profile Tab**
+  - UserProfile (tab root)
+  - Settings (push)
+
+## Deep Links
+
+Scheme: `myapp://`
+
+| Pattern | Screen | Params |
+|---------|--------|--------|
+| `/screen/ItemList` | ItemList | variant, category |
+| `/screen/ItemDetail` | ItemDetail | id, variant |
+| `/screen/UserProfile` | UserProfile | variant |
+
+## Route Options
+
+| Route | Title | Header |
+|-------|-------|--------|
+| ItemList | "Items" | large |
+| ItemDetail | "{item.name}" | standard |
+```
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Spec filenames | kebab-case | `item-list.md`, `user-profile.md` |
+| Route names | PascalCase | `ItemList`, `UserProfile` |
+| Schema IDs | kebab-case | `item`, `user-profile` |
+| API namespaces | PascalCase | `Items`, `Users` |
+
+## Mapping Index
+
+Maintain in `design/specs/screens/index.md`:
+
+```markdown
+# Screens Index
+
+| Screen Name | Route | Spec File | Status |
+|-------------|-------|-----------|--------|
+| Item List | ItemList | item-list.md | complete |
+| Item Detail | ItemDetail | item-detail.md | draft |
+| User Profile | UserProfile | user-profile.md | complete |
+```
+
+## Precedence
+
+1. **Human specs** — Always authoritative
+2. **AI consolidations** — Facts gathered from stories; regenerable
+3. **Defaults** — Framework conventions
+
+After spec changes, refresh corresponding consolidations before codegen.
+
+## See Also
+
+- [Codegen Guide](codegen.md)
+- [Generation Workflow](generation.md)
+- [Stories](../agent-rules/stories.md)

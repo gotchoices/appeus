@@ -1,25 +1,161 @@
-# Code Generation Guide (Appeus)
+# Code Generation Guide
 
-Inputs
-- Human specs: design/specs/screens/*.md, design/specs/navigation.md, design/specs/global/*
-- AI consolidations: design/generated/screens/*.md, design/generated/navigation.md
+Detailed reference for generating app code from specs and consolidations.
 
-Outputs
-- RN screens: src/screens/*
-- Navigation: src/navigation/*
+## Inputs
 
-Rules
-- Human specs override consolidations
-- Idempotent writes; only change files when inputs change
-- Don’t write unless user requests regeneration
- - Embed AppeusMeta header with dependsOn/depHashes in generated files
- - Follow vertical slicing when possible (see scripts/generate-next.sh)
+### Human Specs (Authoritative)
 
-Mapping (example)
-- screen-id: chat-interface -> screen file: ChatInterface.tsx, route: ChatInterface
-- slots: imports/component/styles in spec override defaults
+| Type | Single-App Path | Multi-App Path |
+|------|-----------------|----------------|
+| Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
+| Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
+| Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
+| API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
+| Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
 
-Deep links
-- myapp://screen/<RouteName>?scenario=<id>&variant=<name>
+### AI Consolidations (Regenerable)
 
+| Type | Single-App Path | Multi-App Path |
+|------|-----------------|----------------|
+| Screen consolidations | `design/generated/screens/*.md` | `design/generated/<target>/screens/*.md` |
+| API consolidations | `design/generated/api/*.md` | `design/generated/api/*.md` (shared) |
 
+## Outputs
+
+| Type | Path |
+|------|------|
+| Screen code | `apps/<name>/src/screens/<Screen>.tsx` |
+| Navigation | `apps/<name>/src/navigation/*` |
+| Data adapters | `apps/<name>/src/data/*` |
+| Mock data | `mock/data/<namespace>.<variant>.json` |
+
+## Rules
+
+1. **Human specs override consolidations** — Always check for a spec before using consolidation
+2. **Idempotent writes** — Only change files when inputs have changed
+3. **Human-triggered only** — Don't write unless user requests regeneration
+4. **Embed metadata** — Include AppeusMeta header with dependsOn/depHashes
+5. **Vertical slicing** — Generate one screen at a time (see `generate-next.sh`)
+
+## Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Screen spec file | kebab-case | `item-list.md`, `user-profile.md` |
+| Screen code file | PascalCase | `ItemList.tsx`, `UserProfile.tsx` |
+| Route name | PascalCase | `ItemList`, `UserProfile` |
+
+### Mapping Example
+
+```
+spec: item-list.md → route: ItemList → file: ItemList.tsx
+spec: user-profile.md → route: UserProfile → file: UserProfile.tsx
+```
+
+## Spec Slots
+
+Screen specs can include code slots that override generator defaults:
+
+```markdown
+```ts slot=imports
+import { CustomComponent } from '../components/CustomComponent';
+```
+
+```tsx slot=component
+// Custom component body
+```
+
+```ts slot=styles
+// Custom styles
+```
+```
+
+Available slots:
+- `imports` — Additional import statements
+- `component` — Component body override
+- `styles` — StyleSheet definitions
+
+## Deep Links
+
+Format: `<scheme>://screen/<RouteName>?scenario=<id>&variant=<name>`
+
+Examples:
+```
+myapp://screen/ItemList?variant=happy
+myapp://screen/UserProfile?variant=empty&id=123
+```
+
+Parameters:
+- `scenario` — Scenario identifier for tracking
+- `variant` — Mock data variant (happy, empty, error)
+- Additional params as needed by the screen
+
+## AppeusMeta Header
+
+Generated files include metadata for staleness tracking:
+
+```typescript
+/* AppeusMeta:
+{
+  "target": "mobile",
+  "route": "ItemList",
+  "dependsOn": [
+    "design/generated/screens/ItemList.md",
+    "design/specs/screens/item-list.md",
+    "design/specs/navigation.md"
+  ],
+  "depHashes": {
+    "design/generated/screens/ItemList.md": "sha256:abc123...",
+    "design/specs/screens/item-list.md": "sha256:def456..."
+  },
+  "generatedAt": "2025-12-07T12:34:56Z"
+}
+*/
+```
+
+## Framework-Specific Output
+
+### React Native
+
+```
+apps/<name>/src/
+├── screens/
+│   ├── ItemList.tsx
+│   └── UserProfile.tsx
+├── navigation/
+│   ├── index.tsx
+│   └── linking.ts
+├── components/
+├── data/
+└── mock/
+```
+
+### SvelteKit
+
+```
+apps/<name>/src/
+├── routes/
+│   ├── items/
+│   │   └── +page.svelte
+│   └── profile/
+│       └── +page.svelte
+├── lib/
+│   ├── components/
+│   └── data/
+└── ...
+```
+
+## Agent Guidance
+
+1. Check for human spec before reading consolidation
+2. Merge spec slots with generated code
+3. Maintain navigation consistency
+4. Update dependency tracking after generation
+5. Run `check-stale.sh` to verify freshness
+
+## See Also
+
+- [Generation Workflow](generation.md)
+- [Spec Schema](spec-schema.md)
+- [Mock Variants](mock-variants.md)

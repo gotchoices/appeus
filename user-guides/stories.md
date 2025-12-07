@@ -1,14 +1,53 @@
 # User Guide: Stories
 
-Write concise, goal-oriented stories in `design/stories/` with:
-- Story Overview (As a / I want / So that)
-- Sequence (step-by-step)
-- Acceptance Criteria
-- Edge Cases
+Stories define user requirements. The agent derives screens and specs from your stories.
 
-After saving, ask the agent to derive consolidations and scenarios, then regenerate when ready.
+## Location
 
-Propose screens
-- Maintain a first pass list of screens/routes in `design/specs/screens/index.md` (routes in PascalCase). The agent will refine this via consolidations and specs.
+- Single-app: `design/stories/*.md`
+- Multi-app: `design/stories/<target>/*.md`
 
+## Structure
 
+```markdown
+# User Story: <Title>
+
+## Story Overview
+As a <user type>
+I want to <goal>
+So that <benefit>
+
+## Sequence
+1. User does X
+2. System responds with Y
+3. User sees Z
+
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+## Variants
+- happy: Normal flow
+- empty: Empty state
+- error: Error handling
+```
+
+## Tips
+
+- Focus on **what**, not UI specifics
+- Number stories for reading order (01-browsing.md)
+- Include edge cases and error scenarios
+
+## After Writing
+
+1. Ask agent to derive consolidations
+2. Review proposed screens in `design/specs/screens/index.md`
+3. Refine specs as needed
+4. Request code generation when ready
+
+## Multi-App Projects
+
+For projects with multiple targets:
+- Write separate stories per target
+- Agent reads ALL stories when deriving shared schema
+- Shared data model goes in `design/specs/schema/`

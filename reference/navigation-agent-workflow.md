@@ -1,19 +1,119 @@
-# Navigation Agent Workflow (Appeus)
+# Navigation Agent Workflow
 
-Inputs
-- Human navigation spec: design/specs/navigation.md
-- AI navigation consolidation: design/generated/navigation.md
+How to generate navigation code from specs.
 
-Outputs
-- RN navigation: src/navigation/*
+## Paths
 
-Rules
-- Human spec precedence
-- Keep deep link routing consistent with app config
+| Content | Single-App | Multi-App |
+|---------|------------|-----------|
+| Navigation spec | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
+| Navigation code | `apps/<name>/src/navigation/*` | `apps/<name>/src/navigation/*` |
 
-Steps
-1) Merge navigation.md with generated navigation (if present)
-2) Update src/navigation/* and verify route names match screen outputs
-3) Ensure deep links include scenario/variant where relevant
+## Inputs
 
+- Human navigation spec (authoritative)
+- Screen specs (for route details)
+- AI consolidation (if present, lower precedence)
 
+## Outputs
+
+- Navigation structure: `apps/<name>/src/navigation/index.tsx`
+- Deep link config: `apps/<name>/src/navigation/linking.ts`
+- Route types: `apps/<name>/src/navigation/types.ts`
+
+## Rules
+
+1. Human spec takes precedence over any consolidation
+2. Deep link routing must match app config
+3. Route names must match screen component names
+
+## Workflow
+
+### 1. Read Navigation Spec
+
+Parse `design/specs/navigation.md` for:
+- Sitemap structure (tabs, stacks)
+- Route definitions
+- Deep link patterns
+- Route options (titles, headers)
+
+### 2. Merge with Consolidation
+
+If `design/generated/navigation.md` exists:
+- Use for additional context
+- Spec overrides consolidation
+
+### 3. Generate Navigation Code
+
+Create/update navigation files:
+
+```typescript
+// apps/mobile/src/navigation/index.tsx
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Tab navigator
+const Tab = createBottomTabNavigator();
+
+// Stack navigators
+const MainStack = createNativeStackNavigator();
+
+// ... configure navigators based on spec
+```
+
+### 4. Configure Deep Links
+
+Generate linking configuration:
+
+```typescript
+// apps/mobile/src/navigation/linking.ts
+export const linking = {
+  prefixes: ['myapp://'],
+  config: {
+    screens: {
+      ItemList: 'screen/ItemList',
+      ItemDetail: 'screen/ItemDetail',
+      // ... from spec
+    },
+  },
+};
+```
+
+### 5. Verify Consistency
+
+- Route names match screen exports
+- Deep links work with variant params
+- Navigation structure matches sitemap
+
+## Deep Link Format
+
+```
+<scheme>://screen/<Route>?variant=<name>&<params>
+```
+
+Include in generated linking:
+- `variant` — Mock data variant
+- `scenario` — Scenario tracking ID
+- Route-specific params (id, etc.)
+
+## Framework-Specific
+
+### React Native
+
+Uses React Navigation with:
+- Stack navigators
+- Tab navigators
+- Deep linking via Linking API
+
+### SvelteKit
+
+Uses file-based routing:
+- `src/routes/` structure
+- `+page.svelte` files
+- URL params for variants
+
+## See Also
+
+- [Spec Schema - Navigation](spec-schema.md#navigation-spec-format)
+- [Codegen Guide - Deep Links](codegen.md#deep-links)
+- [Mock Variants](mock-variants.md)

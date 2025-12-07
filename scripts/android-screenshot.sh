@@ -9,21 +9,21 @@ set -euo pipefail
 #
 # Usage:
 #   appeus/scripts/android-screenshot.sh \
-#     --deeplink "chat://connections?variant=happy" \
-#     --output "./design/generated/images/connections-happy.png" \
-#     --app-id "org.sereus.chat" \
+#     --deeplink "myapp://screen/ItemList?variant=happy" \
+#     --output "./design/generated/images/item-list-happy.png" \
+#     --app-id "com.example.myapp" \
 #     --avd "Medium_Phone_API_34" \
 #     --delay 3 \
 #     --reuse
 #
 # Environment defaults (can be overridden by flags):
 #   APPEUS_ANDROID_AVD   (default: Medium_Phone_API_34)
-#   APPEUS_APP_ID        (default: org.sereus.chat)
+#   APPEUS_APP_ID        (required, or use --app-id flag)
 #   APPEUS_SCREEN_DELAY  (default: 3)
 #
 
 AVD="${APPEUS_ANDROID_AVD:-Medium_Phone_API_34}"
-APP_ID="${APPEUS_APP_ID:-org.sereus.chat}"
+APP_ID="${APPEUS_APP_ID:-}"
 DELAY="${APPEUS_SCREEN_DELAY:-3}"
 DEEPLINK=""
 OUTPUT="screenshot.png"

@@ -1,12 +1,50 @@
 # User Guide: Navigation
 
-Define your sitemap and deep links in `design/specs/navigation.md`.
+Define your app's sitemap and deep links in the navigation spec.
 
-Guidance
-- Keep route names stable
-- Document deep link patterns and parameters (scenario, variant)
-- Clarify header titles and options per route
+## Location
 
-The agent merges this with generated navigation (derived from stories) and updates `src/navigation/*` when you request regeneration.
+- Single-app: `design/specs/navigation.md`
+- Multi-app: `design/specs/<target>/navigation.md`
 
+## Structure
 
+```markdown
+# Navigation
+
+## Sitemap
+
+- **Main Tab**
+  - ItemList (tab root)
+  - ItemDetail (push)
+- **Profile Tab**
+  - UserProfile (tab root)
+  - Settings (push)
+
+## Deep Links
+
+Scheme: `myapp://`
+
+| Pattern | Screen | Params |
+|---------|--------|--------|
+| `/screen/ItemList` | ItemList | variant, category |
+| `/screen/ItemDetail` | ItemDetail | id, variant |
+
+## Route Options
+
+| Route | Title | Header |
+|-------|-------|--------|
+| ItemList | "Items" | large |
+| ItemDetail | dynamic | standard |
+```
+
+## Tips
+
+- Keep route names stable (PascalCase)
+- Include variant param for mock data switching
+- Document header options per route
+- Clarify modal vs push behavior
+
+## After Changes
+
+Agent merges navigation spec with consolidations and updates `apps/<name>/src/navigation/` on regeneration.

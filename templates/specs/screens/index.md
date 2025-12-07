@@ -1,25 +1,24 @@
-# Screens Plan (Human Proposal)
+# Screens Plan
 
-Purpose
-- Make a first pass at screen names and routes before generation.
-- If you leave this as-is, the agent will propose names from stories.
+List of screens for this target with routes and status.
 
-Instructions
-- List each screen with a clear, stable name and short purpose.
-- Add a proposed route (used for deep links and navigation).
-- Optional: note variants to support early (happy, empty, error).
+## Instructions
 
-Template
+- List each screen with a clear, stable name
+- Add the route name (PascalCase, used for navigation and deep links)
+- Spec file uses kebab-case (`item-list.md` for route `ItemList`)
+- Note variants to support (happy, empty, error)
 
-| Screen Name        | Route            | Purpose                                 | Variants                |
-|--------------------|------------------|-----------------------------------------|-------------------------|
-| ConnectionsList    | ConnectionsList  | Home list of connections/threads        | happy, empty, error     |
-| ChatInterface      | ChatInterface    | Thread conversation view                | happy, empty, error     |
-| ProfileSetup       | ProfileSetup     | Setup/edit profile                      | happy, error            |
-| MediaPicker        | MediaPicker      | Select or capture media                 | happy, empty, error     |
+## Screens
 
-Notes
-- Add/remove rows as needed. You can refine names later, but avoiding churn helps.
-- Screen-specific requirements go in `design/specs/screens/<screen-id>.md`.
+| Screen Name | Route | Spec File | Variants | Status |
+|-------------|-------|-----------|----------|--------|
+| Item List | ItemList | item-list.md | happy, empty, error | draft |
+| Item Detail | ItemDetail | item-detail.md | happy, error | draft |
+| User Profile | UserProfile | user-profile.md | happy, empty | draft |
 
+## Notes
 
+- Add/remove rows as needed
+- Screen-specific requirements go in spec files
+- Agent proposes screens from stories if this is empty

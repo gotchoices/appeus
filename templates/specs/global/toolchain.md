@@ -1,13 +1,30 @@
 # Toolchain Spec
 
-language: ts  # ts | js
-runtime: expo  # expo | bare-rn
-packageManager: yarn  # yarn | npm | pnpm
-navigation: react-navigation  # react-navigation | expo-router
-state: zustand  # zustand | redux | recoil | jotai
-http: fetch  # fetch | axios
+Framework and tooling configuration for this target.
 
-notes:
-- Adjust as needed; regenerate to apply.
+## Configuration
 
+```yaml
+language: ts           # ts | js
+packageManager: yarn   # yarn | npm | pnpm
+```
 
+## React Native (if applicable)
+
+```yaml
+runtime: bare          # bare | expo
+navigation: react-navigation
+state: zustand         # zustand | redux | jotai
+http: fetch            # fetch | axios
+```
+
+## SvelteKit (if applicable)
+
+```yaml
+adapter: auto          # auto | node | static
+```
+
+## Notes
+
+- Adjust values as needed for your project
+- Regenerate after changes

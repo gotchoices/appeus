@@ -23,9 +23,7 @@ appeus/
 │   ├── consolidations.md    # AI consolidations
 │   ├── scenarios.md         # Scenario generation
 │   ├── api.md               # API specs
-│   ├── rn-src.md            # React Native source rules
-│   ├── sveltekit-src.md     # SvelteKit source rules
-│   └── ...                  # Additional framework adapters
+│   └── src.md               # App source rules (links to framework references)
 │
 ├── reference/               # Detailed docs, accessed via agent-rules links
 │   ├── workflow.md          # Overall workflow
@@ -34,7 +32,10 @@ appeus/
 │   ├── mocking.md           # Mock data strategy
 │   ├── scenarios.md         # Screenshot and scenario workflow
 │   ├── spec-schema.md       # Spec file format
-│   └── *-agent-workflow.md  # Per-domain workflow details
+│   ├── *-agent-workflow.md  # Per-domain workflow details
+│   └── frameworks/          # Framework-specific references
+│       ├── react-native.md
+│       └── sveltekit.md
 │
 ├── user-guides/             # Human-facing docs, linked via README.md
 │   ├── stories.md           # How to write stories
@@ -205,8 +206,7 @@ Brief, linked rules that appear via AGENTS.md symlinks in project folders.
 | stories.md | design/stories/AGENTS.md |
 | specs.md | design/specs/AGENTS.md |
 | consolidations.md | design/generated/AGENTS.md |
-| rn-src.md | apps/mobile/AGENTS.md (React Native) |
-| sveltekit-src.md | apps/web/AGENTS.md (SvelteKit) |
+| src.md | apps/<name>/AGENTS.md (all frameworks) |
 
 ### For Agents Needing Details (reference/)
 

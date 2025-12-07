@@ -1,25 +1,53 @@
-# AI Agent Rules: Project Root (Appeus)
+# Agent Rules: Project Root
 
-This is an Appeus‑guided RN project. Use the rules in `design/` and `src/` to do the actual work; this file is only an orientation.
+This is an Appeus v2 project.
 
-Start here
-- Design surface: `design/AGENTS.md` (stories, specs, consolidations, scenarios)
-- App source: `src/AGENTS.md` (screens, navigation, data adapters)
+## Orientation
 
-Workflows
-- Generate code (stories/specs → RN code): see `design/AGENTS.md` and scripts under `appeus/scripts/` (`check-stale.sh`, `generate-next.sh`, `regenerate.sh`).
-- Generate scenarios (screenshots → docs with deep links): see `appeus/scripts/android-screenshot.sh` and planned `build-images.sh`/`generate-scenarios.sh`.
+| Area | Location | Purpose |
+|------|----------|---------|
+| Project config | `design/specs/project.md` | Toolchain decisions |
+| Design surface | `design/AGENTS.md` | Stories, specs, consolidations |
+| App source | `apps/<name>/AGENTS.md` | Screen code, navigation |
 
-Cadence
-- Agents should run `check-stale.sh` first to refresh status, then proceed with `generate-next.sh` or target a specific route with `regenerate`.
+## Key Workflows
 
-References
-- See `appeus/reference/` for complete guidance (generation precedence, staleness, testing, mock variants).
+### Code Generation
 
-Conventions
-- Precedence: human specs > AI consolidations > defaults.
-- `design/generated/*` is regenerable; don’t hand‑edit.
-- Use deep links for mock variants (`?variant=`) and optional `?locale=`.
-- Do not modify Appeus toolkit files under `appeus/*` or any `*/AGENTS.md` symlinks. If toolkit behavior needs change, propose an upstream edit to the Appeus toolkit; do not alter a project’s symlinked copies.
+Stories/specs → app code.
 
+1. `appeus/scripts/check-stale.sh` — Check what's stale
+2. `appeus/scripts/generate-next.sh` — Pick next slice
+3. Generate code for that screen
+4. Verify with `check-stale.sh`
 
+Reference: [generation.md](../reference/generation.md)
+
+### Scenario Generation
+
+Screenshots with deep links for review.
+
+Reference: [scenarios.md](../reference/scenarios.md)
+
+## Precedence
+
+1. Human specs > AI consolidations > defaults
+2. `design/generated/*` is regenerable — don't hand-edit
+
+## Conventions
+
+- Deep links: `<scheme>://screen/<Route>?variant=<name>`
+- Don't modify `appeus/*` or `AGENTS.md` symlinks
+
+## Multi-App Projects
+
+For projects with multiple targets:
+- Check `design/specs/project.md` for target list
+- Paths use `<target>/` subdirectories
+- Schema and API are shared across targets
+
+## References
+
+- [Workflow](../reference/workflow.md)
+- [Scaffold](../reference/scaffold.md)
+- [Generation](../reference/generation.md)

@@ -1,35 +1,71 @@
-# AI Agent Rules: Stories (Appeus)
+# Agent Rules: Stories
 
-You are in `design/stories/`, where humans write user stories. Your job is to clarify requirements, propose screens/routes, and ensure they flow into consolidations/specs and then RN code.
+You are in `design/stories/`. User stories define requirements.
 
-Story structure
-- Overview (As a … I want … so that …)
-- Sequence (numbered steps)
-- Acceptance criteria (testable)
+## Paths
 
-Workflow (Appeus)
-1) Read stories to extract requirements and candidate screens/routes
-2) Update `design/specs/screens/index.md` with proposed screen names (routes in PascalCase)
-3) Create/refresh consolidations under `design/generated/screens/*` capturing facts and dependencies
-4) When asked, regenerate RN code for the next slice (`appeus/scripts/check-stale.sh` → `generate-next.sh` → `regenerate.sh`)
-5) After screens stabilize, generate scenarios (screenshots + deep links)
+- Single-app: `design/stories/*.md`
+- Multi-app: `design/stories/<target>/*.md`
 
-Guidance
-- Focus on “what” (requirements). “How” lives in specs; respect precedence (specs > consolidations > defaults)
+## Story Structure
+
+```markdown
+# Story Title
+
+## Goal
+As a <user>, I want <action> so that <benefit>.
+
+## Sequence
+1. User does X
+2. System responds with Y
+3. User sees Z
+
+## Acceptance
+- Criterion 1
+- Criterion 2
+
+## Variants
+- happy: Normal flow
+- empty: Empty state
+- error: Error condition
+```
+
+## Workflow
+
+1. Read story for requirements
+2. Identify screens and navigation
+3. Update `design/specs/screens/index.md` with proposed screens
+4. Create/refresh consolidations in `design/generated/screens/`
+5. On request, generate code via `check-stale.sh` → `generate-next.sh`
+
+Reference: [stories-agent-workflow.md](../reference/stories-agent-workflow.md)
+
+## Do
+
+- Focus on "what" (requirements)
 - Reuse existing screens where possible
-- Keep consolidations accurate with dependency metadata (dependsOn/depHashes)
+- Keep consolidations accurate with metadata
 
-Links
-- Generation/staleness: `appeus/reference/generation.md`
-- Scenarios/images: `appeus/reference/scenarios.md`
-- Spec schema and precedence: `appeus/reference/spec-schema.md`
+## Don't
 
-Naming
-- Stories may be numbered for reading order (e.g., `01-first-story.md`)
-- Map from story → screens via `design/specs/screens/index.md`
+- Don't skip consolidations when dependencies change
+- Don't invent unreachable routes
+- Don't hand-edit `design/generated/*`
 
-Common mistakes
-- Don’t skip consolidations when dependencies changed
-- Don’t invent routes that aren’t navigable from the root
-- Don’t hand-edit `design/generated/*`
+## Naming
 
+- Stories: numbered for order (`01-browsing.md`)
+- Map story → screens via `design/specs/screens/index.md`
+
+## Multi-App
+
+For projects with multiple targets:
+- Stories in `design/stories/<target>/`
+- Schema derived from ALL target stories
+- Shared data model in `design/specs/schema/`
+
+## References
+
+- [Story Template](../templates/stories/story-template.md)
+- [Generation](../reference/generation.md)
+- [Spec Schema](../reference/spec-schema.md)

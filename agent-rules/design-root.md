@@ -1,64 +1,87 @@
-# AI Agent Rules: Design Root (Appeus)
+# Agent Rules: Design Root
 
-You are in the project’s design root. This is the human-facing surface where stories, specs, and AI-generated consolidations live. Your job is to guide users from stories to a running React Native app via code generation, not SVG wireframes.
+You are in the design surface. Stories, specs, and consolidations live here.
 
-Workflows
-- Generate code: stories/specs → consolidations → RN code. See `appeus/reference/generation.md` and scripts: `appeus/scripts/check-stale.sh`, `appeus/scripts/generate-next.sh`, `appeus/scripts/regenerate.sh`.
-- Generate scenarios: RN app → screenshots → scenario docs with deep links. See `appeus/reference/scenarios.md` and `appeus/scripts/android-screenshot.sh` (plus future image/scenario builders).
+## Structure
 
-Core flow
-1) Human writes stories in `design/stories/`
-2) You derive consolidations in `design/generated/` (screens, navigation, api, scenarios) where helpful, with explicit dependency metadata (dependsOn/depHashes/provides/needs)
-3) Human writes/edits specs in `design/specs/` (screens, navigation.md, global/*)
-4) When asked, generate/update RN code in `src/screens/*` and `src/navigation/*`
-5) Run the app and validate via scenarios (deep links), iterate
+| Folder | Purpose | Editable? |
+|--------|---------|-----------|
+| `stories/` | User stories | Human |
+| `specs/` | Authoritative specs | Human |
+| `generated/` | AI consolidations, scenarios | AI only |
 
-Vertical mode (preferred)
-- Use `appeus/scripts/check-stale.sh` → `generate-next.sh` to pick the next screen (reachable from root) and produce a step-by-step plan.
-- For each slice: consolidate → api → mocks → engine stubs → RN code → scenarios. Update status (staleness) afterward.
+## Paths
 
-Precedence
-- Human specs override AI consolidations; consolidations override defaults.
-- Consolidate first: If any dependency of a screen is stale, refresh its consolidation before regenerating RN code (see `appeus/reference/generation.md`).
+**Single-app:**
+- Stories: `design/stories/*.md`
+- Specs: `design/specs/screens/*.md`, `design/specs/navigation.md`
+- Consolidations: `design/generated/screens/*.md`
 
-Where things live
-- Stories: `design/stories/`
-- Specs (human): `design/specs/` (screens/*, navigation.md, global/*)
-- Generated (AI-only): `design/generated/` (screens/*, navigation.md, scenarios/*)
-- App code (outputs): `src/screens/*`, `src/navigation/*`
+**Multi-app:**
+- Stories: `design/stories/<target>/*.md`
+- Specs: `design/specs/<target>/screens/*.md`
+- Shared: `design/specs/schema/*.md`, `design/specs/api/*.md`
 
-Commands
-- `appeus/scripts/check-stale` to list per-screen staleness (JSON + summary)
-- `appeus/scripts/generate-next.sh` to pick next vertical slice and print a plan
-- `appeus/scripts/regenerate --screen <Route>` to print the per-slice steps (agent performs them)
-- After writing outputs for a route, run:
-  - `appeus/scripts/update-dep-hashes.sh --route <Route>` to refresh `depHashes` in `design/generated/meta/outputs.json`
-  - then `appeus/scripts/check-stale.sh` to verify freshness
+## Workflows
 
-Agent cadence
-- Always run `check-stale` first to refresh status, then choose the next slice with `generate-next.sh` (or a specific `regenerate` target).
+### Code Generation
 
-Triggers
-- If the human says “generate” or “generate code”, run the code workflow, slice-by-slice.
-- If the human says “generate scenarios”, run the scenario workflow (build images, write Markdown).
+1. Human writes stories in `stories/`
+2. You derive consolidations in `generated/` (with dependency metadata)
+3. Human writes/edits specs in `specs/`
+4. On request, generate app code in `apps/<name>/src/`
+5. Validate via scenarios, iterate
 
-Naming
-- Screen specs filenames: kebab-case under `design/specs/screens/*`. Routes/components in code: PascalCase (e.g., `ChatInterface`). Maintain mapping in `design/specs/screens/index.md`.
+### Vertical Slicing
 
-Mock variants
-- For mock/demo-only data selection via deep links (e.g., `?variant=empty`), follow the guidance in `appeus/reference/mock-variants.md`.
+Use scripts to process one screen at a time:
 
-Testing
-- See `appeus/reference/testing.md` for the recommended multi-layer testing strategy (unit, component, e2e). Advise the user when to add tests (before/after) and keep selectors platform-agnostic.
+```bash
+appeus/scripts/check-stale.sh      # What's stale?
+appeus/scripts/generate-next.sh    # Pick next slice
+```
 
-Do
-- Read stories and existing specs before proposing changes
-- Consolidate requirements for multi-story screens in `design/generated/screens/*`
-- Keep generated artifacts under `design/generated/*` fully regenerable
-- Propose RN code updates only when the user asks to regenerate
+For each slice: consolidate → api → mocks → code → scenarios.
 
-Don’t
-- Don’t edit `src/*` without an explicit regenerate request
-- Don’t prioritize consolidations over human specs
+Reference: [generation.md](../reference/generation.md)
 
+## Precedence
 
+Human specs > AI consolidations > defaults
+
+**Important:** Consolidate first. If dependencies are stale, refresh consolidation before generating code.
+
+## Commands
+
+| Script | Purpose |
+|--------|---------|
+| `check-stale.sh` | Per-screen staleness report |
+| `generate-next.sh` | Pick next vertical slice |
+| `regenerate.sh --screen <Route>` | Target specific screen |
+| `update-dep-hashes.sh --route <Route>` | Refresh dependency hashes |
+
+## Naming
+
+- Spec filenames: kebab-case (`item-list.md`)
+- Routes/components: PascalCase (`ItemList`)
+- Mapping in `design/specs/screens/index.md`
+
+## Do
+
+- Read stories and specs before proposing changes
+- Keep consolidations in `generated/` with full metadata
+- Propose code updates only when user asks
+
+## Don't
+
+- Don't edit app code without regenerate request
+- Don't prioritize consolidations over human specs
+- Don't hand-edit `generated/*`
+
+## References
+
+- [Workflow](../reference/workflow.md)
+- [Generation](../reference/generation.md)
+- [Spec Schema](../reference/spec-schema.md)
+- [Mock Variants](../reference/mock-variants.md)
+- [Testing](../reference/testing.md)

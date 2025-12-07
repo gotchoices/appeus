@@ -1,27 +1,74 @@
-# AI Agent Rules: App Source (src) (Appeus)
+# Agent Rules: App Source
 
-You are in the RN app source tree. Do not modify files unless the human has requested regeneration. All edits should be derived from `design/specs/*` (human) and `design/generated/*` (AI), with human precedence.
+You are in an app's source tree (`apps/<name>/`).
 
-See also
-- Generation: `appeus/reference/generation.md`
-- Mock variants: `appeus/reference/mock-variants.md`
-- Testing: `appeus/reference/testing.md`
+## Check Framework
 
-When regenerating
-- Screens: write/update `src/screens/*` components
-- Navigation: write/update `src/navigation/*` routes and options
-- Ensure deep linking is configured and route params include `scenario` and `variant` when present
-- Keep imports organized; prefer TypeScript when project language is TS
- - Write dependency metadata to `design/generated/meta/outputs.json` (preferred), including dependsOn/depHashes. You may also add an optional `AppeusMeta` header comment in files for human readability.
- - After updating an output for a route, run `appeus/scripts/update-dep-hashes.sh --route <Route>` to refresh `depHashes`, then `appeus/scripts/check-stale.sh` to confirm it’s fresh.
+Read `design/specs/project.md` for the framework, then see the appropriate reference:
 
-Mock variants
-- Do not hard-code variants into production logic. Mock/demo variants are supplied via deep links and handled through a small context under `src/mock/*`. See `appeus/reference/mock-variants.md`.
+| Framework | Reference |
+|-----------|-----------|
+| React Native | [frameworks/react-native.md](../reference/frameworks/react-native.md) |
+| SvelteKit | [frameworks/sveltekit.md](../reference/frameworks/sveltekit.md) |
 
-Internationalization
-- Use a translation hook (current minimal `useT()` or i18next’s `useTranslation` when adopted). Avoid hard-coded UI strings.
+## Universal Rules
 
-Out of scope
-- Runtime schema rendering; Appeus uses code generation to produce RN code
+These apply regardless of framework:
 
+### Precedence
 
+1. Human specs (authoritative)
+2. AI consolidations (regenerable)
+3. Framework defaults
+
+### Modification
+
+- Do not modify files without regeneration request
+- All edits derived from specs and consolidations
+- Embed AppeusMeta header in generated files
+
+### Mock Variants
+
+- Don't hardcode variants in production logic
+- Variants come via deep links or URL params
+- Branch in data adapters, not UI components
+- See [mock-variants.md](../reference/mock-variants.md)
+
+### After Regeneration
+
+1. Update `design/generated/meta/outputs.json`
+2. Run `update-dep-hashes.sh --route <Route>`
+3. Verify with `check-stale.sh`
+
+## Common Patterns
+
+### Data Adapters
+
+```
+src/data/<namespace>.ts
+```
+
+Each adapter:
+- Checks mock mode
+- Reads variant from context/URL
+- Returns mock data or calls real API
+
+### Components
+
+```
+src/components/<Component>.tsx|svelte
+```
+
+Shared UI components used across screens.
+
+### Navigation/Routing
+
+- React Native: `src/navigation/` with React Navigation
+- SvelteKit: `src/routes/` with file-based routing
+
+## References
+
+- [Codegen](../reference/codegen.md)
+- [Generation](../reference/generation.md)
+- [Mock Variants](../reference/mock-variants.md)
+- [Testing](../reference/testing.md)
