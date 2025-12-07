@@ -1,5 +1,8 @@
 # Agent Rules: Design Root
 
+> This project uses **Appeus**, a design-first workflow for building apps.
+> Agent rules, references, and scripts are provided by the `appeus/` folder.
+
 You are in the design surface. Stories, specs, and consolidations live here.
 
 ## Structure

@@ -1,5 +1,9 @@
 # Agent Rules: Project Root
 
+> This project uses **Appeus**, a design-first workflow for building apps.
+> Agent rules, references, and scripts are provided by the `appeus/` folder.
+> See `appeus/README.md` for toolkit overview.
+
 This is an Appeus v2 project.
 
 ## Orientation

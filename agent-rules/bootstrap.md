@@ -1,5 +1,9 @@
 # Agent Rules: Bootstrap (Discovery Phase)
 
+> This project uses **Appeus**, a design-first workflow for building apps.
+> AGENT rules, references, and scripts are provided by the `appeus/` folder.
+> See `appeus/README.md` for toolkit overview.
+
 This project has not yet completed its discovery phase.
 
 ## Your Task
@@ -24,13 +28,12 @@ Guide the user through completing `design/specs/project.md`.
 ### 3. Toolchain (per target)
 
 **Mobile options:**
-- React Native (Expo or bare)
-- NativeScript (Vue or Svelte)
+- React Native (Expo or bare) — supported
+- NativeScript (Vue or Svelte) — planned, not yet implemented
 
 **Web options:**
-- SvelteKit
-- Nuxt (Vue)
-- Next.js (React)
+- SvelteKit — supported
+- Nuxt, Next.js — planned, not yet implemented
 
 ### 4. Data Strategy
 
