@@ -160,6 +160,21 @@ When `add-app.sh` is run on a single-app project, it automatically reorganizes:
 
 Schema and API specs remain at the top level (shared).
 
+## Shared vs Per-Target Specs
+
+| Location | Scope | Examples |
+|----------|-------|----------|
+| `design/specs/project.md` | Project-wide | Toolchain, platforms, data strategy |
+| `design/specs/schema/` | Shared | Data entities (even for local-only apps) |
+| `design/specs/api/` | Shared | Backend API endpoints (if applicable) |
+| `design/specs/*.md` (top level) | Shared | Cross-app workflows, shared patterns |
+| `design/specs/<target>/` | Per-target | Screens, navigation, target-specific global |
+
+**Note:** Not all projects use a client/server model. For local-first apps without a backend API:
+- `schema/` still holds the data model (local storage entities)
+- `api/` may be empty or unused
+- Put cross-cutting specs (shared workflows, components) directly in `design/specs/`
+
 ## Notes
 
 - `design/generated/*` is fully regenerable — do not hand-edit
