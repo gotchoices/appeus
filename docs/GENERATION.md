@@ -32,11 +32,23 @@ Generation in Appeus v2 operates at two levels:
 
 ## Core Principles
 
-1. **Human-first precedence:** specs > consolidations > defaults
+1. **Human-first precedence:** stories + specs > consolidations > defaults
 2. **Schema-first for multi-target:** Derive shared schema before per-target generation
 3. **Vertical slicing:** Implement one navigable screen/page at a time
 4. **Deterministic generation:** consolidate → schema → api → mocks → app code → scenarios
 5. **Accurate dependency tracking:** Hash-based metadata for staleness detection
+
+## What Goes Where (Anti–Spec Creep)
+
+To keep the workflow sustainable and human-readable:
+
+| Artifact | Audience | Intent | Notes |
+|----------|----------|--------|-------|
+| **Stories** (`design/stories/…`) | Humans | “What happens” (narrative) | Avoid implementation detail |
+| **Specs** (`design/specs/…`) | Humans | “How it behaves” (user-observable UX contract) | Keep readable; avoid programmer-facing APIs/state machines |
+| **Consolidations** (`design/generated/…`) | Agents/engineers | Programmer-facing digest + dependency metadata | Translator layer; regenerable |
+
+Rule of thumb: if a spec is getting hard for the human to read, move programmer-structure into the consolidation instead.
 
 ## Dependency Model
 
@@ -133,7 +145,6 @@ When metadata missing:
 | `check-stale.sh` | Per-screen staleness report + JSON |
 | `regenerate.sh --screen <Route>` | Print plan for specific slice |
 | `generate-next.sh` | Pick next stale screen, print plan |
-| `generate-all.sh` | Iterate until clean |
 | `update-dep-hashes.sh --route <Route>` | Refresh depHashes after generation |
 
 Scripts operate per-target; pass `--target <name>` when project has multiple apps.

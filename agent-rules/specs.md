@@ -2,6 +2,10 @@
 
 You are in `design/specs/`. Human-authored specs are authoritative.
 
+## Guardrail (Keep Specs Human-Readable)
+
+Specs are a **user-observable UX contract**. If you find yourself writing programmer-facing structure, put it in consolidations (`design/generated/…`) instead.
+
 ## Paths
 
 | Type | Location |

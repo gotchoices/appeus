@@ -35,7 +35,8 @@ appeus/
 │   ├── *-agent-workflow.md  # Per-domain workflow details
 │   └── frameworks/          # Framework-specific references
 │       ├── react-native.md
-│       └── sveltekit.md
+│       ├── sveltekit.md
+│       └── nativescript-svelte.md
 │
 ├── user-guides/             # Human-facing docs, linked via README.md
 │   ├── stories.md           # How to write stories

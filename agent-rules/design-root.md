@@ -37,6 +37,10 @@ For multi-app: add `--target <name>`.
 4. On request, generate code
 5. Validate via scenarios
 
+## Guardrail
+
+If specs are becoming complex/programmer-facing, **stop and update consolidations**. Keep specs user-observable.
+
 ## References
 
 - [Generation](appeus/reference/generation.md)

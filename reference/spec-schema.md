@@ -6,6 +6,19 @@ Structure and conventions for human-authored specs.
 
 Specs live in `design/specs/` and provide authoritative details that override AI consolidations.
 
+## Spec Writing Style (User-Observable)
+
+Specs should remain **human-readable** and describe the **user-observable UX contract**:
+
+- **What the user sees** (states, empty/error conditions)
+- **What the user can do** (actions, constraints, confirmations)
+- **What must be true** (invariants, validation, ordering rules)
+- **Acceptance criteria** (testable outcomes)
+
+Avoid turning specs into programmer-facing design docs (component APIs, internal state machines, reducer tables). That programmer mapping belongs in **consolidations** (`design/generated/…`).
+
+If a spec is becoming hard for the human to read, move implementation-structure detail into the consolidation and keep the spec at the behavior level.
+
 ## Spec Types
 
 | Type | Single-App Path | Multi-App Path |

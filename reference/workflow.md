@@ -55,8 +55,9 @@ For multi-target projects, agent reads ALL stories to derive a shared data model
 
 ### Phase 6: Specs and Consolidations
 
-- Agent creates consolidations in `design/generated/` (regenerable)
-- Human refines specs in `design/specs/` (authoritative)
+- **Stories** stay user-narrative (“what happens”).
+- **Specs** stay a human-readable UX contract (user-observable behavior: states, rules, acceptance).
+- **Consolidations** are the translator layer: programmer-facing digest (implementation mapping, edge-case completeness, dependency metadata) and are regenerable.
 - Precedence: Specs > Consolidations > Defaults
 
 ### Phase 7: Code Generation

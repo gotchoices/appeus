@@ -8,6 +8,24 @@ Detailed reference for code generation, staleness detection, and dependency trac
 
 Transform stories and specs into app code.
 
+## What Goes Where (Anti-“Spec Creep” Guardrail)
+
+Appeus works best when each artifact stays in its lane:
+
+| Artifact | Audience | Content (intent) | Avoid |
+|----------|----------|------------------|-------|
+| **Stories** (`design/stories/…`) | Humans | **What happens** (user narrative) | UI implementation detail |
+| **Specs** (`design/specs/…`) | Humans | **How it behaves**, still **user-observable** (rules, states, acceptance) | Programmer-facing APIs, class diagrams, exhaustive internal state machines |
+| **Consolidations** (`design/generated/…`) | Agents/engineers | **Programmer mapping**: how we’ll implement from specs + stories (components, events, data adapters, routing) + dependency metadata | Overwriting or “upgrading” human specs |
+
+**Rule:** If a spec is getting hard for the human to read, stop and move “programmer-structure” detail into the consolidation instead.
+
+### Example (Where to put it)
+
+- “User can filter transactions by account; filter persists while the page is open.” → **spec**
+- “Implement filter persistence via store + URL params + debounce.” → **consolidation**
+- “Component `AccountAutocomplete` exposes `onSelect(accountId)`.” → **consolidation**
+
 **Inputs:**
 - Stories: `design/stories/` or `design/stories/<target>/`
 - Specs: `design/specs/` with screens, navigation, schema, api, global
@@ -217,16 +235,17 @@ Maintain in `design/specs/screens/index.md`:
 
 1. Always run `check-stale.sh` before generation
 2. Consolidate first if stale; then generate code
-3. Never overwrite human specs
-4. For multi-target: derive schema from ALL stories first
-5. After each slice, re-run `check-stale.sh`
-6. Stop when clean or on user request
+3. Never overwrite human stories or specs
+4. If asked to “improve/normalize” stories or specs, keep them user-observable; put programmer-facing structure in consolidations
+5. For multi-target: derive schema from ALL stories first
+6. After each slice, re-run `check-stale.sh`
+7. Stop when clean or on user request
 
 ## Precedence
 
 Always respect:
-1. **Human specs** — Authoritative, never overwritten
-2. **AI consolidations** — Regenerable, derived from stories
+1. **Human specs, stories** — Authoritative, never overwritten
+2. **AI consolidations** — Regenerable, derived from stories, specs
 3. **Defaults** — Framework conventions
 
 ## Multi-Target Considerations

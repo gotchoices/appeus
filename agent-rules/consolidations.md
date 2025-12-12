@@ -4,7 +4,7 @@ You are in `design/generated/`. AI-generated content lives here.
 
 ## Purpose
 
-Consolidations gather facts from stories into per-screen summaries. They are **regenerable** — human specs take precedence.
+Consolidations are the **translator layer**: gather facts from stories/specs into a programmer-facing digest (implementation mapping) with dependency metadata. They are **regenerable** — human specs take precedence.
 
 ## Paths
 

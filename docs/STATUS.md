@@ -148,7 +148,6 @@ These items were completed in v1 and carry forward:
 
 - [ ] `detach-appeus.sh` — Remove appeus symlinks from finished project
 - [ ] NativeScript Vue adapter
-- [ ] NativeScript Svelte adapter
 - [ ] Scenario generation for web (Playwright-based)
 - [ ] Shared component library across targets
 - [ ] ScenarioRunner overlay for mobile

@@ -20,9 +20,14 @@ Appeus is a design-first workflow that turns user stories into running applicati
 
 4. **Shared data layer** — Schema and API specs are defined once and shared across all targets.
 
-5. **Human precedence** — Specs (human) > consolidations (AI) > defaults.
+5. **Human precedence** — Stories + specs (human) > consolidations (AI) > defaults.
 
-6. **Vertical slicing** — Generate one navigable screen/page at a time, top-to-bottom.
+6. **Artifact lanes (anti–spec creep)** —
+   - Stories: user narrative (“what happens”)
+   - Specs: user-observable UX contract (“how it behaves”), human-readable
+   - Consolidations: programmer-facing digest + metadata (regenerable translator layer)
+
+7. **Vertical slicing** — Generate one navigable screen/page at a time, top-to-bottom.
 
 ## Key Differences from v1
 
