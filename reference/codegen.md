@@ -9,6 +9,7 @@ Detailed reference for generating app code from specs and consolidations.
 | Type | Single-App Path | Multi-App Path |
 |------|-----------------|----------------|
 | Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
+| Component specs | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
 | Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
 | Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
 | API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |

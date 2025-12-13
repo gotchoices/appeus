@@ -52,6 +52,7 @@ if is_single_app_mode; then
   fi
   
   SPECS_SCREENS_DIR="${DESIGN_DIR}/specs/screens"
+  SPECS_COMPONENTS_DIR="${DESIGN_DIR}/specs/components"
   SPECS_NAV_FILE="${DESIGN_DIR}/specs/navigation.md"
   SPECS_GLOBAL_DIR="${DESIGN_DIR}/specs/global"
   STORIES_DIR="${DESIGN_DIR}/stories"
@@ -78,6 +79,7 @@ else
   fi
   
   SPECS_SCREENS_DIR="${DESIGN_DIR}/specs/${TARGET}/screens"
+  SPECS_COMPONENTS_DIR="${DESIGN_DIR}/specs/${TARGET}/components"
   SPECS_NAV_FILE="${DESIGN_DIR}/specs/${TARGET}/navigation.md"
   SPECS_GLOBAL_DIR="${DESIGN_DIR}/specs/${TARGET}/global"
   STORIES_DIR="${DESIGN_DIR}/stories/${TARGET}"
@@ -136,6 +138,10 @@ for ROUTE in "${SCREENS[@]}"; do
     while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${STORIES_DIR}" -type f -name "*.md" -print0 2>/dev/null || true)
     [ -f "${SPECS_NAV_FILE}" ] && INPUTS+=("${SPECS_NAV_FILE}")
     while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${SPECS_GLOBAL_DIR}" -type f -print0 2>/dev/null || true)
+    # Component specs (shared within target)
+    if [ -d "${SPECS_COMPONENTS_DIR}" ]; then
+      while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${SPECS_COMPONENTS_DIR}" -type f -print0 2>/dev/null || true)
+    fi
     # Schema specs (shared)
     while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/schema" -type f -print0 2>/dev/null || true)
     # Per-screen spec

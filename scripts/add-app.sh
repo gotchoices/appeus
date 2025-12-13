@@ -169,6 +169,13 @@ migrate_to_multi_app() {
     mv "${PROJECT_DIR}/design/specs/screens" "${PROJECT_DIR}/design/specs/${existing_name}/screens"
     echo "  Moved specs/screens to design/specs/${existing_name}/screens/"
   fi
+
+  # Migrate specs/components (if present in single-app mode)
+  if [ -d "${PROJECT_DIR}/design/specs/components" ]; then
+    mkdir -p "${PROJECT_DIR}/design/specs/${existing_name}"
+    mv "${PROJECT_DIR}/design/specs/components" "${PROJECT_DIR}/design/specs/${existing_name}/components"
+    echo "  Moved specs/components to design/specs/${existing_name}/components/"
+  fi
   
   # Migrate specs/navigation.md
   if [ -f "${PROJECT_DIR}/design/specs/navigation.md" ]; then
@@ -238,6 +245,7 @@ fi
 
 mkdir -p "${PROJECT_DIR}/design/stories/${APP_NAME}"
 mkdir -p "${PROJECT_DIR}/design/specs/${APP_NAME}/screens"
+mkdir -p "${PROJECT_DIR}/design/specs/${APP_NAME}/components"
 mkdir -p "${PROJECT_DIR}/design/specs/${APP_NAME}/global"
 mkdir -p "${PROJECT_DIR}/design/generated/${APP_NAME}/screens"
 mkdir -p "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios"
@@ -250,6 +258,11 @@ ln -snf "../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/genera
 # Copy templates
 if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/screens/index.md" ]; then
   cp "${APPEUS_DIR}/templates/specs/screens/index.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/screens/index.md"
+fi
+
+if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/components/index.md" ]; then
+  mkdir -p "${PROJECT_DIR}/design/specs/${APP_NAME}/components"
+  cp "${APPEUS_DIR}/templates/specs/components/index.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/components/index.md"
 fi
 
 if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/navigation.md" ]; then

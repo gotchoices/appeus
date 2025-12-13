@@ -168,7 +168,7 @@ Schema and API specs remain at the top level (shared).
 | `design/specs/schema/` | Shared | Data entities (even for local-only apps) |
 | `design/specs/api/` | Shared | Backend API endpoints (if applicable) |
 | `design/specs/*.md` (top level) | Shared | Cross-app workflows, shared patterns |
-| `design/specs/<target>/` | Per-target | Screens, navigation, target-specific global |
+| `design/specs/<target>/` | Per-target | Screens, components, navigation, target-specific global |
 
 **Note:** Not all projects use a client/server model. For local-first apps without a backend API:
 - `schema/` still holds the data model (local storage entities)

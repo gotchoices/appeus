@@ -27,6 +27,7 @@ If a spec is becoming hard for the human to read, move implementation-structure 
 | Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
 | API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
 | Screen | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
+| Component | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
 | Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
 | Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
 
@@ -75,6 +76,30 @@ Free-form Markdown describing:
 - Edge cases and error handling
 - Accessibility considerations
 - References to related screens
+
+## Component Spec Format
+
+Component specs are for reusable UI building blocks (e.g., `AccountAutocomplete`, `TransactionResultsTable`).
+They should stay **user-observable** (behavior, states, constraints) and remain human-readable.
+
+### Frontmatter (Minimum)
+
+```yaml
+---
+id: account-autocomplete          # kebab-case identifier (matches filename)
+name: AccountAutocomplete         # stable component name
+---
+```
+
+### Body (Recommended Sections)
+
+- Purpose (what the user is trying to accomplish with this element)
+- Interaction behavior (keyboard, focus, selection rules)
+- States (loading/empty/error/disabled)
+- Inputs/Outputs (what the user provides, what the UI emits/changes)
+- Acceptance criteria (testable outcomes)
+
+Implementation mapping (props/events/types, file paths) belongs in consolidations.
 
 ### Code Slots
 

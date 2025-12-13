@@ -48,6 +48,7 @@ appeus/
 │   ├── specs/
 │   │   ├── project.md       # Decision document template
 │   │   ├── schema/          # Schema spec templates
+│   │   ├── components/      # Component spec templates
 │   │   ├── screens/         # Screen spec templates
 │   │   ├── global/          # Global specs (toolchain, ui, deps)
 │   │   └── navigation.md    # Navigation template

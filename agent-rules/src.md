@@ -30,6 +30,14 @@ Variants come via deep links/URL params. Branch in data adapters, not UI.
 
 See [mock-variants.md](appeus/reference/mock-variants.md)
 
+## Components (Prefer Reuse)
+
+If screen/route files are getting large, extract reusable UI into the app’s components folder:
+
+- SvelteKit: `src/lib/components/`
+- React Native: `src/components/`
+- NativeScript Svelte: `app/components/`
+
 ## References
 
 - [Codegen](appeus/reference/codegen.md)

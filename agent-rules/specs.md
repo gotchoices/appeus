@@ -11,6 +11,7 @@ Specs are a **user-observable UX contract**. If you find yourself writing progra
 | Type | Location |
 |------|----------|
 | Screens | `specs/screens/*.md` or `specs/<target>/screens/*.md` |
+| Components | `specs/components/*.md` or `specs/<target>/components/*.md` |
 | Navigation | `specs/navigation.md` or `specs/<target>/navigation.md` |
 | Schema | `specs/schema/*.md` (shared) |
 | API | `specs/api/*.md` (shared) |
