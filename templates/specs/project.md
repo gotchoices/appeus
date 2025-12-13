@@ -12,6 +12,12 @@ This document captures key decisions for the project. Complete this during the d
 
 <describe primary user personas>
 
+**Delivery posture (pick one):**
+
+- Prototype / Spike — optimize for speed and learning
+- MVP — optimize for speed, avoid obvious dead-ends
+- Production / Industrial-strength — optimize for correctness, scalability, accessibility, maintainability
+
 ## Platforms
 
 **What platforms will this project target?**
@@ -73,6 +79,11 @@ List the apps to be built:
 ## Notes
 
 <additional context, constraints, decisions>
+
+**Quality / performance posture (brief):**
+
+- Expected scale: small | medium | large (relative to your domain)
+- Critical interactions that must stay fast (e.g., search, scrolling, typeahead, import, sync):
 
 ---
 

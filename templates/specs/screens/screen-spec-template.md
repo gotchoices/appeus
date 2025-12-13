@@ -19,6 +19,7 @@ overrides:
 
 ## Notes
 - Add clarifications, wire references, and behaviors here.
+- Keep the project’s delivery posture in mind (see `design/specs/project.md`): if this screen can grow large or must stay fast, call that out as user-observable expectations.
 
 ```ts slot=imports
 // Optional: custom imports

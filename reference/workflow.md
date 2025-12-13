@@ -24,6 +24,7 @@ Agent guides user through `project.md`:
 - Target platforms (mobile, web, desktop)
 - Toolchain choices per target
 - Data strategy (local-first, cloud sync, etc.)
+- Delivery posture (prototype/MVP/production) and quality/performance expectations
 
 Do not proceed until decisions are documented.
 

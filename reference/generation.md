@@ -20,6 +20,8 @@ Appeus works best when each artifact stays in its lane:
 
 **Rule:** If a spec is getting hard for the human to read, stop and move “programmer-structure” detail into the consolidation instead.
 
+Before committing to “quick and simple” vs “scalable and robust” implementations, consult `design/specs/project.md` for the project’s delivery posture and quality/performance expectations.
+
 ### Example (Where to put it)
 
 - “User can filter transactions by account; filter persists while the page is open.” → **spec**

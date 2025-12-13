@@ -19,6 +19,8 @@ Avoid turning specs into programmer-facing design docs (component APIs, internal
 
 If a spec is becoming hard for the human to read, move implementation-structure detail into the consolidation and keep the spec at the behavior level.
 
+Also keep the project’s **delivery posture** in mind (from `design/specs/project.md`): prototype/MVP may accept simpler implementations, while production/industrial-strength should call out performance/robustness expectations explicitly (still at the user-observable level).
+
 ## Spec Types
 
 | Type | Single-App Path | Multi-App Path |
