@@ -157,41 +157,7 @@ These items were completed in v1 and carry forward:
 
 ## Known Issues
 
-### BUG: Scripts compute wrong PROJECT_DIR when appeus is a symlink
-
-**Affected scripts:** `update-dep-hashes.sh`, `check-stale.sh`, and likely others
-
-**Problem:** Scripts compute `PROJECT_DIR` by going two levels up from `SCRIPT_DIR`:
-```bash
-SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-```
-
-When `appeus` is a symlink (e.g., `bonum/appeus -> /path/to/appeus-2`), the `-P` flag resolves the symlink, so:
-- `SCRIPT_DIR` = `/path/to/appeus-2/scripts`
-- `PROJECT_DIR` = `/path/to` (wrong! should be `bonum/`)
-
-**Reproduction:**
-```bash
-cd /Users/kyle/share/devel/ser/bonum
-./appeus/scripts/update-dep-hashes.sh --target web --all
-# Outputs: "No outputs registered in /Users/kyle/share/devel/ser/design/generated/web/meta/outputs.json"
-# (Wrong path - should be .../bonum/design/...)
-```
-
-**Suggested fix:** Use `$0` or resolve from CWD instead of relying on `BASH_SOURCE` with `-P`:
-```bash
-# Option 1: Assume script is run from project root
-PROJECT_DIR="$(pwd)"
-
-# Option 2: Find project root by looking for design/ directory
-PROJECT_DIR="$(pwd)"
-while [[ ! -d "${PROJECT_DIR}/design" && "$PROJECT_DIR" != "/" ]]; do
-  PROJECT_DIR="$(dirname "$PROJECT_DIR")"
-done
-```
-
-**Workaround:** Run scripts from appeus directory directly, or manually compute hashes
+### FIXED (done): Scripts computed wrong `PROJECT_DIR` when `appeus/` is a symlink (resolved via `scripts/lib/project-root.sh` + updates across staleness/generation scripts)
 
 ## Notes
 
