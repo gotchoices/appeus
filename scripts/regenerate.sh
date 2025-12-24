@@ -11,15 +11,6 @@ set -euo pipefail
 #
 # In multi-app projects, --target is required.
 
-SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=lib/project-root.sh
-source "${SCRIPT_DIR}/lib/project-root.sh"
-PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
-  echo "Error: Could not find project root. Run from inside your project (with design/ and appeus/ at the root), or set APPEUS_PROJECT_DIR." >&2
-  exit 1
-}
-DESIGN_DIR="${PROJECT_DIR}/design"
-
 TARGET=""
 TARGET_KIND=""
 TARGET_VAL=""
@@ -38,6 +29,15 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
+
+SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/project-root.sh
+source "${SCRIPT_DIR}/lib/project-root.sh"
+PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
+  echo "Error: Could not find project root. Run from inside your project (with design/ and appeus/ at the root), or set APPEUS_PROJECT_DIR." >&2
+  exit 1
+}
+DESIGN_DIR="${PROJECT_DIR}/design"
 
 # Detect single-app vs multi-app mode
 is_single_app_mode() {

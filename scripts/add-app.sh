@@ -34,6 +34,20 @@ APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 APP_NAME=""
 FRAMEWORK=""
 REFRESH_MODE=0
+KEEP_APP_GIT="${APPEUS_APP_GIT:-0}" # 1 = keep per-app git repo (if scaffold creates one)
+
+strip_nested_git_repo() {
+  local app_path="$1"
+  if [ "${KEEP_APP_GIT}" = "1" ]; then
+    return 0
+  fi
+  # Many scaffolders auto-init a git repo. Appeus projects are intended to have a single repo at the project root,
+  # so remove nested `.git` by default to avoid submodule/subrepo surprises.
+  if [ -e "${app_path}/.git" ]; then
+    rm -rf "${app_path}/.git"
+    echo "  Removed nested git repo: ${app_path}/.git (set APPEUS_APP_GIT=1 to keep)"
+  fi
+}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -67,6 +81,7 @@ while [[ $# -gt 0 ]]; do
       echo "  APPEUS_PM=yarn|npm|pnpm   Package manager (default: yarn)"
       echo "  APPEUS_RUNTIME=expo|bare  RN runtime (default: bare, RN only)"
       echo "  APPEUS_RN_VERSION=X.Y.Z   RN version (default: 0.82.1, RN only)"
+        echo "  APPEUS_APP_GIT=1          Keep per-app git repo if scaffold initializes one (default: 0 = remove)"
       echo ""
       echo "Examples:"
       echo "  $0 --name mobile --framework react-native"
@@ -300,6 +315,8 @@ ln -snf "appeus/agent-rules/project.md" "${PROJECT_DIR}/AGENTS.md"
 # Dispatch to framework-specific script (skip if refresh mode and app exists)
 if [ "$REFRESH_MODE" = "1" ] && [ "$APP_EXISTS" = "1" ]; then
   echo "Refresh mode: Skipping framework scaffold (app already exists)"
+  # Enforce default: no nested repos unless explicitly requested.
+  strip_nested_git_repo "${PROJECT_DIR}/apps/${APP_NAME}"
   echo ""
   echo "=== App '${APP_NAME}' refreshed successfully ==="
   echo ""
@@ -312,6 +329,7 @@ else
   echo ""
 
   if bash "$FRAMEWORK_SCRIPT" "${PROJECT_DIR}/apps/${APP_NAME}" "$APP_NAME"; then
+    strip_nested_git_repo "${PROJECT_DIR}/apps/${APP_NAME}"
     echo ""
     echo "=== App '${APP_NAME}' created successfully ==="
     echo ""
