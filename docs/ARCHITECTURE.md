@@ -73,182 +73,189 @@ appeus/
 └── README.md                # Toolkit overview
 ```
 
-## Project Structure (v2)
+## Project Structure (v2.1)
 
-Appeus v2 uses a **progressive structure**: single-app projects use flat layouts; multi-app projects use per-target subdirectories. The transition is automated.
+This document describes the **canonical project layout** that agents and scripts should expect. For goals and guiding principles, see `docs/DESIGN.md`.
 
-### Single-App Layout
+Appeus projects are organized around:
+- **Shared design**: project decisions + shared domain contract
+- **Per-app design**: stories/specs/consolidations per target app
+- **Per-app code**: framework scaffolds under `apps/`
 
-When a project has only one app (the common starting point):
-
-```
-project/
-├── AGENTS.md → appeus/agent-rules/project.md
-├── appeus → ../appeus-2
-│
-├── design/
-│   ├── AGENTS.md
-│   ├── specs/
-│   │   ├── AGENTS.md
-│   │   ├── project.md           # Toolchain decisions
-│   │   ├── schema/              # Data model
-│   │   ├── api/                 # API surface
-│   │   ├── screens/             # Screen specs (flat)
-│   │   │   ├── index.md
-│   │   │   └── <screen>.md
-│   │   ├── navigation.md        # Navigation spec
-│   │   └── global/              # Global specs
-│   ├── stories/                 # Stories (flat)
-│   │   ├── AGENTS.md
-│   │   └── *.md
-│   └── generated/
-│       ├── AGENTS.md
-│       ├── screens/             # Consolidations (flat)
-│       ├── scenarios/
-│       ├── images/
-│       ├── api/
-│       └── status.json
-│
-├── apps/
-│   └── <name>/                  # Single app scaffold
-│       ├── AGENTS.md
-│       ├── src/
-│       └── ...
-│
-└── mock/
-    └── data/
-```
-
-### Multi-App Layout
-
-When a project has multiple apps (after adding a second app):
+### Canonical layout (one or many apps, detailed)
 
 ```
 project/
-├── AGENTS.md → appeus/agent-rules/project.md
-├── appeus → ../appeus-2
-│
+├── appeus → </path/to/appeus>                 # Symlink to the toolkit
+├── AGENTS.md → ./appeus/agent-rules/bootstrap.md # Root agent entrypoint (later → agent-rules/project.md)
 ├── design/
-│   ├── AGENTS.md
-│   ├── specs/
-│   │   ├── AGENTS.md
-│   │   ├── project.md           # Toolchain decisions
-│   │   ├── schema/              # ★ Shared data model
-│   │   ├── api/                 # ★ Shared API surface
-│   │   ├── <target>/            # Per-target specs
+│   ├── AGENTS.md → ../appeus/agent-rules/design-root.md
+│   │
+│   ├── specs/                                 # Human-authored, authoritative
+│   │   ├── AGENTS.md → ../../appeus/agent-rules/specs.md
+│   │   ├── project.md                         # Project-wide decisions (toolchain, quality posture, etc.)
+│   │   │
+│   │   ├── domain/                            # Optional: shared domain contract (preferred in v2.1)
+│   │   │   ├── schema.md                      # Optional: core data structures / entities
+│   │   │   ├── api.md                         # Optional: operations/procedures (even in non-client/server apps)
+│   │   │   ├── rules.md                       # Optional: invariants, validation, permissions, semantics
+│   │   │   └── interfaces.md                  # Optional: external systems, storage backends, sync model
+│   │   │
+│   │   ├── mobile/                            # Example target: mobile app
 │   │   │   ├── screens/
-│   │   │   │   ├── index.md
-│   │   │   │   └── <screen>.md
-│   │   │   ├── navigation.md
+│   │   │   │   ├── index.md                   # Screen registry (names/routes)
+│   │   │   │   └── <Screen>.md                # Screen specs (user-observable UX contract)
+│   │   │   ├── components/
+│   │   │   │   ├── index.md                   # Component inventory
+│   │   │   │   └── <Component>.md             # Component specs (reusable UI)
+│   │   │   ├── navigation.md                  # Navigation/routing spec
 │   │   │   └── global/
-│   │   └── ...
-│   ├── stories/
-│   │   ├── AGENTS.md
-│   │   ├── <target>/            # Per-target stories
-│   │   │   └── *.md
-│   │   └── ...
-│   └── generated/
-│       ├── AGENTS.md
-│       ├── <target>/            # Per-target consolidations
-│       │   ├── screens/
+│   │   │       ├── ui.md
+│   │   │       └── dependencies.md
+│   │   │
+│   │   └── web/                               # Example target: web app (same structure)
+│   │       └── ...
+│   │
+│   ├── stories/                               # Human-authored narrative (“what happens”)
+│   │   ├── AGENTS.md → ../../appeus/agent-rules/stories.md
+│   │   ├── mobile/
+│   │   │   └── 01-first-story.md
+│   │   └── web/
+│   │       └── 01-first-story.md
+│   │
+│   └── generated/                             # Agent-generated; subject to overwrite
+│       ├── AGENTS.md → ../../appeus/agent-rules/consolidations.md
+│       ├── mobile/
+│       │   ├── meta/outputs.json              # Dependency hashes + staleness metadata
+│       │   ├── screens/                       # Consolidations (translator layer)
+│       │   │   └── <Screen>.md
 │       │   ├── scenarios/
-│       │   ├── images/
-│       │   └── status.json
-│       ├── api/                 # Shared API consolidations
-│       └── ...
-│
+│       │   └── images/
+│       └── web/
+│           └── ...
 ├── apps/
-│   ├── <target>/                # Per-target scaffold
-│   │   ├── AGENTS.md
-│   │   ├── src/
-│   │   └── ...
-│   └── ...
-│
-├── packages/                    # Optional shared code
-│   └── shared/
-│       └── ...
-│
+│   ├── mobile/                              # Framework scaffold per app (e.g., React Native)
+│   │   ├── AGENTS.md → ../../appeus/agent-rules/src.md
+│   │   └── src/
+│   │       └── ...
+│   └── web/                                 # Framework scaffold per app (e.g., SvelteKit)
+│       ├── AGENTS.md → ../../appeus/agent-rules/src.md
+│       └── src/
+│           └── ...
 └── mock/
-    └── data/                    # Shared mock data
+    └── data/                    # Shared mock data (optional)
 ```
 
-### Single-to-Multi Migration
-
-When you run `add-app.sh` on a single-app project, the script automatically reorganizes:
-
-| Before | After |
-|--------|-------|
-| `design/stories/*.md` | `design/stories/<existing-target>/*.md` |
-| `design/specs/screens/` | `design/specs/<existing-target>/screens/` |
-| `design/specs/navigation.md` | `design/specs/<existing-target>/navigation.md` |
-| `design/generated/screens/` | `design/generated/<existing-target>/screens/` |
-| `design/generated/scenarios/` | `design/generated/<existing-target>/scenarios/` |
-
-The script preserves all content while restructuring paths. Schema and API specs remain at the top level (shared).
+Notes:
+- `<target>` is an app name like `mobile`, `web`, `desktop`, etc.
+- The root `AGENTS.md` may later be repointed from `bootstrap.md` to `project.md` after discovery.
 
 ## Component Purposes
 
-### For Developing Appeus (docs/)
+### For Developing Appeus (see `./README.md`)
 
-| File | Purpose |
-|------|---------|
-| DESIGN.md | Why appeus works the way it does |
-| GENERATION.md | Detailed generation strategy |
-| STATUS.md | What's done, what's next |
-| ARCHITECTURE.md | Folder structure reference |
+### For Agents Running in an Appeus-Guided Project (agent-rules/)
+These files appear in various folders of the scaffold as AGENTS.md files linked back to a particular file under agent-rules.
 
-### For Agents Building Apps (agent-rules/)
+These files will be consumed by agents as they traverse the project tree so they should:
+- Be very clean and clean so they do not unnecessarily consume limited AI context space
+- Be relevant to the folder they appear in
+- Contain hyperlinks to definitive documents in the `./reference` folder
+- Serve as an efficient index for agents so they can look up the reference details when then need them
 
-Brief, linked rules that appear via AGENTS.md symlinks in project folders.
+### Discovery Phase
+In the initial scaffold, the root AGENTS.md is pointed to bootstrap.md.  This causes the agent to more aggressively guide the user to complete specs/project.md before proceeding.  Once this phase is complete, the agent should repoint this link to agent-rules/project.md.  The agent will then assume a regular development role.
 
-| File | When Linked |
-|------|-------------|
-| bootstrap.md | Root AGENTS.md during discovery phase |
-| project.md | Root AGENTS.md after discovery |
-| stories.md | design/stories/AGENTS.md |
-| specs.md | design/specs/AGENTS.md |
-| consolidations.md | design/generated/AGENTS.md |
-| src.md | apps/<name>/AGENTS.md (all frameworks) |
+Post discovery development still involves additional phases, but those should be explained and detected according to rules outlined in agent-rules/project.md.
 
-### For Agents Needing Details (reference/)
+### For More Details (reference/)
+These documents contain more complete, exhaustive information agents need to know.  This information should be in plain language understandable by humans or AI agents.
 
-Longer documents with complete workflow details, accessed via links in agent-rules.
+Documents should be limited to a single topic so that the agent-rules files can point to them from a topical reference and the agent can read the linked topic into its context and be prepared for the applicable task.
+
+Reference documents should not contain extra fluff or formatting which would waste valuable AI context.  They should be clear, complete and to-the-point without redundancy but still completely covering the topic.
 
 ### For Humans (user-guides/)
+Human-friendly guides linked via README.md in project folders.  These files are intended to help the human understand what they should do when in the applicable folder and its children.
 
-Human-friendly guides linked via README.md in project folders.
+Examples include:
+- In this folder, you should create user stories. These stories should ...
+- Here you create specifications. They can oveerride everything else so keep them consistent ...
+- The domain folder is intended to contain ...
 
 ### For Project Setup (templates/)
 
-Starter files copied into projects. Agents and scripts use these to seed new specs, stories, and consolidation files.
+Starter files get copied into projects when the project scaffold is create. Agents and scripts use these to seed new specs, stories, and consolidation files.
 
 ### For Automation (scripts/)
 
-| Script | Who Uses | Purpose |
-|--------|----------|---------|
-| init-project.sh | Human | Bootstrap new project |
-| add-app.sh | Human/Agent | Add app scaffold |
-| check-stale.sh | Agent | Detect what needs regeneration |
-| regenerate.sh | Agent | Plan for specific slice |
-| generate-next.sh | Agent | Pick and plan next slice |
-| update-dep-hashes.sh | Agent | Update metadata after generation |
-| android-screenshot.sh | Agent | Capture Android screenshots |
-| preview-scenarios.sh | Human | Local scenario preview |
-| publish-scenarios.sh | Human | Publish to web |
+This section documents **what exists under `scripts/` today**, what each script is for, and where it fits in the workflow.
 
-## Path Detection
+#### Entry points (human or agent)
 
-Scripts and agent rules detect whether a project is single-app or multi-app:
+- **`init-project.sh` — initialize an Appeus-guided project**
+  - **Who runs it**: typically the human (an agent can run it if instructed)
+  - **What it does**: creates the core project scaffold non-destructively (design folders, symlinks, starter templates, `.gitignore` entries).
+  - **Expected behavior**: idempotent; refreshes symlinks; never overwrites existing user-authored files.
 
-**Single-app indicators:**
-- `design/specs/screens/` exists (flat)
-- `design/specs/navigation.md` exists (single file)
-- No `design/specs/<target>/` subdirectories
+- **`add-app.sh` — add a new app target**
+  - **Who runs it**: human or agent
+  - **What it does**: creates `apps/<target>/` via a framework adapter and ensures the matching `design/*/<target>/` folders exist.
+  - **Notable behavior**: supports `--refresh` for idempotent updates; prevents nested git repos under `apps/<target>/` by default.
 
-**Multi-app indicators:**
-- `design/specs/<target>/screens/` directories exist
-- `design/specs/<target>/navigation.md` files exist
-- Multiple subdirectories under `apps/`
+#### Staleness + “what should I do next?”
 
-Scripts adjust paths automatically based on detected mode. Agent rules reference paths using variables that resolve based on mode.
+- **`check-stale.sh` — compute staleness for a target**
+  - **Who runs it**: typically the agent
+  - **What it does**: reports which routes/screens appear stale by comparing inputs (stories/specs/navigation/global/domain) to outputs (generated app code).
+  - **How it decides dependencies**: prefers the per-target dependency registry in `design/generated/<target>/meta/outputs.json` when present; falls back to a heuristic input set when missing.
+  - **What it writes**: a per-target JSON staleness report under `design/generated/<target>/` (scripts should treat malformed/missing reports as regenerable and rebuild them).
 
+- **`generate-next.sh` — convenience: pick one stale slice and print a plan**
+  - **Status**: recommended convenience (not strictly required)
+  - **Why keep it**: it standardizes “what next?” across agents, reduces indecision, and produces a deterministic next step (especially helpful when many screens are stale).
+  - **If you prefer a manual flow**: agents can run `check-stale.sh`, pick a screen based on priority, then follow the workflow in `reference/`.
+
+- **`regenerate.sh` — DEPRECATED (plan-only)**
+  - **Why deprecate**: it does not perform regeneration; it only prints static “plan text,” which is better expressed in `agent-rules/` + `reference/` (and it has caused confusion for some agents/users).
+  - **Replacement**: use `generate-next.sh` for an automated “next plan,” or follow the relevant reference workflow directly (starting from `check-stale.sh` and the chosen slice).
+
+#### Dependency metadata
+
+- **`update-dep-hashes.sh` — refresh dependency hashes**
+  - **Who runs it**: agent
+  - **What it does**: recomputes SHA256 hashes for the `dependsOn` files already registered per route and writes them into `depHashes` in `design/generated/<target>/meta/outputs.json`.
+  - **Important behavior**:
+    - It updates **only** the route you pass via `--route`, or **all registered routes** when you pass `--all`.
+    - It does **not** “freshen” other stale slices by itself; staleness is driven by input/output timestamps (and by whether `dependsOn` is complete).
+    - If `outputs.json` is missing or empty/template-like (no routes registered), this script will not infer routes; it will print “No outputs registered” and exit.
+
+#### Scenarios and images
+
+- **`build-images.sh` — capture missing/stale scenario images**
+  - **Who runs it**: agent
+  - **What it does**: iterates scenario definitions and captures screenshots where needed (mobile-first).
+
+- **`android-screenshot.sh` — capture a screenshot from an Android emulator**
+  - **Who runs it**: agent (usually indirectly via `build-images.sh`)
+  - **What it does**: performs a deep-link + screenshot capture for an Android target.
+
+- **`preview-scenarios.sh` — local scenario preview**
+  - **Who runs it**: human
+  - **What it does**: serves the scenarios folder locally for review.
+
+- **`publish-scenarios.sh` — publish scenarios site**
+  - **Who runs it**: human
+  - **What it does**: packages scenarios and optionally syncs them to a destination.
+
+#### Framework adapters and shared script libraries
+
+- **`frameworks/*.sh` — framework-specific app scaffolding**
+  - Called by `add-app.sh`. Each adapter owns how to scaffold, configure, and (when possible) make the scaffold reproducible/idempotent.
+
+- **`lib/project-root.sh` — shared project-root detection**
+  - Used by scripts to locate the project root reliably (including when `appeus/` is a symlink).
+
+#### Legacy scripts (retained for now)
+
+These remain in the repo but are not the v2.1 workflow entry points: `rn-init.sh`, `setup-appeus.sh`.

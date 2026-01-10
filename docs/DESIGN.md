@@ -1,251 +1,99 @@
 # DESIGN
-
 Design decisions, rationale, and vision for Appeus v2.
 
-## Vision
-
+## Approach
 Appeus is a design-first workflow that turns user stories into running applications. The agent guides developers from initial project conception through working code, with stories as the source of truth.
 
-**v1 (RN-first):** Scaffold React Native first, then add design surface.
+## Vision
+Figma helps UX designers prototype UIs without coding, but once a design exists, engineers still need to implement it in real code. Sometimes it is not optimal (or even feasible) to implement a design that was created with no thought to the realities of code, data, and performance.
 
-**v2 (Design-first):** Create project and design surface first, then instantiate app scaffolds based on documented decisions.
+Appeus aims to bring real application code in from the start, so prototypes are generated from actual framework code rather than an abstract set of pixels.
+
+## History
+**v0:**
+Used AI to transform user stories into a set of screens and components, authored as XML renderings. The hope was that XML would be more readily parseable by AI than Figma output.
+
+**v1:**
+Built solely around React Native. The user would instantiate a React Native project, then insert a `design/` folder into the project and begin authoring stories.
+
+**v2:**
+Built to accommodate multiple apps (“targets”) in one project. The user initializes a project with a design surface, then adds one or more apps (mobile, web, desktop, etc.).
 
 ## Core Principles
 
-1. **Design precedes scaffolding** — Toolchain decisions are made and documented before any framework code is generated.
+1. **Design precedes scaffolding** — Toolchain decisions are made and documented before framework code is generated.
 
-2. **Multi-target native** — A project may contain multiple apps (mobile, web, desktop) with distinct stories but shared schema and API.
+2. **Multi-target native** — A project may contain any number of apps (mobile, web, desktop), each with distinct stories/specs, while sharing domain decisions.
 
-3. **Agent-guided discovery** — The agent leads the developer through architecture decisions, capturing them in specs before proceeding.
+3. **Shared domain contract** — The project’s “domain” (data model and behavior) is defined once and reused across all targets. Depending on the project, this may include schema, operations (API/procedures), rules/invariants, external interfaces, and other storage/access decisions.
 
-4. **Shared data layer** — Schema and API specs are defined once and shared across all targets.
+4. **Agent-guided discovery** — The agent leads the developer through implementation phases, capturing user intent as stories and proposing specs for details that can't reasonably be inferred.
 
-5. **Human precedence** — Stories + specs (human) > consolidations (AI) > defaults.
+5. **Vertical slicing** — Generate one testable feature at a time. For example:
+   - a navigable screen (top-to-bottom)
+   - a reusable component (invoked by a screen)
+   - a user-observable data flow
 
 6. **Artifact lanes (anti–spec creep)** —
    - Stories: user narrative (“what happens”)
    - Specs: user-observable UX contract (“how it behaves”), human-readable
    - Consolidations: programmer-facing digest + metadata (regenerable translator layer)
 
-7. **Vertical slicing** — Generate one navigable screen/page at a time, top-to-bottom.
+7. **Human precedence, agent inference** — For each slice, the agent generates consolidations with this priority:
+   1. Human-authored specs (authoritative)
+   2. Human-authored stories (agent should report and recommend resolution of any inconsistencies in stories)
+   3. Prior consolidations, if present (treated as regenerable translator state)
+   4. Defaults and best-practice inference (based on stories/specs)
 
-## Key Differences from v1
+8. **Iteration** — At any point, the user can modify stories/specs and ask the agent to regenerate one or more slices.
 
-| Aspect | v1 | v2 |
-|--------|----|----|
-| Bootstrap | `rn-init.sh` → `setup-appeus.sh` | `init-project.sh` → (discovery) → `add-app.sh` |
-| Toolchain | Template filled after RN exists | Decision document before any scaffold |
-| Targets | Single RN app | One or many: mobile, web, etc. |
-| Stories | One set | Per-target sets, plus optional shared |
-| Schema | Implicit in screens | Explicit shared specs |
-| Folder structure | RN app with design/ inside | Project root with apps/ inside |
+9. **Peer review** — Stories can be developed into scenarios: storyboards like the original stories, augmented with screenshots from the app in various (mock) data states.
 
-## Architecture
+## Design Phases
+The user and agent will work in various phases of the project, some phases are specific to a particular target.  Others are shared across all targets of the project.
+  - Initial project and Appeus scaffold (shared): the user creates a workspace and installs Appeus.
+  - Project/toolchain specification (shared): the user answers basic questions about how the project will be structured and developed (what apps exist, how data is stored/processed/accessed, etc.). This phase is completed by initializing the project for at least one app target.a
+  - Story Generation (per target): the user is responsible for generating stories but will likely request agent assistance in drafting them. The agent should help keep them in an appropriate tone, style and format.
+  - Navigation (per target): if no navigation spec exists yet, the agent infers a minimal navigation layout from stories (screen/component list + starter navigation template). The user reviews and updates the navigation spec before proceeding.
+  - Domain (shared): if no shared domain specs exist yet, the agent proposes them based on the project decisions and target stories/specs. If domain specs do exist, this might not be the first app on the project. In any case, the agent should help review the domain specifications to make sure they are compatible with the present target and without losing compatibility with other previously generated targets. The user should review updates before proceeding.
+  - Screen/component slicing (target): under user direction, the agent implements the UI one slice at a time, giving the user a chance to test and commit at each stable milestone. This phase typically uses mock data so the UI can be validated in multiple states.
+  - Final wiring (target): after screen/UI approval, slices are finished and tested against the production data model.
 
-### Progressive Structure
 
-Appeus uses a **progressive structure** that starts simple and scales:
+## Example project scaffold (high level)
 
-- **Single-app projects** use a flat layout (no subdirectories for targets)
-- **Multi-app projects** use per-target subdirectories
-- **Transition is automated** — when you add a second app, `add-app.sh` reorganizes the folder structure
+For more complete scaffold structure, see `docs/ARCHITECTURE.md`.
 
-This avoids unnecessary complexity for simple projects while supporting growth.
-
-### Single-App Structure
-
-When a project has only one app:
-
-```
-project/
-├── AGENTS.md
-├── appeus → ../appeus-2
-├── design/
-│   ├── specs/
-│   │   ├── project.md           # Toolchain decisions
-│   │   ├── schema/              # Data model (still shared, just not with other apps yet)
-│   │   ├── api/                 # API surface
-│   │   ├── screens/             # Screen specs (flat)
-│   │   ├── navigation.md        # Navigation spec
-│   │   └── global/              # Global specs
-│   ├── stories/                 # Stories (flat, no subdirectory)
-│   │   └── *.md
-│   └── generated/
-│       ├── screens/             # Consolidations (flat)
-│       ├── scenarios/
-│       └── images/
-├── apps/
-│   └── <name>/                  # Single app scaffold
-└── mock/
-    └── data/
-```
-
-### Multi-App Structure
-
-When a project has multiple apps:
+Appeus projects are organized around:
+- **Shared design**: project decisions + shared domain contract
+- **Per-target design**: stories/specs/consolidations per app target
+- **Per-target code**: framework scaffolds under `apps/`
 
 ```
 project/
-├── AGENTS.md
-├── appeus → ../appeus-2
+├── appeus → </path/to/appeus>
 ├── design/
-│   ├── specs/
-│   │   ├── project.md           # Toolchain decisions
-│   │   ├── schema/              # ★ Shared data model
-│   │   ├── api/                 # ★ Shared API surface
-│   │   ├── <target>/            # Per-target specs
-│   │   │   ├── screens/
-│   │   │   ├── navigation.md
-│   │   │   └── global/
-│   │   └── ...
+│   ├── specs/                   # Human-generated, human-readable material
+│   │   ├── project.md           # Project-wide specs
+│   │   ├── domain/              # Optional: shared domain contract (schema/ops/rules/interfaces)
+│   │   └── <target>/            # Per-app specs (screens/components/navigation/global)
 │   ├── stories/
-│   │   ├── <target>/            # Per-target stories
-│   │   └── ...                  # (shared/ subfolder optional)
-│   └── generated/
-│       ├── <target>/            # Per-target consolidations, scenarios
-│       │   ├── screens/
-│       │   ├── scenarios/
-│       │   └── images/
-│       └── ...
+│   │   └── <target>/            # Per-app stories
+│   └── generated/               # Agent-generated content, subject to overwrite
+│       └── <target>/            # Per-app consolidations, scenarios, status
 ├── apps/
-│   ├── <target>/                # Framework scaffold per target
-│   └── ...
-├── packages/
-│   └── shared/                  # Shared TypeScript types (optional)
+│   └── <target>/                # Framework scaffold per app (react-native, svelte, etc)
 └── mock/
-    └── data/                    # Shared mock data
+    └── data/                    # Shared mock data for testing, scenarios (optional)
 ```
 
-### Adding Apps Later
+## Operational goals
 
-A project can start with one app and add more later:
+Appeus should be safe to adopt early, and easy to remove later:
 
-1. User runs `add-app.sh --name web --framework sveltekit`
-2. Script detects existing single-app structure
-3. Script automatically reorganizes:
-   - `design/stories/*.md` → `design/stories/<existing-target>/*.md`
-   - `design/specs/screens/` → `design/specs/<existing-target>/screens/`
-   - `design/specs/navigation.md` → `design/specs/<existing-target>/navigation.md`
-   - `design/generated/screens/` → `design/generated/<existing-target>/screens/`
-   - etc.
-4. Script creates new target folders for the added app
-5. Agent rules now operate in multi-app mode
+- **Idempotent setup**: running `scripts/init-project.sh` or `scripts/add-app.sh` multiple times should be safe and should refresh links and add missing scaffold without overwriting user-authored files.
+- **Non-destructive adoption**: Appeus should be usable inside an existing repo by adding only what’s missing and never clobbering existing project files.
+- **Detachable**: a finished project should be able to remove Appeus symlinks and agent scaffolding while keeping the resulting app code and human-authored design artifacts intact (stories/specs).
+- **Self-checking guidance**: agents should be generally aware of the expected scaffold layout and be able to detect older/malformed project structure or generated artifacts, then advise and assist the user in reorganizing to the current layout.
 
-This transition is **safe and automated** — no manual folder shuffling required.
-
-### Bootstrap Flow
-
-1. **Project init** — `init-project.sh` creates project folder with minimal `AGENTS.md` and `design/specs/project.md` template.
-
-2. **Discovery phase** — Agent guides user through `project.md`: purpose, platforms, toolchain choices, data strategy.
-
-3. **Add apps** — For each target, `add-app.sh --name <name> --framework <framework>` creates `apps/<name>/` with appropriate scaffold.
-
-4. **Story authoring** — User writes stories in `design/stories/<target>/`.
-
-5. **Schema derivation** — Agent derives shared schema from all stories, writes to `design/specs/schema/`.
-
-6. **Per-target generation** — Standard appeus flow per target: consolidations → specs → codegen.
-
-## Multi-Target Coordination
-
-When a project has multiple targets (e.g., mobile + web):
-
-- **Schema awareness** — When deriving schema, agent reads stories from ALL targets to ensure data model supports both.
-
-- **API consistency** — API specs are shared; both apps call the same endpoints.
-
-- **Cross-reference** — Agent rules in each target reference shared specs and can consult sibling target stories for context.
-
-- **Independent generation** — Each target generates independently but respects shared constraints.
-
-## Framework Adapters
-
-Appeus v2 supports multiple frameworks via adapters:
-
-| Framework | Scaffold Command | Reference | Output Path |
-|-----------|------------------|-----------|-------------|
-| React Native | `add-app.sh --framework react-native` | `reference/frameworks/react-native.md` | `apps/<name>/src/screens/` |
-| SvelteKit | `add-app.sh --framework sveltekit` | `reference/frameworks/sveltekit.md` | `apps/<name>/src/routes/` |
-| NativeScript Vue | `add-app.sh --framework nativescript-vue` | TBD | TBD |
-
-Each adapter provides:
-- Scaffold initialization script
-- Framework-specific reference doc
-- Codegen templates and conventions
-- Navigation/routing patterns
-
-All apps use the same `agent-rules/src.md` which links to the appropriate framework reference.
-
-## Scope Boundaries
-
-### In Scope (v2)
-- Design-first bootstrap with discovery phase
-- Multi-target project structure
-- Shared schema/API specs
-- React Native adapter (carried from v1)
-- Web adapter (SvelteKit initially)
-
-### Deferred
-- Scenario generation for web (can add later)
-- NativeScript adapters (can add when needed)
-- Shared component libraries across targets
-
-### Out of Scope
-- Runtime schema rendering (appeus generates code, not runtime interpreters)
-- Backend/server code generation
-
-## Migration from v1
-
-Existing v1 projects (single RN app with design/ inside):
-- Continue working with appeus-1 (v1 branch)
-- Optionally migrate by wrapping in project folder and moving app to `apps/mobile/`
-- Migration is mechanical but not required
-
-## Operational Principles
-
-### Idempotent Setup
-
-Running `init-project.sh` or `add-app.sh` multiple times is safe:
-- Symlinks are refreshed (always point to current appeus)
-- New folders/templates are added if missing
-- Existing user files are never overwritten
-- A report shows what was added vs. skipped
-
-This allows projects to pick up new appeus features by re-running setup.
-
-### Non-Destructive in Existing Projects
-
-Appeus can be added to an existing project (e.g., a manually created codebase):
-- Init detects existing content and works around it
-- Only adds the appeus scaffolding that's missing
-- Never clobbers existing files
-
-### Version Control
-
-Appeus symlinks should be gitignored:
-
-```gitignore
-# Appeus (recreate with: path/to/appeus/scripts/init-project.sh)
-appeus
-AGENTS.md
-**/AGENTS.md
-```
-
-Rationale: Symlink targets are machine-specific. The project documents its appeus dependency in `design/specs/project.md`; collaborators run init to set up their environment.
-
-### Detaching Appeus
-
-A finished project can be detached from appeus:
-- `detach-appeus.sh` removes all symlinks
-- All user content (stories, specs, src, generated) remains
-- The project becomes a standalone codebase
-
-Use cases: archival, handoff to non-appeus teams, simplifying finished projects.
-
-## References
-
-- Generation strategy: `docs/GENERATION.md`
-- Status/roadmap: `docs/STATUS.md`
-- Agent rules: `agent-rules/*.md`
-- Reference docs: `reference/*.md`
+Framework adapter details, version-control guidance, and migration notes are intentionally documented in `docs/ARCHITECTURE.md` rather than here.

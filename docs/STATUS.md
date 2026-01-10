@@ -26,6 +26,88 @@ These items were completed in v1 and carry forward:
 - [x] `README.md` — v2 overview
 - [x] `QUICKSTART.md` — v2 bootstrap flow
 
+## v2.1 Checklist (current minor update)
+
+- [ ] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/scripts).
+- [ ] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`, then add a clear deprecation notice (and/or replace with a pointer to the relevant reference doc).
+- [ ] **Verify `scripts/update-dep-hashes.sh` behavior**:
+  - [ ] Does running it after regenerating one slice update only that slice (`--route`) vs all routes (`--all`)?
+  - [ ] Make sure that absence of any switches does not imply --all.
+  - [ ] Confirm it does not accidentally “freshen” unrelated stale slices.
+- [ ] **Handle placeholder/malformed meta registry** (`design/generated/<target>/meta/outputs.json`):
+  - [ ] If `outputs.json` is missing or template-like, the script should create it, if necessary, and add in structures for the outputs being updated.
+  - [ ] Can/should the script also trim json structures for outputs that no longer exist in the filesystem?
+
+### v2.1: `docs/GENERATION.md` review todos
+
+- [ ] Update “Shared (Cross-Target)” paths to reflect v2.1 shared domain contract (`design/specs/domain/*`) rather than separate `schema/` + `api/`.
+- [ ] Decide whether low-level per-target JSON “status registry” naming belongs in `docs/GENERATION.md` (vs `docs/ARCHITECTURE.md`); if not, remove/relocate.
+- [ ] Add a clearer “phases” description aligned with `docs/DESIGN.md` (bootstrap/discovery → domain contract → per-target planning → slice loop → scenarios → final wiring), focused on generation responsibilities.
+- [ ] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
+
+### v2.1 File-by-file compliance review
+
+Each item below is a “review for v2.1 compliance” task (canonical scaffold, docs alignment, deprecated/removed commands, and current workflow guidance).
+
+#### agent-rules/
+
+- [ ] Review `agent-rules/api.md`
+- [ ] Review `agent-rules/bootstrap.md`
+- [ ] Review `agent-rules/consolidations.md`
+- [ ] Review `agent-rules/design-root.md`
+- [ ] Review `agent-rules/project.md`
+- [ ] Review `agent-rules/root.md`
+- [ ] Review `agent-rules/scenarios.md`
+- [ ] Review `agent-rules/schema.md`
+- [ ] Review `agent-rules/specs.md`
+- [ ] Review `agent-rules/src.md`
+- [ ] Review `agent-rules/stories.md`
+
+#### reference/
+
+- [ ] Review `reference/api-agent-workflow.md`
+- [ ] Review `reference/codegen.md`
+- [ ] Review `reference/generation.md`
+- [ ] Review `reference/mock-variants.md`
+- [ ] Review `reference/mocking.md`
+- [ ] Review `reference/navigation-agent-workflow.md`
+- [ ] Review `reference/scaffold.md`
+- [ ] Review `reference/scenarios-agent-workflow.md`
+- [ ] Review `reference/scenarios.md`
+- [ ] Review `reference/screens-agent-workflow.md`
+- [ ] Review `reference/spec-schema.md`
+- [ ] Review `reference/specs-agent-workflow.md`
+- [ ] Review `reference/stories-agent-workflow.md`
+- [ ] Review `reference/testing.md`
+- [ ] Review `reference/workflow.md`
+- [ ] Review `reference/frameworks/nativescript-svelte.md`
+- [ ] Review `reference/frameworks/react-native.md`
+- [ ] Review `reference/frameworks/sveltekit.md`
+
+#### scripts/
+
+- [ ] Review `scripts/init-project.sh`
+- [ ] Review `scripts/add-app.sh`
+- [ ] Review `scripts/check-stale.sh`
+- [ ] Review `scripts/update-dep-hashes.sh`
+- [ ] Review `scripts/generate-next.sh`
+- [ ] Review `scripts/regenerate.sh` (deprecate and/or replace)
+- [ ] Review `scripts/build-images.sh`
+- [ ] Review `scripts/android-screenshot.sh`
+- [ ] Review `scripts/preview-scenarios.sh`
+- [ ] Review `scripts/publish-scenarios.sh`
+- [ ] Review `scripts/rn-init.sh` (evaluate/remove)
+- [ ] Review `scripts/setup-appeus.sh` (evaluate/remove)
+- [ ] Review `scripts/lib/project-root.sh`
+- [ ] Review `scripts/frameworks/react-native.sh`
+- [ ] Review `scripts/frameworks/sveltekit.sh`
+- [ ] Review `scripts/frameworks/nativescript-svelte.sh`
+- [ ] Review `scripts/frameworks/nativescript-vue.sh`
+- [ ] Review `scripts/frameworks/nuxt.sh`
+- [ ] Review `scripts/frameworks/nextjs.sh`
+- [ ] Review `scripts/frameworks/tauri.sh`
+- [ ] Review `scripts/frameworks/capacitor.sh`
+
 ## v2 Reference Docs Complete
 
 - [x] `reference/workflow.md` — v2 design-first workflow
