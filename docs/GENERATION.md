@@ -130,31 +130,154 @@ After generating a slice, update dependency metadata for the slice and confirm i
 Once the slice is stable and tested, the user should commit a clean milestone.  This is facilitated by the agent pausing between slices and waiting for the user to start the next generation slice.
 
 ## Dependency model (nodes, relationships, and what “dependsOn” means)
+
+Appeus tracks dependencies to answer a practical question: **what needs regeneration when an input changes?**
+
+This section reflects v2.1 principles:
+- **Human precedence**: stories/specs are authoritative; agents must not overwrite them.
+- **Consolidations are the translator layer**: consolidations are regenerable and carry programmer-facing structure + dependency metadata.
+- **Deterministic staleness**: generated artifacts record `dependsOn` (and hashes) so staleness can be computed reliably.
+
+### Nodes (things we track)
+
+- **Human inputs (authoritative)**
+  - Stories: `design/stories/<target>/…`
+  - Target specs: `design/specs/<target>/…` (screens/components/navigation/global)
+  - Shared domain contract: `design/specs/domain/…` (schema/ops/rules/interfaces as applicable)
+  - Project/toolchain spec: `design/specs/project.md` (shared; influences generation choices)
+- **Generated translator artifacts (regenerable)**
+  - Screen consolidations: `design/generated/<target>/screens/<Screen>.md`
+- **Generated outputs**
+  - App code: `apps/<target>/src/…` (framework-specific)
+  - Mock data: `mock/data/…` (variants + metadata)
+- **Generated metadata**
+  - A per-target dependency registry under `design/generated/<target>/meta/…` used by staleness tooling.
+
+### Relationships (typical)
+
+- **Screen consolidation** depends on:
+  - stories that reference the screen
+  - target specs (screen + components + navigation + global)
+  - shared domain contract assumptions
+- **Generated code for a screen/page** depends on:
+  - the screen consolidation (primary translator artifact)
+  - any required target specs that affect wiring (navigation/global)
+- **Mock data** depends on:
+  - relevant domain operations/entities and mock-variant conventions
+
+### “provides” / “needs” (conceptual)
+
+Generated artifacts often declare what they provide and what they need. In v2.1, needs should be expressed in terms of the **domain contract** (rather than hard-coding a schema/api folder split). For example:
+- provides: `screen:<target>:<Route>`
+- needs: `domain:Entity:<Name>`, `domain:Op:<Name>` (and other domain primitives as applicable)
+
 ## Staleness detection (hash-based preferred; mtime fallback)
+
+### Hash-based (preferred)
+
+1. Compute sha256 for each `dependsOn` file
+2. Compare to saved `depHashes` in the consolidation/output metadata
+3. Any mismatch ⇒ stale
+
+### Fallback (mtime-based)
+
+When metadata is missing:
+- **Inputs**: stories, target specs (screens/components/navigation/global), shared domain contract, and (when relevant) `design/specs/project.md`
+- **Outputs**: consolidations, app code (and any other generated slice outputs, such as mocks)
+- **Stale** if any input mtime > output mtime
+
 ## Scripts (what exists, what is optional)
-## Metadata formats (frontmatter / code headers / mocks)
+
+This section summarizes the scripts involved in generation and staleness tracking.
+
+| Script | Purpose | Notes |
+|--------|---------|-------|
+| `scripts/check-stale.sh` | Compute per-target staleness report | Primary input to deciding what to (re)generate next |
+| `scripts/update-dep-hashes.sh --route <Route>` | Update dependency hashes for one route | Should not imply `--all` unless explicitly requested |
+| `scripts/build-images.sh` | Capture missing/stale scenario images | Optional; used during Scenario / Peer Review |
+| `scripts/preview-scenarios.sh` | Local scenario preview | Optional (human-facing) |
+| `scripts/publish-scenarios.sh` | Publish scenarios as HTML | Optional; requires a publication destination |
+
+Notes:
+- Scripts operate per-target; pass `--target <name>` when a project has multiple app targets.
+- If required metadata is missing or template-like, scripts should initialize/repair it for the active `<target>`.
+
+## Metadata formats (frontmatter / JSON registries / mocks)
+
+### Consolidation frontmatter (YAML)
+
+Consolidations are the regenerable translator layer. They should include dependency metadata so staleness can be computed deterministically.
+
+```yaml
+---
+provides: ["screen:mobile:LogHistory"]
+needs: ["domain:Op:LogEntries.list", "domain:Entity:Entry"]
+dependsOn:
+  - design/stories/mobile/02-daily.md
+  - design/specs/project.md
+  - design/specs/domain/schema.md
+  - design/specs/mobile/screens/log-history.md
+  - design/specs/mobile/navigation.md
+depHashes:
+  design/stories/mobile/02-daily.md: "sha256:..."
+  design/specs/project.md: "sha256:..."
+  design/specs/domain/schema.md: "sha256:..."
+  design/specs/mobile/screens/log-history.md: "sha256:..."
+  design/specs/mobile/navigation.md: "sha256:..."
+---
+```
+
+### Per-target metadata registries (JSON)
+
+Staleness tooling may maintain per-target JSON registries under `design/generated/<target>/meta/…` as an index for “what exists” and “what is stale.” These registries are **generated metadata** and should be initialized/repaired automatically when missing, malformed, or template-like.
+
+### Mock meta
+
+Mock data often has a companion metadata file describing what variants exist and what inputs it was derived from.
+
+```json
+{
+  "namespace": "LogEntries",
+  "dependsOn": ["design/specs/domain/api.md"],
+  "depHashes": { "design/specs/domain/api.md": "sha256:..." },
+  "variants": ["happy", "empty", "error"]
+}
+```
 ## Notes for agent-rules and reference (design constraints for workflow docs)
+
+These points exist to keep workflow docs consistent and to avoid confusion for agents and humans:
+
+- Keep `agent-rules/` very **brief** and use them primarily as an index into the detailed `reference/` docs.
+- Reference (`reference/`) docs cover a single topic so agent context is not encumbered with extra tokens.
+- Stories and specs should be primarily human generated.  If an agent is asked to assist with them, keep the language human-readable.  Programmer-facing structure is inferred and generated into **consolidations**.
+- When generating, always refresh **consolidations first** where inputs have changed; treat them as the translator layer.
+- Never overwrite human specs as part of generation; only write consolidations, generated outputs, and generated metadata.
+- Treat per-target JSON registries under `design/generated/<target>/meta/…` as **repairable generated metadata** (initialize/repair when missing/template-like).
+- Pause after each stable slice so the user can run/test/commit before proceeding.
+
+Artifact lanes (anti–spec creep):
+- **Stories**: what happens (human narrative)
+- **Specs**: how it behaves (user-observable contract; still human-readable)
+- **Consolidations**: programmer-facing digest + dependency metadata (regenerable translator layer)
+
 ## Testing (per-slice expectations)
+
+- Check with the user and/or project specifications to know if render/screen tests are required.
+- If applicable, agent can recommend at least one basic render/smoke test for the screen/page when feasible.
+- Prefer fast checks (lint/typecheck/unit/smoke) during slicing; defer heavier E2E until multiple slices are stable.
+
+## Common user command intents (for workflow mapping)
+
+Users may issue short commands. Agent workflows should map these to concrete actions:
+
+- **“what's next?”**: identify target + phase → point to the next prerequisite or next stale slice, with minimal steps.
+- **“generate” / “generate a slice” / "generate next"**: identify target → identify candidate slice → refresh consolidations/specs as needed → generate code → update dependency metadata → (optional) scenarios.
+- **“generate scenarios”**: identify target → select slice(s) → generate/refresh scenario docs under `design/generated/<target>/scenarios/` → (optionally) preview/publish.
+- **“generate screenshots”**: identify target → build/refresh scenario images for missing/stale scenarios (optionally using `scripts/build-images.sh`) → confirm scenarios are no longer stale.
 
 ===================================== Eventual EOF =====================================
 
 ## Old content below will be integrated into new outline above
-
-## Working context: target selection
-
-Before discussing phases, the generator must know **which app/target** it is operating on.
-
-- Projects may contain multiple app targets (e.g. `mobile`, `web`), each with its own stories/specs/generated outputs and app code under `apps/<target>/`.
-- Any workflow guidance in `agent-rules/` and `reference/` should make the active target explicit (or require it), to avoid cross-target writes.
-- If a target is ambiguous (or missing), the safe behavior is to stop and ask the user which target is being worked on.
-
-## Common user command intents (for workflow mapping)
-
-Users often issue short commands. Agent workflows should map these to concrete actions:
-
-- **“generate” / “generate a slice”**: identify target → identify candidate slice → refresh consolidations/specs as needed → generate code → update dependency metadata → (optional) scenarios.
-- **“generate next slice”**: like “generate,” but using an optional helper to pick a candidate slice when multiple are stale.
-- **“what should I do next?”**: identify target + phase → point to the next prerequisite or next stale slice, with minimal steps.
 
 ## Phases and progression (for reviewing agent workflows)
 
@@ -162,22 +285,20 @@ This section is not operative “agent instruction.” Its purpose is to describ
 
 ### How an agent can detect the current phase
 
-Signals an agent can use (in rough order):
+Primary source of truth is the per-target checklist file (e.g., a `STATUS.md` for each app target). When iterating, an agent can also look for **revisit signals** that indicate an earlier phase needs to be revisited:
 
-- **Bootstrap/discovery incomplete**
-  - `design/specs/project.md` missing or clearly incomplete.
-  - No app targets exist yet under `apps/`.
-- **Domain contract missing or immature**
-  - Domain specs exist but are too sparse to support consistent generation across targets.
-  - Stories exist but shared schema/API specs have not been derived/refined.
-- **Per-target planning missing**
-  - No per-target screens index; no navigation spec; or screens are present but not registered for slicing.
-- **Slice iteration phase**
-  - Screens are registered; staleness reporting identifies one or more slices as missing/stale.
-- **Scenario/peer-review phase**
-  - Slices exist but scenarios/screenshots are missing or stale for review.
-- **Final wiring**
-  - UI slices are stable; remaining work is integrating the real data model and production connections.
+- **Bootstrap/discovery revisit**
+  - `design/specs/project.md` is missing/clearly incomplete, or toolchain/quality posture has changed materially.
+- **Domain contract revisit**
+  - Stories/specs require new or changed domain operations/entities/rules, or generation is blocked by missing domain contract details.
+- **Per-target planning revisit**
+  - Navigation/screens index is missing/clearly incomplete, or generation keeps thrashing due to unclear routing/screen set.
+- **Slicing revisit**
+  - Staleness reporting indicates slices are missing/stale, or a “fresh” slice behaves incorrectly vs the spec (spec/story needs revision).
+- **Scenario/peer-review revisit**
+  - Scenario docs/images are missing/stale for the current slice set, or review feedback requires story/spec changes.
+- **Final wiring revisit**
+  - UI slices are stable, but production wiring work requires changes to earlier specs (often domain contract + target wiring specs).
 
 ### How an agent should help progress through phases
 
@@ -187,174 +308,3 @@ At a high level:
 - Prefer **small, testable increments**: one slice at a time, then validate (run/test) and record the result (scenarios optional).
 - When phase assumptions are violated (missing/malformed generated metadata), treat them as **repairable outputs** and rebuild rather than hand-editing.
 
-### Generation flow (as phases)
-
-### Phase 1: Schema Derivation (Multi-Target)
-
-When multiple targets exist:
-
-1. Agent reads stories from ALL targets (`design/stories/*/`)
-2. Identifies entities and relationships mentioned across stories
-3. Proposes schema specs in `design/specs/schema/`
-4. Human reviews and refines
-
-This ensures the data model supports all target experiences.
-
-### Phase 2: Per-Target Generation (Vertical Slice)
-
-For each target, the standard flow applies:
-
-1. **Screen consolidation** — Refresh `design/generated/<target>/screens/<Screen>.md`
-2. **API consolidations** — Refresh needed namespaces
-3. **Mocks** — Generate/refresh mock data for required namespaces
-4. **App code** — Generate screen/page and update navigation
-5. **Scenarios** — Capture screenshots, generate scenario docs (mobile targets)
-6. **Update status** — Write to `status.json`, print report
-
-### Slice Selection
-
-Build navigation graph from `design/specs/<target>/navigation.md` and screens index.
-
-Selection order:
-1. First stale screen reachable from root
-2. Then stale neighbors (navigable from fresh screens)
-3. Remaining stale screens
-
-## What Goes Where (Anti–Spec Creep)
-
-To keep the workflow sustainable and human-readable:
-
-| Artifact | Audience | Intent | Notes |
-|----------|----------|--------|-------|
-| **Stories** (`design/stories/…`) | Humans | “What happens” (narrative) | Avoid implementation detail |
-| **Specs** (`design/specs/…`) | Humans | “How it behaves” (user-observable UX contract) | Keep readable; avoid programmer-facing APIs/state machines |
-| **Consolidations** (`design/generated/…`) | Agents/engineers | Programmer-facing digest + dependency metadata | Translator layer; regenerable |
-
-Rule of thumb: if a spec is getting hard for the human to read, move programmer-structure into the consolidation instead.
-
-## Dependency Model
-
-### Nodes and Relationships
-
-**Schema consolidation** (`design/specs/schema/<entity>.md`)
-- dependsOn: stories from ALL targets that reference the entity
-- Shared across targets
-
-**Screen consolidation** (`design/generated/<target>/screens/<Screen>.md`)
-- provides: `["screen:<target>:<Screen>"]`
-- needs: `["api:<Namespace>", "schema:<Entity>"]`
-- dependsOn: stories, specs, navigation, schema specs
-
-**API consolidation** (`design/generated/api/<Namespace>.md`)
-- provides: `["api:<Namespace>"]`
-- dependsOn: schema specs, stories, screen specs that dictate shape
-
-**App code** (`apps/<target>/src/screens/<Screen>.tsx` or equivalent)
-- AppeusMeta header with dependsOn and depHashes
-
-**Scenarios** (`design/generated/<target>/scenarios/<story-id>.md`)
-- dependsOn: stories + screens referenced
-
-### Status Registry
-
-`design/generated/<target>/status.json` tracks per-target staleness:
-```json
-{
-  "screens": [
-    {
-      "route": "LogHistory",
-      "stale": false,
-      "reason": ""
-    }
-  ],
-  "timestamp": "2025-12-07T...",
-  "staleCount": 0
-}
-```
-
-## Staleness Detection
-
-### Hash-Based (Preferred)
-
-1. Compute sha256 for each dependsOn file
-2. Compare to saved depHashes in consolidation/output
-3. Mismatch = stale
-
-### Fallback (mtime-Based)
-
-When metadata missing:
-- Inputs: stories, specs, navigation, schema
-- Outputs: generated consolidations, app code
-- stale = any input mtime > output mtime
-
-## Scripts
-
-| Script | Purpose |
-|--------|---------|
-| `check-stale.sh` | Per-screen staleness report + JSON |
-| `update-dep-hashes.sh --route <Route>` | Refresh depHashes after generation |
-
-Scripts operate per-target; pass `--target <name>` when project has multiple apps.
-
-## File Metadata Formats
-
-### Consolidation Frontmatter (YAML)
-
-  ```yaml
----
-provides: ["screen:mobile:LogHistory"]
-needs: ["api:LogEntries", "schema:Entry"]
-  dependsOn:
-  - design/stories/mobile/02-daily.md
-  - design/specs/mobile/screens/log-history.md
-  - design/specs/mobile/navigation.md
-  - design/specs/schema/entry.md
-  depHashes:
-  design/specs/mobile/screens/log-history.md: "sha256:..."
-  design/specs/schema/entry.md: "sha256:..."
----
-  ```
-
-### Generated Code Header
-
-```typescript
-  /* AppeusMeta:
-  {
-  "target": "mobile",
-    "dependsOn": [
-    "design/generated/mobile/screens/LogHistory.md",
-    "design/specs/mobile/navigation.md"
-    ],
-    "depHashes": {
-    "design/generated/mobile/screens/LogHistory.md": "sha256:..."
-    },
-  "generatedAt": "2025-12-07T12:34:56Z"
-  }
-  */
-  ```
-
-### Mock Meta
-
-  ```json
-  {
-  "namespace": "LogEntries",
-  "dependsOn": ["design/specs/api/log-entries.md"],
-  "depHashes": { "design/specs/api/log-entries.md": "sha256:..." },
-  "variants": ["happy", "empty", "error"]
-}
-```
-
-## Notes for agent-rules and reference (not operative guidance)
-
-- Always refresh consolidations first when dependencies changed
-- Never overwrite human specs; only write consolidations and generated outputs
-- For multi-target projects, derive schema before per-target generation
-- After each slice, re-run `check-stale.sh` and update status
-- Stop when clean or on user request
-
-## Testing
-
-Per slice:
-- Add basic render test for the screen/page
-- Add smoke test to open via deep link with variant (mobile)
-- Defer E2E until several slices are ready
