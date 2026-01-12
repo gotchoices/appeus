@@ -48,6 +48,19 @@ done
 
 [[ -n "$MODE" ]] || die "Please specify --route <RouteName> or --all"
 
+# v2.1 canonical: per-target specs are directories under design/specs/, alongside project.md and domain/
+# Keep backward compatibility by excluding legacy v2.0 folders as well.
+list_targets() {
+  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "domain" \
+    ! -name "schema" \
+    ! -name "api" \
+    ! -name "global" \
+    ! -name "screens" \
+    ! -name "components" \
+    -exec basename {} \; 2>/dev/null
+}
+
 # Detect single-app vs multi-app mode
 is_single_app_mode() {
   if [ -d "${DESIGN_DIR}/specs/screens" ]; then
@@ -65,11 +78,21 @@ if is_single_app_mode; then
   OUTPUTS_JSON="${DESIGN_DIR}/generated/meta/outputs.json"
 else
   if [ -z "$TARGET" ]; then
-    echo "Error: Multi-app project detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" -exec basename {} \; 2>/dev/null
-    exit 1
+    targets="$(list_targets || true)"
+    if [ -z "${targets}" ]; then
+      die "No targets found under design/specs/. Add an app first (scripts/add-app.sh)."
+    fi
+    target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
+    if [ "${target_count}" = "1" ]; then
+      TARGET=$(printf "%s\n" "${targets}" | head -n 1)
+      echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
+    else
+      echo "Error: Multiple targets detected. --target is required." >&2
+      echo ""
+      echo "Available targets:"
+      printf "%s\n" "${targets}"
+      exit 1
+    fi
   fi
   OUTPUTS_JSON="${DESIGN_DIR}/generated/${TARGET}/meta/outputs.json"
 fi

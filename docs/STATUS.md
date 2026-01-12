@@ -46,7 +46,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Update “Shared (Cross-Target)” paths to reflect v2.1 shared domain contract (`design/specs/domain/*`) rather than separate `schema/` + `api/`.
 - [x] Remove/relocate low-level per-target JSON “status registry” naming from docs (keep docs focused on workflow; implementation details live elsewhere).
 - [x] Align phase naming and generation loop language with `docs/DESIGN.md` (and track per-target phase progression via `STATUS.md`).
-- [ ] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
+- [x] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
 
 ### v2.1: key workflow + tooling changes to validate
 
@@ -257,7 +257,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 ## Backlog / Future Enhancements
 
-- [ ] `detach-appeus.sh` — Remove appeus symlinks from finished project
+- [x] `detach-appeus.sh` — Remove appeus symlinks from finished project
 - [ ] NativeScript Vue adapter
 - [ ] Scenario generation for web (Playwright-based)
 - [ ] Shared component library across targets

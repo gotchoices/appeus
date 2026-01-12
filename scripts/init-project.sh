@@ -120,8 +120,7 @@ ensure_symlink "appeus/agent-rules/bootstrap.md" "${PROJECT_DIR}/AGENTS.md"
 # 3. Create design folder structure
 ensure_dir "${PROJECT_DIR}/design"
 ensure_dir "${PROJECT_DIR}/design/specs"
-ensure_dir "${PROJECT_DIR}/design/specs/schema"
-ensure_dir "${PROJECT_DIR}/design/specs/api"
+ensure_dir "${PROJECT_DIR}/design/specs/domain"
 ensure_dir "${PROJECT_DIR}/design/stories"
 ensure_dir "${PROJECT_DIR}/design/generated"
 
@@ -130,24 +129,14 @@ ensure_symlink "../appeus/agent-rules/design-root.md" "${PROJECT_DIR}/design/AGE
 ensure_symlink "../../appeus/agent-rules/specs.md" "${PROJECT_DIR}/design/specs/AGENTS.md"
 ensure_symlink "../../appeus/agent-rules/stories.md" "${PROJECT_DIR}/design/stories/AGENTS.md"
 ensure_symlink "../../appeus/agent-rules/consolidations.md" "${PROJECT_DIR}/design/generated/AGENTS.md"
-ensure_symlink "../../../appeus/agent-rules/api.md" "${PROJECT_DIR}/design/specs/api/AGENTS.md"
-ensure_symlink "../../../appeus/agent-rules/schema.md" "${PROJECT_DIR}/design/specs/schema/AGENTS.md"
 
 # 5. Copy project.md template
 copy_if_missing "${APPEUS_DIR}/templates/specs/project.md" "${PROJECT_DIR}/design/specs/project.md"
 
-# 6. Copy schema index template
-copy_if_missing "${APPEUS_DIR}/templates/specs/schema/index.md" "${PROJECT_DIR}/design/specs/schema/index.md"
-
-# 7. Create API README
-write_if_missing "${PROJECT_DIR}/design/specs/api/README.md" "# API Specs
-- Add files per procedure using the template in appeus/templates/specs/api/procedure-template.md
-- Human-authored specs override AI consolidations in design/generated/api/*
-"
-
-# 8. Create generated subdirectories (shared)
-ensure_dir "${PROJECT_DIR}/design/generated/api"
-ensure_dir "${PROJECT_DIR}/design/generated/meta"
+# 6. (v2.1) Domain contract lives under design/specs/domain/
+# Keep this folder empty by default; projects vary widely in whether they need schema/api/rules/interfaces.
+# (Templates will be migrated to templates/specs/domain/ as part of the v2.1 runtime asset work.)
+ensure_symlink "../../../appeus/user-guides/domain.md" "${PROJECT_DIR}/design/specs/domain/README.md"
 
 # 9. Human-facing README symlinks
 ensure_symlink "../../appeus/user-guides/stories.md" "${PROJECT_DIR}/design/stories/README.md"
