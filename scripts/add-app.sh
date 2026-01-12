@@ -267,6 +267,11 @@ mkdir -p "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios"
 mkdir -p "${PROJECT_DIR}/design/generated/${APP_NAME}/images"
 mkdir -p "${PROJECT_DIR}/design/generated/${APP_NAME}/meta"
 
+# Seed per-target phase checklist if missing
+if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/STATUS.md" ]; then
+  cp "${APPEUS_DIR}/templates/specs/target-status.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/STATUS.md"
+fi
+
 # Create AGENTS.md symlinks for the new target
 ln -snf "../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios/AGENTS.md"
 

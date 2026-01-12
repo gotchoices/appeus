@@ -23,14 +23,15 @@ Project config: `design/specs/project.md`
 
 | User Says | Action |
 |-----------|--------|
-| "generate" / "next slice" | `generate-next.sh`, then generate code |
-| "what's next" | `check-stale.sh`, summarize, suggest |
+| "generate" / "generate a slice" | Choose target → choose a slice from `design/specs/<target>/screens/index.md` (prefer stale per `check-stale.sh`) → generate/refresh consolidations → generate code |
+| "what's next" | Choose target → consult `design/specs/<target>/STATUS.md` → run `check-stale.sh` → summarize + suggest next smallest step |
 | "generate scenarios/images" | See `design/AGENTS.md` |
 
-For multi-app: add `--target <name>` to scripts.
+Target selection:
+- If exactly **one** app target exists, default to it.
+- If multiple targets exist, ask the user which `--target` to operate on.
 
 ## Key References
 
 - [Workflow](appeus/reference/workflow.md)
 - [Generation](appeus/reference/generation.md)
-- [Scaffold](appeus/reference/scaffold.md)

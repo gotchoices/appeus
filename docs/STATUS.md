@@ -63,10 +63,10 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
   - [x] If `outputs.json` is template-like (empty), scripts seed it from the screens index (non-destructively).
   - [x] If a route/output is missing from the registry but is being updated, tooling adds a minimal entry (non-destructively).
   - [x] Decision: scripts do **not** auto-trim registry entries for outputs that no longer exist (manual cleanup only).
-- [ ] **Discovery handoff + target phase awareness**
-  - [ ] Ensure `agent-rules/bootstrap.md` guides the agent to complete `design/specs/project.md` and add the first app target via `scripts/add-app.sh`.
-  - [ ] Verify `scripts/add-app.sh` seeds a per-target checklist file (e.g. `STATUS.md`) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
-  - [ ] Ensure `agent-rules/project.md` tells the agent to determine the active target and consult the target checklist before generating the next slice.
+- [x] **Discovery handoff + target phase awareness**
+  - [x] Ensure `agent-rules/bootstrap.md` guides the agent to complete `design/specs/project.md` and add the first app target via `scripts/add-app.sh`.
+  - [x] Verify `scripts/add-app.sh` seeds a per-target checklist file (`design/specs/<target>/STATUS.md`) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
+  - [x] Ensure `agent-rules/project.md` tells the agent to determine the active target and consult the target checklist before generating the next slice.
 - [ ] **Migrate domain contract templates to v2.1 layout**: move `templates/specs/{schema,api}` into `templates/specs/domain/` (preserve existing template content under the new layout).
 - [ ] **Update scripts to use `templates/specs/domain/`**: update scripts that seed/copy domain-contract templates to use the new paths (and fix any remaining path assumptions).
 

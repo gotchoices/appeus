@@ -8,7 +8,7 @@ set -euo pipefail
 #   appeus/scripts/check-stale.sh [--target <name>]
 #
 # In single-app mode, --target is optional.
-# In multi-app mode, --target is required.
+# In multi-app mode, --target is required when multiple targets exist.
 
 # Parse arguments
 TARGET=""
@@ -36,6 +36,17 @@ PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
 DESIGN_DIR="${PROJECT_DIR}/design"
 
 [ -d "${DESIGN_DIR}" ] || { echo "No design/ directory."; exit 1; }
+
+list_targets() {
+  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "domain" \
+    ! -name "schema" \
+    ! -name "api" \
+    ! -name "global" \
+    ! -name "screens" \
+    ! -name "components" \
+    -exec basename {} \; 2>/dev/null
+}
 
 # Detect single-app vs multi-app mode
 is_single_app_mode() {
@@ -76,11 +87,22 @@ if is_single_app_mode; then
 else
   # Multi-app mode
   if [ -z "$TARGET" ]; then
-    echo "Error: Multi-app project detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "domain" ! -name "global" -exec basename {} \; 2>/dev/null
-    exit 1
+    targets="$(list_targets || true)"
+    if [ -z "${targets}" ]; then
+      echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
+      exit 1
+    fi
+    target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
+    if [ "${target_count}" = "1" ]; then
+      TARGET=$(printf "%s\n" "${targets}" | head -n 1)
+      echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
+    else
+      echo "Error: Multiple targets detected. --target is required." >&2
+      echo ""
+      echo "Available targets:"
+      printf "%s\n" "${targets}"
+      exit 1
+    fi
   fi
   
   SPECS_SCREENS_DIR="${DESIGN_DIR}/specs/${TARGET}/screens"

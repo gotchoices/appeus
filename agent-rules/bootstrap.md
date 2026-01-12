@@ -34,6 +34,8 @@ Guide the user through completing `design/specs/project.md`.
 
 Then proceed to story authoring in `design/stories/`.
 
+After adding the first app target, phase tracking for that target should use `design/specs/<target>/STATUS.md`.
+
 ## Reference
 
 - [Workflow](appeus/reference/workflow.md)
