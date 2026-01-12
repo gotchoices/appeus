@@ -52,6 +52,17 @@ An Appeus project consists of [several phases](./DESIGN.md#design-phases). Some 
   - This means all data is managed, processed and stored according to the production specification.
   - This phase might also involve regression testing, feature addition, etc.
 
+### Iteration: when to revisit a phase
+
+Phase progression is tracked per target in that target’s checklist file (e.g., `STATUS.md`). When iterating, it is normal to revisit earlier phases; common “revisit” signals include:
+
+- **Bootstrap/discovery revisit**: `design/specs/project.md` is missing/clearly incomplete, or toolchain/quality posture has changed materially.
+- **Domain contract revisit**: stories/specs require new/changed domain operations/entities/rules, or generation is blocked by missing domain contract details.
+- **Per-target planning revisit**: navigation/screens index is missing/clearly incomplete, or generation keeps thrashing due to unclear routing/screen set.
+- **Slicing revisit**: staleness reporting indicates slices are missing/stale, or a “fresh” slice behaves incorrectly vs the spec (spec/story needs revision).
+- **Scenario/peer-review revisit**: scenario docs/images are missing/stale for the current slice set, or review feedback requires story/spec changes.
+- **Final wiring revisit**: UI slices are stable, but production wiring work requires changes to earlier specs (often domain contract + target wiring specs).
+
 ## Inputs and Outputs
 
 ### Shared (Cross-Target)
@@ -274,37 +285,4 @@ Users may issue short commands. Agent workflows should map these to concrete act
 - **“generate” / “generate a slice” / "generate next"**: identify target → identify candidate slice → refresh consolidations/specs as needed → generate code → update dependency metadata → (optional) scenarios.
 - **“generate scenarios”**: identify target → select slice(s) → generate/refresh scenario docs under `design/generated/<target>/scenarios/` → (optionally) preview/publish.
 - **“generate screenshots”**: identify target → build/refresh scenario images for missing/stale scenarios (optionally using `scripts/build-images.sh`) → confirm scenarios are no longer stale.
-
-===================================== Eventual EOF =====================================
-
-## Old content below will be integrated into new outline above
-
-## Phases and progression (for reviewing agent workflows)
-
-This section is not operative “agent instruction.” Its purpose is to describe the **phase model** that `agent-rules/` and `reference/` should make observable and actionable for an agent working in a project repo.
-
-### How an agent can detect the current phase
-
-Primary source of truth is the per-target checklist file (e.g., a `STATUS.md` for each app target). When iterating, an agent can also look for **revisit signals** that indicate an earlier phase needs to be revisited:
-
-- **Bootstrap/discovery revisit**
-  - `design/specs/project.md` is missing/clearly incomplete, or toolchain/quality posture has changed materially.
-- **Domain contract revisit**
-  - Stories/specs require new or changed domain operations/entities/rules, or generation is blocked by missing domain contract details.
-- **Per-target planning revisit**
-  - Navigation/screens index is missing/clearly incomplete, or generation keeps thrashing due to unclear routing/screen set.
-- **Slicing revisit**
-  - Staleness reporting indicates slices are missing/stale, or a “fresh” slice behaves incorrectly vs the spec (spec/story needs revision).
-- **Scenario/peer-review revisit**
-  - Scenario docs/images are missing/stale for the current slice set, or review feedback requires story/spec changes.
-- **Final wiring revisit**
-  - UI slices are stable, but production wiring work requires changes to earlier specs (often domain contract + target wiring specs).
-
-### How an agent should help progress through phases
-
-At a high level:
-
-- Ensure the **prerequisites of the next phase** exist (folders/files/specs), without overwriting user-authored content.
-- Prefer **small, testable increments**: one slice at a time, then validate (run/test) and record the result (scenarios optional).
-- When phase assumptions are violated (missing/malformed generated metadata), treat them as **repairable outputs** and rebuild rather than hand-editing.
 
