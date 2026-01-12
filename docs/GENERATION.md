@@ -43,8 +43,8 @@ An Appeus project consists of [several phases](./DESIGN.md#design-phases). Some 
   Agent generated storyboards with screenshots based on stories:
   - This optional phase is helpful if other team members will be reviewing the proposed screens and navigation.
   - It is possible that the screens so far are prototypical and data is still mocked.
-  - A local review may be generated for the user using prevew-scenarios.sh.
-  - Or a review may be made available more publicly as html using publish-scenarios.sh, assuming an available web server.
+  - A local review may be generated for the user using `scripts/preview-scenarios.sh`.
+  - Or a review may be made available more publicly as HTML using `scripts/publish-scenarios.sh`, assuming an available web server.
   - Based on review, the user may iterate back to stories/navigation/specs and repeat phases to refine the app; further refinements should be tracked in the target checklist.
 - **Final wiring**
   Agent generated code based on stories, specs:

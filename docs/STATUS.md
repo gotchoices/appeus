@@ -28,8 +28,30 @@ These items were completed in v1 and carry forward:
 
 ## v2.1 Checklist (current minor update)
 
-- [ ] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/scripts).
-- [ ] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`, then add a clear deprecation notice (and/or replace with a pointer to the relevant reference doc).
+### Goals for the v2.1 runtime asset review
+
+Each runtime asset should be reviewed **one at a time** for compliance with v2.1 (as defined in `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, and `docs/GENERATION.md`):
+- **Pause between files** so the human can review/approve; check off each item only after approval.
+- If a runtime asset implements a behavior **not documented in `docs/*`**, stop and decide:
+  - Was it intentionally removed/changed in v2.1?
+  - Or is it useful and should be documented in `docs/*` (then resume the review)?
+- `agent-rules/` should be **lean** and primarily an index into `reference/`, scoped to the folder and its children.
+- Confirm `AGENTS.md` files are planted in the right places in the project tree and are non-redundant.
+- `reference/` docs may need splitting; they should be consistent with v2.1.
+- `user-guides/` should be helpful, brief, and human-readable.
+- Scripts and templates should match the v2.1 workflow and layout (domain contract under `design/specs/domain/`).
+
+### v2.1: docs alignment review (docs/*)
+
+- [x] Update “Shared (Cross-Target)” paths to reflect v2.1 shared domain contract (`design/specs/domain/*`) rather than separate `schema/` + `api/`.
+- [x] Remove/relocate low-level per-target JSON “status registry” naming from docs (keep docs focused on workflow; implementation details live elsewhere).
+- [x] Align phase naming and generation loop language with `docs/DESIGN.md` (and track per-target phase progression via `STATUS.md`).
+- [ ] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
+
+### v2.1: key workflow + tooling changes to validate
+
+- [ ] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/reference/scripts).
+- [ ] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`.
 - [ ] **Deprecate `scripts/generate-next.sh`**: remove doc reliance; agents should select the next slice using stories/spec priority and staleness output (not a script selector).
 - [ ] **Delete deprecated scripts before release**: remove `scripts/generate-next.sh` and `scripts/regenerate.sh` once docs/agent-rules/reference no longer rely on them.
 - [ ] **Verify `scripts/update-dep-hashes.sh` behavior**:
@@ -37,60 +59,31 @@ These items were completed in v1 and carry forward:
   - [ ] Make sure that absence of any switches does not imply --all.
   - [ ] Confirm it does not accidentally “freshen” unrelated stale slices.
 - [ ] **Handle placeholder/malformed meta registry** (`design/generated/<target>/meta/outputs.json`):
-  - [ ] If `outputs.json` is missing or template-like, the script should create it, if necessary, and add in structures for the outputs being updated.
-  - [ ] Can/should the script also trim json structures for outputs that no longer exist in the filesystem?
+  - [ ] If `outputs.json` is missing or template-like, the script should create it (per target) and add/update structures for the outputs being updated.
+  - [ ] Decide whether scripts should trim registry entries for outputs that no longer exist.
+- [ ] **Discovery handoff + target phase awareness**
+  - [ ] Ensure `agent-rules/bootstrap.md` guides the agent to complete `design/specs/project.md` and add the first app target via `scripts/add-app.sh`.
+  - [ ] Verify `scripts/add-app.sh` seeds a per-target checklist file (e.g. `STATUS.md`) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
+  - [ ] Ensure `agent-rules/project.md` tells the agent to determine the active target and consult the target checklist before generating the next slice.
+- [ ] **Migrate domain contract templates to v2.1 layout**: move `templates/specs/{schema,api}` into `templates/specs/domain/` (preserve existing template content under the new layout).
+- [ ] **Update scripts to use `templates/specs/domain/`**: update scripts that seed/copy domain-contract templates to use the new paths (and fix any remaining path assumptions).
 
-### v2.1: `docs/GENERATION.md` review todos
+### v2.1: runtime asset compliance review (pause after each file for approval)
 
-- [ ] Update “Shared (Cross-Target)” paths to reflect v2.1 shared domain contract (`design/specs/domain/*`) rather than separate `schema/` + `api/`.
-- [ ] Decide whether low-level per-target JSON “status registry” naming belongs in `docs/GENERATION.md` (vs `docs/ARCHITECTURE.md`); if not, remove/relocate.
-- [ ] Add a clearer “phases” description aligned with `docs/DESIGN.md` (bootstrap/discovery → domain contract → per-target planning → slice loop → scenarios → final wiring), focused on generation responsibilities.
-- [ ] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
+#### Project scaffold + AGENTS.md placement
 
-### v2.1: discovery handoff + target phase awareness
+- [ ] Verify canonical `AGENTS.md` placement and non-redundancy across: project root, `design/`, `design/specs/`, `design/stories/`, `design/generated/`, and `apps/<target>/` (and confirm symlink targets are correct).
 
-- [ ] Ensure `agent-rules/bootstrap.md` explicitly guides the agent to (a) complete `design/specs/project.md` and (b) add the first app target via `scripts/add-app.sh`.
-- [ ] Verify `scripts/add-app.sh` seeds a per-target checklist file (e.g. `design/specs/<target>/STATUS.md` or equivalent) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
-- [ ] Ensure `agent-rules/project.md` tells the agent to determine the active target and to consult the target checklist (and cross-check prerequisites) before generating the next slice.
+#### templates/
 
-### v2.1 File-by-file compliance review
-
-Each item below is a “review for v2.1 compliance” task (canonical scaffold, docs alignment, deprecated/removed commands, and current workflow guidance).
-
-#### agent-rules/
-
-- [ ] Review `agent-rules/api.md`
-- [ ] Review `agent-rules/bootstrap.md`
-- [ ] Review `agent-rules/consolidations.md`
-- [ ] Review `agent-rules/design-root.md`
-- [ ] Review `agent-rules/project.md`
-- [ ] Review `agent-rules/root.md`
-- [ ] Review `agent-rules/scenarios.md`
-- [ ] Review `agent-rules/schema.md`
-- [ ] Review `agent-rules/specs.md`
-- [ ] Review `agent-rules/src.md`
-- [ ] Review `agent-rules/stories.md`
-
-#### reference/
-
-- [ ] Review `reference/api-agent-workflow.md`
-- [ ] Review `reference/codegen.md`
-- [ ] Review `reference/generation.md`
-- [ ] Review `reference/mock-variants.md`
-- [ ] Review `reference/mocking.md`
-- [ ] Review `reference/navigation-agent-workflow.md`
-- [ ] Review `reference/scaffold.md`
-- [ ] Review `reference/scenarios-agent-workflow.md`
-- [ ] Review `reference/scenarios.md`
-- [ ] Review `reference/screens-agent-workflow.md`
-- [ ] Review `reference/spec-schema.md`
-- [ ] Review `reference/specs-agent-workflow.md`
-- [ ] Review `reference/stories-agent-workflow.md`
-- [ ] Review `reference/testing.md`
-- [ ] Review `reference/workflow.md`
-- [ ] Review `reference/frameworks/nativescript-svelte.md`
-- [ ] Review `reference/frameworks/react-native.md`
-- [ ] Review `reference/frameworks/sveltekit.md`
+- [ ] Review `templates/specs/project.md`
+- [ ] Review domain contract templates under `templates/specs/domain/` (after migration)
+- [ ] Review `templates/specs/screens/index.md` and `templates/specs/screens/screen-spec-template.md`
+- [ ] Review `templates/specs/components/index.md` and `templates/specs/components/component-spec-template.md`
+- [ ] Review `templates/specs/navigation.md`
+- [ ] Review `templates/specs/global/toolchain.md`, `templates/specs/global/ui.md`, `templates/specs/global/dependencies.md`
+- [ ] Review `templates/stories/story-template.md`
+- [ ] Review `templates/generated/…` (consolidations/scenarios templates)
 
 #### scripts/
 
@@ -98,28 +91,56 @@ Each item below is a “review for v2.1 compliance” task (canonical scaffold, 
 - [ ] Review `scripts/add-app.sh`
 - [ ] Review `scripts/check-stale.sh`
 - [ ] Review `scripts/update-dep-hashes.sh`
-- [ ] Review `scripts/generate-next.sh`
-- [ ] Review `scripts/regenerate.sh` (deprecate and/or replace)
 - [ ] Review `scripts/build-images.sh`
 - [ ] Review `scripts/android-screenshot.sh`
 - [ ] Review `scripts/preview-scenarios.sh`
 - [ ] Review `scripts/publish-scenarios.sh`
-- [ ] Review `scripts/rn-init.sh` (evaluate/remove)
-- [ ] Review `scripts/setup-appeus.sh` (evaluate/remove)
 - [ ] Review `scripts/lib/project-root.sh`
-- [ ] Review `scripts/frameworks/react-native.sh`
-- [ ] Review `scripts/frameworks/sveltekit.sh`
-- [ ] Review `scripts/frameworks/nativescript-svelte.sh`
-- [ ] Review `scripts/frameworks/nativescript-vue.sh`
-- [ ] Review `scripts/frameworks/nuxt.sh`
-- [ ] Review `scripts/frameworks/nextjs.sh`
-- [ ] Review `scripts/frameworks/tauri.sh`
-- [ ] Review `scripts/frameworks/capacitor.sh`
+- [ ] Review deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh`
+- [ ] Review legacy scripts: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
 
-## v2 Reference Docs Complete
+#### agent-rules/
+
+- [ ] Review `agent-rules/root.md`
+- [ ] Review `agent-rules/project.md`
+- [ ] Review `agent-rules/bootstrap.md`
+- [ ] Review `agent-rules/design-root.md`
+- [ ] Review `agent-rules/stories.md`
+- [ ] Review `agent-rules/specs.md`
+- [ ] Review `agent-rules/consolidations.md`
+- [ ] Review `agent-rules/scenarios.md`
+- [ ] Review `agent-rules/src.md`
+- [ ] Review `agent-rules/api.md` + `agent-rules/schema.md` (decide whether these should become a single `domain.md` in v2.1)
+
+#### reference/
+
+- [ ] Review `reference/workflow.md`
+- [ ] Review `reference/scaffold.md`
+- [ ] Review `reference/generation.md`
+- [ ] Review `reference/codegen.md`
+- [ ] Review `reference/spec-schema.md`
+- [ ] Review `reference/mocking.md` + `reference/mock-variants.md`
+- [ ] Review `reference/scenarios.md`
+- [ ] Review `reference/testing.md`
+- [ ] Review agent workflow refs: `reference/*-agent-workflow.md`
+- [ ] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
+
+#### user-guides/
+
+- [ ] Review `user-guides/stories.md`
+- [ ] Review `user-guides/specs.md`
+- [ ] Review `user-guides/navigation.md`
+- [ ] Review `user-guides/scenarios.md`
+
+#### framework adapters and stubs
+
+- [ ] Review implemented adapters: `scripts/frameworks/react-native.sh`, `scripts/frameworks/sveltekit.sh`, `scripts/frameworks/nativescript-svelte.sh`
+- [ ] Review stubs for v2.1 consistency: `scripts/frameworks/nativescript-vue.sh`, `scripts/frameworks/nuxt.sh`, `scripts/frameworks/nextjs.sh`, `scripts/frameworks/tauri.sh`, `scripts/frameworks/capacitor.sh`
+
+## v2 Reference Docs Complete (historical; some items are v2.0-only)
 
 - [x] `reference/workflow.md` — v2 design-first workflow
-- [x] `reference/scaffold.md` — Progressive structure
+- [x] `reference/scaffold.md` — Progressive structure (v2.0; removed from v2.1 canonical layout)
 - [x] `reference/generation.md` — Multi-target generation
 - [x] `reference/codegen.md` — Updated paths and examples
 - [x] `reference/mocking.md` — Updated for v2
@@ -184,12 +205,12 @@ Each item below is a “review for v2.1 compliance” task (canonical scaffold, 
 - [x] Report output: print what was added vs skipped
 - [x] gitignore template: add appeus symlinks to .gitignore
 
-## v2 Phase 2: Add-App Framework (COMPLETE)
+## v2 Phase 2: Add-App Framework (COMPLETE; some items are v2.0-only)
 
 - [x] `add-app.sh` — Generic app scaffold command with `--name` and `--framework`
 - [x] Dispatcher pattern: add-app.sh calls `frameworks/<name>.sh`
 - [x] React Native adapter: `scripts/frameworks/react-native.sh`
-- [x] Single-to-multi migration: `add-app.sh` auto-reorganizes when adding second app
+- [x] Single-to-multi migration: `add-app.sh` auto-reorganizes when adding second app (v2.0; removed in v2.1 canonical layout)
 - [x] Path detection: detect single-app vs multi-app mode
 
 ## v2 Phase 4: Web Adapter (COMPLETE)

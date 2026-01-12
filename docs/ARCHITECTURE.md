@@ -10,7 +10,7 @@ The appeus folder itself (this toolkit):
 appeus/
 ├── docs/                    # For developing appeus itself (you are here)
 │   ├── DESIGN.md            # Design intent and rationale
-│   ├── GENERATION.md        # Generation strategy details
+│   ├── GENERATION.md        # Generation tactics (how dependency tracking + slicing works)
 │   ├── STATUS.md            # Development roadmap and tracker
 │   └── ARCHITECTURE.md      # This file
 │
@@ -47,7 +47,7 @@ appeus/
 ├── templates/               # Starter files copied into projects
 │   ├── specs/
 │   │   ├── project.md       # Decision document template
-│   │   ├── schema/          # Schema spec templates
+│   │   ├── domain/          # Shared domain contract templates (schema/ops/rules/interfaces)
 │   │   ├── components/      # Component spec templates
 │   │   ├── screens/         # Screen spec templates
 │   │   ├── global/          # Global specs (toolchain, ui, deps)
@@ -156,10 +156,10 @@ Notes:
 These files appear in various folders of the scaffold as AGENTS.md files linked back to a particular file under agent-rules.
 
 These files will be consumed by agents as they traverse the project tree so they should:
-- Be very clean and clean so they do not unnecessarily consume limited AI context space
+- Be very concise so they do not unnecessarily consume limited AI context space
 - Be relevant to the folder they appear in
 - Contain hyperlinks to definitive documents in the `./reference` folder
-- Serve as an efficient index for agents so they can look up the reference details when then need them
+- Serve as an efficient index for agents so they can look up the reference details when they need them
 
 ### Discovery Phase
 In the initial scaffold, the root AGENTS.md is pointed to bootstrap.md.  This causes the agent to more aggressively guide the user to complete specs/project.md before proceeding.  Once this phase is complete, the agent should repoint this link to agent-rules/project.md.  The agent will then assume a regular development role.
@@ -178,7 +178,7 @@ Human-friendly guides linked via README.md in project folders.  These files are 
 
 Examples include:
 - In this folder, you should create user stories. These stories should ...
-- Here you create specifications. They can oveerride everything else so keep them consistent ...
+- Here you create specifications. They can override everything else so keep them consistent ...
 - The domain folder is intended to contain ...
 
 ### For Project Setup (templates/)

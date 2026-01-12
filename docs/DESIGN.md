@@ -81,7 +81,7 @@ project/
 │   ├── stories/
 │   │   └── <target>/            # Per-app stories
 │   └── generated/               # Agent-generated content, subject to overwrite
-│       └── <target>/            # Per-app consolidations, scenarios, status
+│       └── <target>/            # Per-app consolidations, scenarios, metadata
 ├── apps/
 │   └── <target>/                # Framework scaffold per app (react-native, svelte, etc)
 └── mock/
