@@ -3,6 +3,8 @@ set -euo pipefail
 
 # Picks the next stale screen (vertical slice) and prints an AI-facing plan.
 # Supports both single-app and multi-app project structures.
+# NOTE: Deprecated in v2.1. Prefer using check-stale.sh and selecting the next slice
+# deliberately based on user intent/priority. This script is scheduled for removal.
 #
 # Usage:
 #   appeus/scripts/generate-next.sh [--target <name>]
@@ -90,6 +92,10 @@ if [ -z "${STALE_SCREENS}" ]; then
   echo "All screens appear up to date."
   exit 0
 fi
+
+echo "WARNING: generate-next.sh is deprecated and will be removed."
+echo "         Use: appeus/scripts/check-stale.sh  (then pick the next slice explicitly)"
+echo ""
 
 NEXT="$(printf '%s\n' "${STALE_SCREENS}" | head -n1)"
 STALE_COUNT="$(printf '%s\n' "${STALE_SCREENS}" | wc -l | tr -d ' ')"

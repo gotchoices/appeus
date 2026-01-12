@@ -3,49 +3,132 @@
 How Appeus tracks dependencies, detects staleness, and generates outputs. This is a design-intent document; agents follow operative rules in `agent-rules/` and `reference/`.
 
 ## Overview
-  Generation is the process of creating code from stories and specs.  The agent must be able to do this according to [appeus core principles](./DESIGN.md#core-principles) and the Appeus-defined workflow (explained in this file) by reading only the AGENTS.md files in the applicable folders and/or their parent folders up to the project root.
+Generation is the process of creating code from stories and specs. The agent must be able to do this according to the [Appeus core principles](./DESIGN.md#core-principles) and the Appeus-defined workflow (explained in this file) by reading only the `AGENTS.md` files in the applicable folders (and/or their parents up to the project root).
 
-  The agent will not know every detail solely from the AGENTS.md files, but it should at least know all subjects that are available and where to find them in the exhaustive reference files when the time comes to need them.
+The agent will not know every detail solely from `AGENTS.md`, but it should know what subjects exist and where to find the exhaustive details in the `reference/` documents when needed.
 
 ## Working context
-  An appeus project consists of [several phases](./DESIGN.md#design-phases).  Furthermore, some of these phases apply to a specific target while others are shared across the project.  Since there may be multiple targets, it will be important for the agent to know which phase and target are currently being worked on so as to guide the user effectively.
+An Appeus project consists of [several phases](./DESIGN.md#design-phases). Some phases are shared across the project; others are per-target. Since a project may contain multiple targets, it is important for the agent to know which **phase** and which **target** is currently being worked on in order to guide the user effectively.
 
-## Phases and Progression
-- **Bootstrap/discovery incomplete**
-  - At this point, the <project-root>/AGENTS.md file is still symlinked to agent-rules/bootstrap.md.
-  - Therefore, the Agent will be focused on the instructions there until the project parameters are properly completed.
-  - This phase is considered complete when the first app is added.  That script should re-point the root AGENTS.md to agent-rules/project.md whereafter the agent will be more focused on target generation.
-  - When an app is created, it should be seeded with a checklist file (preferred name STATUS.md).  This contains a generic set of not-yet-completed checklist items that will indicate to the user and agent which phase of the target they are in.
+## Phases and progression
+- **Bootstrap/discovery**
+  Human-specified details about how the project will be structured:
+  - At this point, the project root `AGENTS.md` is still symlinked to `appeus/agent-rules/bootstrap.md` and no particular app is yet being worked on.
+  - The agent is focused on discovery and completing `design/specs/project.md` (project/toolchain specification).
+  - This phase is considered complete once project/toolchain decisions are captured and the first app target is added; `add-app.sh` then repoints the root `AGENTS.md` to `appeus/agent-rules/project.md` (post-discovery development).
+  - When an app target is created, the script will seed a per-target checklist file (e.g., `STATUS.md`) to track target-level phases and remaining work.
 - **Story Generation**
-  - Some set of user stories are needed before any meaningful generation can occur and before domain contract can be designed.
-  - As long as stories are incomplete or missing (according to design/stories folder and/or target checklist), the agent should strongly encourage the user to produce them.
-  - If the user has input all desired stories and the agent determines they are sufficient to describe a coherent navigation and storage plan, this phase can be completed in the checklist.
+  Human-specified descriptions of app user experiences:
+  - A set of app-specific user stories is needed before meaningful generation can occur and before the domain contract can be designed.
+  - As long as stories are missing or clearly incomplete (per `design/stories/<target>/` and/or the target checklist), the agent should encourage the user to produce them before going further.
+  - If stories are sufficient to describe a coherent navigation and storage plan, this phase can be checked off in the target checklist.
 - **Navigation Planning**
-  - The agent may assist the user by building a minimal specs/target/navigation.md. This also implies a set of screens which can be enumerated in screens/index.md. The agent should encourage the user to review it and iterate with the agent by modifying stories and/or the navigation spec until the set of screens and the navigation spec seem complete.  This phase can then be checked off in the todo file.
-- **Domain contract**
-  - It is often impossible to take on this phase without first having a sufficient stories.  So even though it is a shared resource, it is listed in the target development flow.
-  - If this is the first app, the domain spec will likely need to be created from scratch.
-  - The agent should use the project spec to decide what documentation is needed (api, schema, etc) and work with the user to develop the needed specs. This spec should be sufficient to explain how to implement both mock and production data management.
-  - If this is not the first app, care must be taken.  The domain contract must be compared to the target stories/specs for suitability.  But if it needs to be changed or augmented, the changes must be made in a way that preserves the function of previously existing apps.  Either the stories/specs in the present app must be adapted or the legacy apps must be updated.
-  - When the domain spec is sufficient to support the present app, this phase may be checked off.
-- **Slice iteration phase**
-  - When this is the next open todo, the agent may, upon user request, proceed to generate slices.
+  Optionally human-generated else agent-inferred, human-reviewed:
+  - If necessary, the agent will assist the user by building a minimal `design/specs/<target>/navigation.md` file.
+  - This navigation spec implies a set of screens which should also be enumerated in `design/specs/<target>/screens/index.md`.
+  - The agent should encourage the user to review and iterate (by modifying stories and/or navigation) until the screen set and navigation spec seem complete; then check this phase off in the target checklist.
+- **Domain Contract**
+  Optionally human-generated else agent-inferred, human-reviewed:
+  - Unless much is known in advance about the intent for data management, it can be difficult or even impossible to complete this phase without sufficient stories first being built. Even though the domain contract is shared, it is listed in the target development flow because all targets depend on it.
+  - If this is the first app, the domain spec will likely be created from scratch.
+  - The agent should use the common project spec to decide what documentation is needed (API, schema, rules, interfaces, etc.) and prompt the user to develop the needed specs. These specs should be sufficient to describe both mock and production data handling.
+  - If this is not the first app, care must be taken: changes must preserve compatibility with previously generated targets.  Either adapt the new target’s stories/specs, or update legacy targets as needed.
+  - When the domain spec is sufficient to support the present target, this phase may be checked off.
+- **Screen/Component Slicing**
+  Agent generated code based on stories, specs:
+  - When this is the next open checklist item, the agent may, upon user request, proceed to generate slices.
   - Generation proceeds according to the workflow outlined below.
-  - When all screens/components are at least to demonstration state, this phase may be checked off
-- **Scenario/peer-review phase**
-  - This phase optional phase is helpful if other team members will be reviewing the proposed screens and navigation
-  - It may be that the screens so far are prototypical and all data has been mock so far
-  - Based on review, the user may go back and iterate from stories again and repeat phases to refine the app
-  - At the user's request, further refinements might be entered and tracked in the todo file
+  - When all screens/components are at least in a demonstration state, this phase may be checked off.
+- **Scenario / Peer Review**
+  Agent generated storyboards with screenshots based on stories:
+  - This optional phase is helpful if other team members will be reviewing the proposed screens and navigation.
+  - It is possible that the screens so far are prototypical and data is still mocked.
+  - A local review may be generated for the user using prevew-scenarios.sh.
+  - Or a review may be made available more publicly as html using publish-scenarios.sh, assuming an available web server.
+  - Based on review, the user may iterate back to stories/navigation/specs and repeat phases to refine the app; further refinements should be tracked in the target checklist.
 - **Final wiring**
-  - Once UI slices are stable, further generation requests will be directed toward wiring of the production domain contract.
+  Agent generated code based on stories, specs:
+  - Once UI slices are stable, further generation requests should be directed toward wiring the production domain contract and/or other program logic.
   - This means all data is managed, processed and stored according to the production specification.
-  - This phase may also involve certain regression testing, feature addition, etc.
+  - This phase might also involve regression testing, feature addition, etc.
 
+## Inputs and Outputs
 
+### Shared (Cross-Target)
 
-## Inputs and outputs (shared vs per-target)
-## Generation flow (domain derivation → per-target slicing loop)
+| Type | Location | Description |
+|------|----------|-------------|
+| Domain contract | `design/specs/domain/` | Shared domain specs (schema/ops/rules/interfaces); exact files vary by project |
+| Mock data | `mock/data/` | Shared mock JSON with variants |
+
+### Per-Target
+
+| Type | Location | Description |
+|------|----------|-------------|
+| Stories | `design/stories/<target>/` | User stories for this target |
+| Screen/page specs | `design/specs/<target>/screens/` | Human-authored specs |
+| Navigation/routing | `design/specs/<target>/navigation.md` | Nav structure, deep links |
+| Consolidations | `design/generated/<target>/screens/` | AI-derived from stories |
+| Scenarios | `design/generated/<target>/scenarios/` | Screenshots + deep links |
+| App code | `apps/<target>/src/` | Generated screens, routes, etc. |
+
+## Generation Flow
+
+This section describes the **code-generation loop** for a single target.  It applies to the phases above Screen Iteration and Final Wiring.
+
+### Preconditions (before generating code)
+
+- **Target is explicit**: the agent knows which `<target>` it is working on (to avoid cross-target writes).
+- **Stories exist**: `design/stories/<target>/` contains enough stories to justify the slice.
+- **Slice registry exists**: `design/specs/<target>/screens/index.md` lists the screen/route to generate.
+- **Navigation exists** (at least minimal): `design/specs/<target>/navigation.md`.
+- **Domain contract is usable** (shared): `design/specs/domain/` is present and sufficient for the slice, or the agent/user agrees to extend it first.
+
+### Step 1: Select a slice
+
+The user may name the slice directly (“generate ItemList”), or the agent may choose a candidate from the screens index:
+- Prefer a screen reachable from the current navigation root.
+- Prefer missing/stale screens first (optionally using `check-stale.sh`).
+
+### Step 2: Read authoritative inputs
+
+For the selected slice, read (in precedence order):
+- **Human specs** for the target (screen/component/navigation/global)
+- **Human stories** for the target
+- **Shared domain contract** (`design/specs/domain/`)
+- Existing consolidations (if present) as regenerable translator state
+
+### Step 3: Generate/refresh consolidation(s)
+
+Write or refresh `design/generated/<target>/screens/<Screen>.md` as the programmer-facing digest that:
+- references the relevant stories/specs/domain assumptions
+- identifies needed components and data interactions
+- records dependency metadata (`dependsOn` and hashes) so staleness is deterministic
+
+### Step 4: Generate code for the slice
+
+Generate/update framework code under `apps/<target>/src/` (screen/page + any necessary routing/nav updates), using the consolidation as the primary translator artifact while preserving human-authored specs.
+
+### Step 5: Validate and iterate
+
+- Prompt the user to run/reload the target app and validate the slice behavior against the spec.
+- If behavior is wrong, the user should iterate by updating **stories/specs** (human lane) and then prompt the agent to regenerate the slice
+- The agent should not “fix the spec by writing programmer structure into it” (that belongs in consolidations).
+
+### Step 6 (optional): Scenario review artifacts
+
+If stakeholder review is needed, capture/refresh scenarios and screenshots for the slice and make them available for review (local preview and/or published HTML).
+
+### Step 7: Update metadata + confirm freshness
+
+After generating a slice, update dependency metadata for the slice and confirm it is no longer stale:
+- Update per-route hashes/registries (e.g., `update-dep-hashes.sh --route <Route>`)
+- Optionally re-run staleness reporting (e.g., `check-stale.sh`) to confirm the slice is fresh.  This can also occur as the first step of selecting the next slice.
+
+### Step 8: Commit at stable milestones
+
+Once the slice is stable and tested, the user should commit a clean milestone.  This is facilitated by the agent pausing between slices and waiting for the user to start the next generation slice.
+
 ## Dependency model (nodes, relationships, and what “dependsOn” means)
 ## Staleness detection (hash-based preferred; mtime fallback)
 ## Scripts (what exists, what is optional)
@@ -137,27 +220,6 @@ Selection order:
 2. Then stale neighbors (navigable from fresh screens)
 3. Remaining stale screens
 
-## Inputs and Outputs
-
-### Shared (Cross-Target)
-
-| Type | Location | Description |
-|------|----------|-------------|
-| Schema specs | `design/specs/schema/*.md` | Data model definitions |
-| API specs | `design/specs/api/*.md` | Endpoint/procedure definitions |
-| Mock data | `mock/data/` | Shared mock JSON with variants |
-
-### Per-Target
-
-| Type | Location | Description |
-|------|----------|-------------|
-| Stories | `design/stories/<target>/` | User stories for this target |
-| Screen/page specs | `design/specs/<target>/screens/` | Human-authored specs |
-| Navigation/routing | `design/specs/<target>/navigation.md` | Nav structure, deep links |
-| Consolidations | `design/generated/<target>/screens/` | AI-derived from stories |
-| Scenarios | `design/generated/<target>/scenarios/` | Screenshots + deep links |
-| App code | `apps/<target>/src/` | Generated screens, routes, etc. |
-
 ## What Goes Where (Anti–Spec Creep)
 
 To keep the workflow sustainable and human-readable:
@@ -210,39 +272,6 @@ Rule of thumb: if a spec is getting hard for the human to read, move programmer-
 }
 ```
 
-## Generation Flow
-
-### Phase 1: Schema Derivation (Multi-Target)
-
-When multiple targets exist:
-
-1. Agent reads stories from ALL targets (`design/stories/*/`)
-2. Identifies entities and relationships mentioned across stories
-3. Proposes schema specs in `design/specs/schema/`
-4. Human reviews and refines
-
-This ensures the data model supports all target experiences.
-
-### Phase 2: Per-Target Generation (Vertical Slice)
-
-For each target, the standard flow applies:
-
-1. **Screen consolidation** — Refresh `design/generated/<target>/screens/<Screen>.md`
-2. **API consolidations** — Refresh needed namespaces
-3. **Mocks** — Generate/refresh mock data for required namespaces
-4. **App code** — Generate screen/page and update navigation
-5. **Scenarios** — Capture screenshots, generate scenario docs (mobile targets)
-6. **Update status** — Write to `status.json`, print report
-
-### Slice Selection
-
-Build navigation graph from `design/specs/<target>/navigation.md` and screens index.
-
-Selection order:
-1. First stale screen reachable from root
-2. Then stale neighbors (navigable from fresh screens)
-3. Remaining stale screens
-
 ## Staleness Detection
 
 ### Hash-Based (Preferred)
@@ -263,7 +292,6 @@ When metadata missing:
 | Script | Purpose |
 |--------|---------|
 | `check-stale.sh` | Per-screen staleness report + JSON |
-| `generate-next.sh` | (Optional) Pick a stale screen, print a plan |
 | `update-dep-hashes.sh --route <Route>` | Refresh depHashes after generation |
 
 Scripts operate per-target; pass `--target <name>` when project has multiple apps.

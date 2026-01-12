@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Regeneration planner (prompt-only) for Appeus v2.
 # Prints an AI-facing plan for a specific slice.
+# NOTE: Deprecated in v2.1. This script prints plan text only and is scheduled for removal.
 #
 # Usage:
 #   appeus/scripts/regenerate.sh [--target <name>] --screen <Route>

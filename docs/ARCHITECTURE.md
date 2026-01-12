@@ -61,8 +61,6 @@ appeus/
 │   ├── init-project.sh      # Bootstrap new project
 │   ├── add-app.sh           # Add app scaffold to project
 │   ├── check-stale.sh       # Staleness detection
-│   ├── regenerate.sh        # Per-slice regeneration plan
-│   ├── generate-next.sh     # Pick next stale screen
 │   ├── update-dep-hashes.sh # Refresh dependency hashes
 │   ├── android-screenshot.sh # Android screenshot capture
 │   ├── build-images.sh      # Batch screenshot capture
@@ -211,14 +209,13 @@ This section documents **what exists under `scripts/` today**, what each script 
   - **How it decides dependencies**: prefers the per-target dependency registry in `design/generated/<target>/meta/outputs.json` when present; falls back to a heuristic input set when missing.
   - **What it writes**: a per-target JSON staleness report under `design/generated/<target>/` (scripts should treat malformed/missing reports as regenerable and rebuild them).
 
-- **`generate-next.sh` — convenience: pick one stale slice and print a plan**
-  - **Status**: recommended convenience (not strictly required)
-  - **Why keep it**: it standardizes “what next?” across agents, reduces indecision, and produces a deterministic next step (especially helpful when many screens are stale).
-  - **If you prefer a manual flow**: agents can run `check-stale.sh`, pick a screen based on priority, then follow the workflow in `reference/`.
+- **`generate-next.sh` — DEPRECATED**
+  - **Why deprecate**: it selects the “next” slice mechanically; agents should choose slices deliberately based on target priorities and the staleness report.
+  - **Replacement**: run `check-stale.sh`, then select the next slice based on user intent/priority and proceed via the reference workflow.
 
 - **`regenerate.sh` — DEPRECATED (plan-only)**
-  - **Why deprecate**: it does not perform regeneration; it only prints static “plan text,” which is better expressed in `agent-rules/` + `reference/` (and it has caused confusion for some agents/users).
-  - **Replacement**: use `generate-next.sh` for an automated “next plan,” or follow the relevant reference workflow directly (starting from `check-stale.sh` and the chosen slice).
+  - **Why deprecate**: it does not perform regeneration; it prints plan text that is better expressed in `agent-rules/` + `reference/` (and it has caused confusion).
+  - **Replacement**: follow the relevant reference workflow directly (starting from `check-stale.sh` and the chosen slice).
 
 #### Dependency metadata
 

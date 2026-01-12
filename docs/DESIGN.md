@@ -52,11 +52,12 @@ Built to accommodate multiple apps (“targets”) in one project. The user init
 ## Design Phases
 The user and agent will work in various phases of the project, some phases are specific to a particular target.  Others are shared across all targets of the project.
   - Initial project and Appeus scaffold (shared): the user creates a workspace and installs Appeus.
-  - Project/toolchain specification (shared): the user answers basic questions about how the project will be structured and developed (what apps exist, how data is stored/processed/accessed, etc.). This phase is completed by initializing the project for at least one app target.a
+  - Bootstrap/Discovery (shared): the user answers basic questions about how the project will be structured and developed (what apps exist, how data is stored/processed/accessed, etc.). This phase is completed by initializing the project for at least one app target.
   - Story Generation (per target): the user is responsible for generating stories but will likely request agent assistance in drafting them. The agent should help keep them in an appropriate tone, style and format.
-  - Navigation (per target): if no navigation spec exists yet, the agent infers a minimal navigation layout from stories (screen/component list + starter navigation template). The user reviews and updates the navigation spec before proceeding.
-  - Domain (shared): if no shared domain specs exist yet, the agent proposes them based on the project decisions and target stories/specs. If domain specs do exist, this might not be the first app on the project. In any case, the agent should help review the domain specifications to make sure they are compatible with the present target and without losing compatibility with other previously generated targets. The user should review updates before proceeding.
-  - Screen/component slicing (target): under user direction, the agent implements the UI one slice at a time, giving the user a chance to test and commit at each stable milestone. This phase typically uses mock data so the UI can be validated in multiple states.
+  - Navigation Planning (per target): if no navigation spec exists yet, the agent infers a minimal navigation layout from stories (screen/component list + starter navigation template). The user reviews and updates the navigation spec before proceeding.
+  - Domain Contract (shared): if no shared domain specs exist yet, the agent proposes them based on the project decisions and target stories/specs. If domain specs do exist, this might not be the first app on the project. In any case, the agent should help review the domain specifications to make sure they are compatible with the present target and without losing compatibility with other previously generated targets. The user should review updates before proceeding.
+  - Screen/Component Slicing (per target): under user direction, the agent implements the UI one slice at a time, giving the user a chance to test and commit at each stable milestone. This phase typically uses mock data so the UI can be validated in multiple states.
+  - Scenario / Peer Review (per target, optional): the agent can generate storyboard-like scenarios with screenshots to support review and iteration.
   - Final wiring (target): after screen/UI approval, slices are finished and tested against the production data model.
 
 

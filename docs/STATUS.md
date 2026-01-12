@@ -30,6 +30,8 @@ These items were completed in v1 and carry forward:
 
 - [ ] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/scripts).
 - [ ] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`, then add a clear deprecation notice (and/or replace with a pointer to the relevant reference doc).
+- [ ] **Deprecate `scripts/generate-next.sh`**: remove doc reliance; agents should select the next slice using stories/spec priority and staleness output (not a script selector).
+- [ ] **Delete deprecated scripts before release**: remove `scripts/generate-next.sh` and `scripts/regenerate.sh` once docs/agent-rules/reference no longer rely on them.
 - [ ] **Verify `scripts/update-dep-hashes.sh` behavior**:
   - [ ] Does running it after regenerating one slice update only that slice (`--route`) vs all routes (`--all`)?
   - [ ] Make sure that absence of any switches does not imply --all.
@@ -44,6 +46,12 @@ These items were completed in v1 and carry forward:
 - [ ] Decide whether low-level per-target JSON “status registry” naming belongs in `docs/GENERATION.md` (vs `docs/ARCHITECTURE.md`); if not, remove/relocate.
 - [ ] Add a clearer “phases” description aligned with `docs/DESIGN.md` (bootstrap/discovery → domain contract → per-target planning → slice loop → scenarios → final wiring), focused on generation responsibilities.
 - [ ] Clarify in `docs/GENERATION.md` how `update-dep-hashes.sh` behaves (`--route` vs `--all`, and what happens when the registry is empty/template-like).
+
+### v2.1: discovery handoff + target phase awareness
+
+- [ ] Ensure `agent-rules/bootstrap.md` explicitly guides the agent to (a) complete `design/specs/project.md` and (b) add the first app target via `scripts/add-app.sh`.
+- [ ] Verify `scripts/add-app.sh` seeds a per-target checklist file (e.g. `design/specs/<target>/STATUS.md` or equivalent) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
+- [ ] Ensure `agent-rules/project.md` tells the agent to determine the active target and to consult the target checklist (and cross-check prerequisites) before generating the next slice.
 
 ### v2.1 File-by-file compliance review
 
