@@ -252,7 +252,3 @@ This section documents **what exists under `scripts/` today**, what each script 
 
 - **`lib/project-root.sh` — shared project-root detection**
   - Used by scripts to locate the project root reliably (including when `appeus/` is a symlink).
-
-#### Legacy scripts (retained for now)
-
-These remain in the repo but are not the v2.1 workflow entry points: `rn-init.sh`, `setup-appeus.sh`.

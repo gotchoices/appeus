@@ -42,7 +42,7 @@ is_single_app_mode() {
   if [ -d "${DESIGN_DIR}/specs/screens" ]; then
     # Check if there are target subdirs in specs (excluding screens, schema, api, global)
     local target_count
-    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
+    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "domain" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
     if [ "$target_count" = "0" ]; then
       return 0  # single-app mode
     fi
@@ -79,7 +79,7 @@ else
     echo "Error: Multi-app project detected. --target is required." >&2
     echo ""
     echo "Available targets:"
-    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" -exec basename {} \; 2>/dev/null
+    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "domain" ! -name "global" -exec basename {} \; 2>/dev/null
     exit 1
   fi
   
@@ -102,6 +102,7 @@ if [ ! -f "${SCREENS_PLAN}" ]; then
 fi
 
 mkdir -p "$(dirname "${STATUS_FILE}")"
+mkdir -p "$(dirname "${META_FILE}")"
 
 # Extract screen routes from the plan table
 SCREENS=()
@@ -121,6 +122,40 @@ if [ ${#SCREENS[@]} -eq 0 ]; then
   echo "No screens found in ${SCREENS_PLAN}"
   echo "Add screens to the index table to track staleness."
   exit 0
+fi
+
+# Ensure meta/outputs.json exists and has entries for known screens (non-destructive).
+if [ ! -f "${META_FILE}" ]; then
+  echo "Creating empty outputs.json at ${META_FILE}"
+  printf '%s\n' '{"outputs":[]}' > "${META_FILE}"
+fi
+if command -v jq >/dev/null 2>&1; then
+  for ROUTE in "${SCREENS[@]}"; do
+    # If route missing from registry, seed a conservative dependsOn list.
+    if ! jq -e --arg r "$ROUTE" 'any(.outputs[]?; .route == $r)' "${META_FILE}" >/dev/null 2>&1; then
+      deps=()
+      [ -f "${PROJECT_DIR}/design/specs/project.md" ] && deps+=("design/specs/project.md")
+      if [ -d "${PROJECT_DIR}/design/specs/domain" ]; then
+        while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${PROJECT_DIR}/design/specs/domain" -type f -name "*.md" -print0 2>/dev/null || true)
+      fi
+      [ -f "${SPECS_NAV_FILE}" ] && deps+=("${SPECS_NAV_FILE#${PROJECT_DIR}/}")
+      [ -f "${SCREENS_PLAN}" ] && deps+=("${SCREENS_PLAN#${PROJECT_DIR}/}")
+      # Per-screen spec
+      KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+      [ -f "${SPECS_SCREENS_DIR}/${KEBAB}.md" ] && deps+=("${SPECS_SCREENS_DIR#${PROJECT_DIR}/}/${KEBAB}.md")
+      [ -f "${SPECS_SCREENS_DIR}/${ROUTE}.md" ] && deps+=("${SPECS_SCREENS_DIR#${PROJECT_DIR}/}/${ROUTE}.md")
+      # Target stories
+      if [ -d "${STORIES_DIR}" ]; then
+        while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${STORIES_DIR}" -type f -name "*.md" -print0 2>/dev/null || true)
+      fi
+      deps_json=$(printf "%s\n" "${deps[@]}" | awk 'NF && !seen[$0]++' | jq -R . | jq -s .)
+      tmp=$(mktemp)
+      jq --arg route "$ROUTE" --argjson deps "$deps_json" '
+        .outputs += [{"route": $route, "dependsOn": $deps, "depHashes": {}}]
+      ' "${META_FILE}" > "$tmp"
+      mv "$tmp" "${META_FILE}"
+    fi
+  done
 fi
 
 json_escape() { python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'; }
@@ -147,8 +182,9 @@ for ROUTE in "${SCREENS[@]}"; do
     if [ -d "${SPECS_COMPONENTS_DIR}" ]; then
       while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${SPECS_COMPONENTS_DIR}" -type f -print0 2>/dev/null || true)
     fi
-    # Schema specs (shared)
-    while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/schema" -type f -print0 2>/dev/null || true)
+    # Domain contract specs (shared, v2.1)
+    while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/domain" -type f -print0 2>/dev/null || true)
+    [ -f "${DESIGN_DIR}/specs/project.md" ] && INPUTS+=("${DESIGN_DIR}/specs/project.md")
     # Per-screen spec
     KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
     [ -f "${SPECS_SCREENS_DIR}/${KEBAB}.md" ] && INPUTS+=("${SPECS_SCREENS_DIR}/${KEBAB}.md")
@@ -217,10 +253,9 @@ for row in "${SUMMARY_ROWS[@]}"; do echo "${row}"; done
 echo ""
 echo "Wrote JSON report to ${STATUS_FILE}"
 
+echo ""
 if [ "${STALE_COUNT}" -gt 0 ]; then
-  echo ""
-  echo "Next: run appeus/scripts/generate-next.sh to target the next vertical slice."
+  echo "Next: pick a stale slice and regenerate it (agents typically use check-stale output + the screens index to choose)."
 else
-  echo ""
   echo "All screens look up to date."
 fi

@@ -50,17 +50,19 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 ### v2.1: key workflow + tooling changes to validate
 
-- [ ] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/reference/scripts).
-- [ ] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`.
-- [ ] **Deprecate `scripts/generate-next.sh`**: remove doc reliance; agents should select the next slice using stories/spec priority and staleness output (not a script selector).
-- [ ] **Delete deprecated scripts before release**: remove `scripts/generate-next.sh` and `scripts/regenerate.sh` once docs/agent-rules/reference no longer rely on them.
-- [ ] **Verify `scripts/update-dep-hashes.sh` behavior**:
-  - [ ] Does running it after regenerating one slice update only that slice (`--route`) vs all routes (`--all`)?
-  - [ ] Make sure that absence of any switches does not imply --all.
-  - [ ] Confirm it does not accidentally “freshen” unrelated stale slices.
-- [ ] **Handle placeholder/malformed meta registry** (`design/generated/<target>/meta/outputs.json`):
-  - [ ] If `outputs.json` is missing or template-like, the script should create it (per target) and add/update structures for the outputs being updated.
-  - [ ] Decide whether scripts should trim registry entries for outputs that no longer exist.
+- [x] **Evaluate and remove legacy bootstrap scripts**: `scripts/rn-init.sh`, `scripts/setup-appeus.sh` (confirm no remaining references in docs/agent-rules/reference/scripts).
+- [x] **Deprecate `scripts/regenerate.sh`**: ensure any useful guidance it prints is represented in `agent-rules/` and `reference/`.
+- [x] **Deprecate `scripts/generate-next.sh`**: remove doc reliance; agents should select the next slice using stories/spec priority and staleness output (not a script selector).
+- [x] **Delete deprecated scripts before release**: remove `scripts/generate-next.sh` and `scripts/regenerate.sh` once docs/agent-rules/reference no longer rely on them.
+- [x] **Verify `scripts/update-dep-hashes.sh` behavior**:
+  - [x] Does running it after regenerating one slice update only that slice (`--route`) vs all routes (`--all`)?
+  - [x] Make sure that absence of any switches does not imply --all.
+  - [x] Confirm it does not accidentally “freshen” unrelated stale slices.
+- [x] **Handle placeholder/malformed meta registry** (`design/generated/<target>/meta/outputs.json`):
+  - [x] If `outputs.json` is missing, scripts create an empty registry file (`{"outputs":[]}`) for the active target.
+  - [x] If `outputs.json` is template-like (empty), scripts seed it from the screens index (non-destructively).
+  - [x] If a route/output is missing from the registry but is being updated, tooling adds a minimal entry (non-destructively).
+  - [x] Decision: scripts do **not** auto-trim registry entries for outputs that no longer exist (manual cleanup only).
 - [ ] **Discovery handoff + target phase awareness**
   - [ ] Ensure `agent-rules/bootstrap.md` guides the agent to complete `design/specs/project.md` and add the first app target via `scripts/add-app.sh`.
   - [ ] Verify `scripts/add-app.sh` seeds a per-target checklist file (e.g. `STATUS.md`) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
@@ -97,7 +99,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `scripts/publish-scenarios.sh`
 - [ ] Review `scripts/lib/project-root.sh`
 - [ ] Review deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh`
-- [ ] Review legacy scripts: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
+- [x] Legacy scripts removed: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
 
 #### agent-rules/
 
@@ -252,8 +254,8 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 ## Cleanup (When Stable)
 
-- [ ] Delete `scripts/rn-init.sh` — Obsolete, replaced by `frameworks/react-native.sh`
-- [ ] Delete `scripts/setup-appeus.sh` — Obsolete, replaced by `init-project.sh` + `add-app.sh`
+- [x] Delete `scripts/rn-init.sh` — Obsolete, replaced by `frameworks/react-native.sh`
+- [x] Delete `scripts/setup-appeus.sh` — Obsolete, replaced by `init-project.sh` + `add-app.sh`
 
 ## Backlog / Future Enhancements
 
