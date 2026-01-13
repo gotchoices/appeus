@@ -67,8 +67,8 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
   - [x] Ensure `agent-rules/bootstrap.md` guides the agent to complete `design/specs/project.md` and add the first app target via `scripts/add-app.sh`.
   - [x] Verify `scripts/add-app.sh` seeds a per-target checklist file (`design/specs/<target>/STATUS.md`) and that the corresponding template exists and matches the authoritative phases in `docs/DESIGN.md`.
   - [x] Ensure `agent-rules/project.md` tells the agent to determine the active target and consult the target checklist before generating the next slice.
-- [ ] **Migrate domain contract templates to v2.1 layout**: move `templates/specs/{schema,api}` into `templates/specs/domain/` (preserve existing template content under the new layout).
-- [ ] **Update scripts to use `templates/specs/domain/`**: update scripts that seed/copy domain-contract templates to use the new paths (and fix any remaining path assumptions).
+- [x] **Remove schema/api domain templates (v2.1)**: eliminate non-universal “schema/api” templates under `templates/specs/` to avoid template noise; domain specs are authored as needed per `user-guides/domain.md`.
+- [x] **Update scripts accordingly**: ensure scripts do not seed schema/api templates; domain is created as an empty folder with README symlink to `user-guides/domain.md`.
 
 ### v2.1: runtime asset compliance review (pause after each file for approval)
 
@@ -79,7 +79,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 #### templates/
 
 - [ ] Review `templates/specs/project.md`
-- [ ] Review domain contract templates under `templates/specs/domain/` (after migration)
+- [x] (No domain templates by default in v2.1; verify domain guidance lives in `user-guides/domain.md`)
 - [ ] Review `templates/specs/screens/index.md` and `templates/specs/screens/screen-spec-template.md`
 - [ ] Review `templates/specs/components/index.md` and `templates/specs/components/component-spec-template.md`
 - [ ] Review `templates/specs/navigation.md`
@@ -98,7 +98,8 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `scripts/preview-scenarios.sh`
 - [ ] Review `scripts/publish-scenarios.sh`
 - [ ] Review `scripts/lib/project-root.sh`
-- [ ] Review deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh`
+- [x] Remove deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh` (deleted in v2.1)
+- [ ] Remove all runtime-asset references to deleted scripts (`reference/`, `agent-rules/`, docs)
 - [x] Legacy scripts removed: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
 
 #### agent-rules/
@@ -113,6 +114,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `agent-rules/scenarios.md`
 - [ ] Review `agent-rules/src.md`
 - [ ] Review `agent-rules/api.md` + `agent-rules/schema.md` (decide whether these should become a single `domain.md` in v2.1)
+- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `agent-rules/`
 
 #### reference/
 
@@ -120,6 +122,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `reference/scaffold.md`
 - [ ] Review `reference/generation.md`
 - [ ] Review `reference/codegen.md`
+- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
 - [ ] Review `reference/spec-schema.md`
 - [ ] Review `reference/mocking.md` + `reference/mock-variants.md`
 - [ ] Review `reference/scenarios.md`
@@ -176,11 +179,10 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] `reference/frameworks/react-native.md` — RN structure, navigation, patterns
 - [x] `reference/frameworks/sveltekit.md` — SvelteKit routes, load functions, patterns
 
-## v2 Templates Complete
+## v2 Templates Complete (historical; schema/api templates removed in v2.1)
 
 - [x] `templates/specs/project.md` — Decision document template
-- [x] `templates/specs/schema/index.md` — Schema index template
-- [x] `templates/specs/schema/entity-template.md` — Entity template
+- [x] `templates/specs/schema/*` — (v2.0) Schema templates (removed in v2.1)
 - [x] `templates/specs/screens/index.md` — Updated
 - [x] `templates/specs/global/toolchain.md` — Generic
 

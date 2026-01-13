@@ -130,7 +130,6 @@ AGENTS.md files are symlinks that point to appeus agent-rules. They belong in an
 | `design/AGENTS.md` | `agent-rules/design-root.md` | Design surface overview |
 | `design/stories/AGENTS.md` | `agent-rules/stories.md` | Story authoring |
 | `design/specs/AGENTS.md` | `agent-rules/specs.md` | Spec authoring |
-| `design/specs/api/AGENTS.md` | `agent-rules/api.md` | API specs |
 | `design/generated/AGENTS.md` | `agent-rules/consolidations.md` | Consolidation rules |
 | `design/generated/scenarios/AGENTS.md` | `agent-rules/scenarios.md` | Scenario generation |
 | `apps/<name>/AGENTS.md` | `agent-rules/<framework>-src.md` | Framework-specific source rules |
@@ -158,21 +157,19 @@ When `add-app.sh` is run on a single-app project, it automatically reorganizes:
 | `design/specs/navigation.md` | `design/specs/<existing>/navigation.md` |
 | `design/generated/screens/` | `design/generated/<existing>/screens/` |
 
-Schema and API specs remain at the top level (shared).
+Domain contract specs remain at the top level (shared, as needed).
 
 ## Shared vs Per-Target Specs
 
 | Location | Scope | Examples |
 |----------|-------|----------|
 | `design/specs/project.md` | Project-wide | Toolchain, platforms, data strategy |
-| `design/specs/schema/` | Shared | Data entities (even for local-only apps) |
-| `design/specs/api/` | Shared | Backend API endpoints (if applicable) |
+| `design/specs/domain/` | Shared (as needed) | Data model, operations, rules, interfaces |
 | `design/specs/*.md` (top level) | Shared | Cross-app workflows, shared patterns |
 | `design/specs/<target>/` | Per-target | Screens, components, navigation, target-specific global |
 
 **Note:** Not all projects use a client/server model. For local-first apps without a backend API:
-- `schema/` still holds the data model (local storage entities)
-- `api/` may be empty or unused
+- `domain/` can hold the data model (local storage entities) and other shared rules
 - Put cross-cutting specs (shared workflows, components) directly in `design/specs/`
 
 ## Notes

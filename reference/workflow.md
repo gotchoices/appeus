@@ -51,8 +51,8 @@ Stories define user-facing requirements:
 ### Phase 5: Schema Derivation
 
 For multi-target projects, agent reads ALL stories to derive a shared data model:
-- Creates `design/specs/schema/` with entity definitions
-- Ensures schema supports all target experiences
+- Creates/updates shared **domain contract** under `design/specs/domain/` (as needed)
+- Ensures domain contract supports all target experiences
 
 ### Phase 6: Specs and Consolidations
 
@@ -88,8 +88,7 @@ Vertical slicing — generate one screen/page at a time:
 
 Human-triggered only. Use:
 - `appeus/scripts/check-stale.sh` — Per-screen staleness summary
-- `appeus/scripts/generate-next.sh` — Pick next stale screen
-- `appeus/scripts/regenerate.sh --screen <Route>` — Target specific screen
+- Then select the next slice deliberately (priority + staleness), generate/update consolidation(s), generate code, and update metadata.
 
 ## Multi-Target Workflow
 

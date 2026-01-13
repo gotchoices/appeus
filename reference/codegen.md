@@ -11,8 +11,7 @@ Detailed reference for generating app code from specs and consolidations.
 | Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
 | Component specs | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
 | Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
-| API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
+| Domain contract | `design/specs/domain/*.md` (as needed) | `design/specs/domain/*.md` (shared, as needed) |
 | Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
 
 ### AI Consolidations (Regenerable)
@@ -36,8 +35,8 @@ Detailed reference for generating app code from specs and consolidations.
 1. **Human specs override consolidations** — Always check for a spec before using consolidation
 2. **Idempotent writes** — Only change files when inputs have changed
 3. **Human-triggered only** — Don't write unless user requests regeneration
-4. **Embed metadata** — Include AppeusMeta header with dependsOn/depHashes
-5. **Vertical slicing** — Generate one screen at a time (see `generate-next.sh`)
+4. **Track metadata** — Keep dependency metadata in consolidation frontmatter and `design/generated/<target>/meta/outputs.json` (not in source headers)
+5. **Vertical slicing** — Generate one screen at a time (selected deliberately via priorities + `check-stale.sh`)
 
 ## Naming Conventions
 

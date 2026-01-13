@@ -47,7 +47,7 @@ appeus/
 ├── templates/               # Starter files copied into projects
 │   ├── specs/
 │   │   ├── project.md       # Decision document template
-│   │   ├── domain/          # Shared domain contract templates (schema/ops/rules/interfaces)
+│   │   ├── (no domain templates by default)  # Domain contract files are created as-needed; see user-guides/domain.md
 │   │   ├── components/      # Component spec templates
 │   │   ├── screens/         # Screen spec templates
 │   │   ├── global/          # Global specs (toolchain, ui, deps)
@@ -209,13 +209,7 @@ This section documents **what exists under `scripts/` today**, what each script 
   - **How it decides dependencies**: prefers the per-target dependency registry in `design/generated/<target>/meta/outputs.json` when present; falls back to a heuristic input set when missing.
   - **What it writes**: a per-target JSON staleness report under `design/generated/<target>/` (scripts should treat malformed/missing reports as regenerable and rebuild them).
 
-- **`generate-next.sh` — DEPRECATED**
-  - **Why deprecate**: it selects the “next” slice mechanically; agents should choose slices deliberately based on target priorities and the staleness report.
-  - **Replacement**: run `check-stale.sh`, then select the next slice based on user intent/priority and proceed via the reference workflow.
-
-- **`regenerate.sh` — DEPRECATED (plan-only)**
-  - **Why deprecate**: it does not perform regeneration; it prints plan text that is better expressed in `agent-rules/` + `reference/` (and it has caused confusion).
-  - **Replacement**: follow the relevant reference workflow directly (starting from `check-stale.sh` and the chosen slice).
+Note: Appeus v2.1 intentionally does **not** ship “pick next slice” / “regeneration plan” scripts. Agents should use `check-stale.sh` to identify stale slices, then choose deliberately based on user intent and priorities.
 
 #### Dependency metadata
 

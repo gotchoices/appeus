@@ -49,5 +49,5 @@ So that <benefit>
 
 For projects with multiple targets:
 - Write separate stories per target
-- Agent reads ALL stories when deriving shared schema
-- Shared data model goes in `design/specs/schema/`
+- Agent reads ALL stories when deriving the shared domain contract (as needed)
+- Shared domain contract goes in `design/specs/domain/`

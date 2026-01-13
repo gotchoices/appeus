@@ -23,7 +23,7 @@ Project config: `design/specs/project.md`
 
 | User Says | Action |
 |-----------|--------|
-| "generate" / "next slice" | `generate-next.sh`, then generate code |
+| "generate" / "next slice" | `check-stale.sh`, then select a slice deliberately and generate code |
 | "what's next" | `check-stale.sh`, summarize, suggest |
 | "add an app" | `add-app.sh --name <name> --framework <framework>` |
 

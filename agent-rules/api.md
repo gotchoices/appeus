@@ -1,11 +1,10 @@
-# Agent Rules: API
+# Agent Rules: Domain — API Topic
 
-You are in `design/specs/api/`. API specs define data endpoints.
+You are in `design/specs/domain/`. This area holds the **shared domain contract** (as needed).
 
 ## Paths
 
-- Specs: `specs/api/*.md` (shared)
-- Consolidations: `generated/api/*.md`
+- Specs: `specs/domain/*.md` (shared)
 - Mock data: `mock/data/*`
 
 ## Workflow

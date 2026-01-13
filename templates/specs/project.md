@@ -71,8 +71,7 @@ List the apps to be built:
 
 **What will be shared across targets?**
 
-- [ ] Schema (data model) — `design/specs/schema/`
-- [ ] API specs — `design/specs/api/`
+- [ ] Domain contract (schema/api/rules/interfaces as needed) — `design/specs/domain/`
 - [ ] TypeScript types — `packages/shared/`
 - [ ] Mock data — `mock/data/`
 

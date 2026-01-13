@@ -8,8 +8,7 @@ How to process human-authored specs and keep consolidations synchronized.
 |------|------------|-----------|
 | Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
 | Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
-| API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
+| Domain contract (as needed) | `design/specs/domain/*.md` | `design/specs/domain/*.md` (shared) |
 | Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
 
 ## Principles

@@ -135,7 +135,6 @@ copy_if_missing "${APPEUS_DIR}/templates/specs/project.md" "${PROJECT_DIR}/desig
 
 # 6. (v2.1) Domain contract lives under design/specs/domain/
 # Keep this folder empty by default; projects vary widely in whether they need schema/api/rules/interfaces.
-# (Templates will be migrated to templates/specs/domain/ as part of the v2.1 runtime asset work.)
 ensure_symlink "../../../appeus/user-guides/domain.md" "${PROJECT_DIR}/design/specs/domain/README.md"
 
 # 9. Human-facing README symlinks

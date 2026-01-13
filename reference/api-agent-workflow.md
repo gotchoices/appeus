@@ -10,12 +10,10 @@ Define engine-facing procedures and data shapes needed by screens and stories.
 
 | Content | Path | Shared? |
 |---------|------|---------|
-| API specs (human) | `design/specs/api/*.md` | Yes |
-| API consolidations | `design/generated/api/*.md` | Yes |
-| Schema specs | `design/specs/schema/*.md` | Yes |
+| Domain contract (human) | `design/specs/domain/*.md` | Yes |
 | Mock data | `mock/data/*` | Yes |
 
-API and schema are always shared across targets in multi-app projects.
+Domain contract files are shared across targets in multi-app projects (create only what you need).
 
 ## Sources
 
@@ -27,8 +25,7 @@ Derive API requirements from:
 
 ## Outputs
 
-- Human API specs in `design/specs/api/*.md`
-- AI consolidations in `design/generated/api/*.md`
+- Human domain contract docs in `design/specs/domain/*.md` (e.g. `api.md`, `schema.md`)
 - Mock data files in `mock/data/`
 - Client adapters in `apps/<name>/src/data/`
 
@@ -43,7 +40,7 @@ Read stories and screen specs to identify:
 
 ### 2. Check Schema
 
-Refer to `design/specs/schema/` for entity definitions:
+Refer to `design/specs/domain/` for entity definitions:
 - Field names and types
 - Relationships
 - Validation rules
@@ -58,7 +55,7 @@ namespace: Items
 provides: ["api:Items"]
 usedBy: ["screen:ItemList", "screen:ItemDetail"]
 dependsOn:
-  - design/specs/schema/item.md
+  - design/specs/domain/schema.md
   - design/stories/01-browsing.md
 ---
 
@@ -90,7 +87,7 @@ Meta file tracks dependencies:
 ```json
 {
   "namespace": "Items",
-  "dependsOn": ["design/specs/api/items.md"],
+  "dependsOn": ["design/specs/domain/api.md"],
   "depHashes": { ... },
   "variants": ["happy", "empty", "error"]
 }

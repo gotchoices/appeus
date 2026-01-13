@@ -30,7 +30,7 @@ Before committing to “quick and simple” vs “scalable and robust” impleme
 
 **Inputs:**
 - Stories: `design/stories/` or `design/stories/<target>/`
-- Specs: `design/specs/` with screens, navigation, schema, api, global
+- Specs: `design/specs/` (screens, navigation, global, target specs, and shared `domain/` when needed)
 
 **Outputs:**
 - Consolidations: `design/generated/screens/` or `design/generated/<target>/screens/`
@@ -46,8 +46,7 @@ Before committing to “quick and simple” vs “scalable and robust” impleme
 
 **Scripts:**
 - `check-stale.sh` — Per-screen staleness summary
-- `generate-next.sh` — Pick next stale screen
-- `regenerate.sh --screen <Route>` — Target specific screen
+  - Then the agent/user selects the slice deliberately (priority + staleness), generates consolidation(s), generates code, and updates metadata.
 
 **Trigger phrases:**
 - "generate code"
@@ -96,10 +95,10 @@ dependsOn:
   - design/stories/01-browsing.md
   - design/specs/screens/item-list.md
   - design/specs/navigation.md
-  - design/specs/schema/item.md
+  - design/specs/domain/schema.md
 depHashes:
   design/specs/screens/item-list.md: "sha256:abc123..."
-  design/specs/schema/item.md: "sha256:def456..."
+  design/specs/domain/schema.md: "sha256:def456..."
 ---
 ```
 

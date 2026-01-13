@@ -26,8 +26,7 @@ Also keep the project’s **delivery posture** in mind (from `design/specs/proje
 | Type | Single-App Path | Multi-App Path |
 |------|-----------------|----------------|
 | Project | `design/specs/project.md` | `design/specs/project.md` |
-| Schema | `design/specs/schema/*.md` | `design/specs/schema/*.md` (shared) |
-| API | `design/specs/api/*.md` | `design/specs/api/*.md` (shared) |
+| Domain contract | `design/specs/domain/*.md` (as needed) | `design/specs/domain/*.md` (shared, as needed) |
 | Screen | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
 | Component | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
 | Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |

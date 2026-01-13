@@ -14,14 +14,14 @@ You are in the design surface (`design/`).
 
 - **Single-app:** `stories/*.md`, `specs/screens/*.md`
 - **Multi-app:** `stories/<target>/*.md`, `specs/<target>/screens/*.md`
-- **Shared:** `specs/schema/*.md`, `specs/api/*.md`
+- **Shared (when needed):** `specs/domain/*.md`
 
 ## User Commands
 
 | User Says | Action |
 |-----------|--------|
-| "generate" / "next slice" | `generate-next.sh`, then generate code |
-| "generate [Screen]" | `regenerate.sh --screen <Route>`, generate |
+| "generate" / "next slice" | `check-stale.sh`, then select a slice deliberately and generate |
+| "generate [Screen]" | Treat `[Screen]` as the chosen slice; generate consolidation(s), generate code, update metadata |
 | "generate scenarios" | Write docs in `generated/scenarios/`, run `build-images.sh` |
 | "generate images" | Configure `images/index.md`, run `build-images.sh` |
 | "what's next" | `check-stale.sh`, summarize |

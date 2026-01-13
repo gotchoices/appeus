@@ -1,10 +1,10 @@
-# Agent Rules: Schema
+# Agent Rules: Domain — Schema Topic
 
-You are in `design/specs/schema/`. Shared data model.
+You are in `design/specs/domain/`. This area holds the **shared domain contract** (as needed).
 
 ## Path
 
-`specs/schema/*.md` — always shared across targets.
+`specs/domain/*.md` — always shared across targets (create only what you need).
 
 ## Purpose
 
@@ -19,7 +19,7 @@ For multi-app projects: read ALL target stories, identify entities, propose sche
 1. Analyze all stories for data requirements
 2. Identify entities and relationships
 3. Create schema specs
-4. Reference from screen specs (`needs: ["schema:Item"]`)
+4. Reference from screen specs (`needs: ["schema:Item"]`) as a conceptual tag; the human docs live under `specs/domain/`
 
 ## Reference
 

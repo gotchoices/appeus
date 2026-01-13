@@ -85,9 +85,9 @@ Each namespace has a `.meta.json` tracking dependencies:
 ```json
 {
   "namespace": "items",
-  "dependsOn": ["design/specs/api/items.md"],
+  "dependsOn": ["design/specs/domain/api.md"],
   "depHashes": {
-    "design/specs/api/items.md": "sha256:..."
+    "design/specs/domain/api.md": "sha256:..."
   },
   "variants": ["happy", "empty", "error"]
 }
@@ -103,7 +103,7 @@ Each namespace has a `.meta.json` tracking dependencies:
 
 ## Data Shape Alignment
 
-Mock data must match API specs in `design/specs/api/`:
+Mock data must match the API portion of the domain contract in `design/specs/domain/`:
 
 1. Agent reads API spec for endpoint shape
 2. Generates mock data matching that shape

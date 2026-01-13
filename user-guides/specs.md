@@ -8,8 +8,7 @@ Specs are human-authored documents that take precedence over AI consolidations.
 |------|------------|-----------|
 | Screens | `specs/screens/*.md` | `specs/<target>/screens/*.md` |
 | Navigation | `specs/navigation.md` | `specs/<target>/navigation.md` |
-| Schema | `specs/schema/*.md` | `specs/schema/*.md` (shared) |
-| API | `specs/api/*.md` | `specs/api/*.md` (shared) |
+| Domain contract (as needed) | `specs/domain/*.md` | `specs/domain/*.md` (shared) |
 | Global | `specs/global/*` | `specs/<target>/global/*` |
 
 ## Screen Specs
