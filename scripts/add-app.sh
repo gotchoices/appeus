@@ -158,6 +158,9 @@ if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/STATUS.md" ]; then
 fi
 
 # Create AGENTS.md symlinks for the new target
+ln -snf "../../../appeus/agent-rules/stories.md" "${PROJECT_DIR}/design/stories/${APP_NAME}/AGENTS.md"
+ln -snf "../../../appeus/agent-rules/specs.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/AGENTS.md"
+ln -snf "../../../appeus/agent-rules/consolidations.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/AGENTS.md"
 ln -snf "../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios/AGENTS.md"
 
 # Copy templates

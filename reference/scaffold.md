@@ -89,3 +89,4 @@ AGENTS.md files are symlinks that point to appeus agent-rules. They belong in fo
 - `design/generated/*` is fully regenerable — do not hand-edit.
 - App code lives in `apps/<target>/…` — framework-specific layout under that folder.
 - `design/specs/domain/` is optional and should remain minimal; it exists to hold shared “domain contract” docs when needed.
+- If a project’s filesystem looks confusing (mixed layouts, missing folders, legacy paths), see `appeus/CHANGELOG.md` → **“Migration to v2.1”** for a practical reorganization checklist.

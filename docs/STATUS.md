@@ -74,7 +74,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 #### Project scaffold + AGENTS.md placement
 
-- [ ] Verify canonical `AGENTS.md` placement and non-redundancy across: project root, `design/`, `design/specs/`, `design/stories/`, `design/generated/`, and `apps/<target>/` (and confirm symlink targets are correct).
+- [x] Verify canonical `AGENTS.md` placement and non-redundancy across: project root, `design/`, `design/specs/`, `design/stories/`, `design/generated/`, and `apps/<target>/` (and confirm symlink targets are correct).
 
 #### templates/
 
