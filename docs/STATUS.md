@@ -109,7 +109,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Ensure each reference doc covers a **single topic**; split or trim where one file mixes multiple topics (notably generation vs scenarios vs staleness).
 - [x] De-duplicate repeated guidance across reference docs (keep global rules in `reference/phases.md` + `reference/precedence.md` + `reference/workflow.md`).
 - [x] Normalize to v2.1 canonical paths and terms everywhere (`<target>`, `design/*/<target>/`, `design/specs/domain/`, no progressive structure).
-- [ ] Remove legacy/contradictory guidance (e.g., “generated code headers”, deleted scripts, `apps/<name>` placeholders).
+- [x] Remove legacy/contradictory guidance (e.g., “generated code headers”, deleted scripts, `apps/<name>` placeholders).
 - [x] Decide what to do with `reference/*-agent-workflow.md` docs: keep only those with unique lane-specific detail; merge or slim the rest.
 
 **Standards to apply during per-file review**

@@ -17,7 +17,7 @@ This doc is intentionally focused on spec handling only. For the overall per-sli
 
 - Specs are human-authored Markdown
 - Specs override consolidations and defaults
-- Code slots in specs override generator output
+- Specs should remain human-readable; keep programmer mapping in consolidations
 
 ## Workflow
 
@@ -26,7 +26,6 @@ This doc is intentionally focused on spec handling only. For the overall per-sli
 Parse the spec for:
 - Frontmatter (id, route, variants, etc.)
 - Layout and behavior descriptions
-- Code slots (imports, component, styles)
 - Dependencies (needs, provides)
 
 ### 2. Update Consolidations
@@ -40,7 +39,7 @@ Refresh the corresponding consolidation to reflect spec constraints:
 
 When user requests regeneration:
 - Read spec and consolidation
-- Apply spec slots to generated code
+- Treat specs as human-readable constraints; put programmer mapping into consolidations
 - Write to `apps/<target>/src/` (framework-specific)
 - Update navigation
 
@@ -51,26 +50,9 @@ After any spec change:
 - Regenerate consolidation before codegen
 - Run `check-stale.sh --target <target>` to verify
 
-## Code Slots
+## No Code in Specs (v2.1)
 
-Specs can include code blocks that override generator defaults:
-
-```markdown
-```ts slot=imports
-import { CustomHook } from '../hooks/useCustom';
-```
-
-```tsx slot=component
-export function MyScreen() {
-  // Custom implementation
-}
-```
-```
-
-Available slots:
-- `imports` — Additional import statements
-- `component` — Full component body
-- `styles` — StyleSheet definitions
+Don’t embed code in specs. If the user needs a “how we’ll implement this” note, put it in the consolidation under `design/generated/<target>/`.
 
 ## See Also
 

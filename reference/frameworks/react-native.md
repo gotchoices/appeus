@@ -31,12 +31,9 @@ apps/<target>/
 ```typescript
 // apps/mobile/src/screens/ItemList.tsx
 
-/* AppeusMeta: { ... } */
-
 import React from 'react';
 import { View, FlatList, StyleSheet, Text } from 'react-native';
 
-// Spec slot: imports
 import { useItems } from '../data/items';
 import { ItemCard } from '../components/ItemCard';
 

@@ -34,8 +34,6 @@ apps/<target>/
 ```svelte
 <!-- apps/web/src/routes/items/+page.svelte -->
 
-<!-- AppeusMeta: { ... } -->
-
 <script lang="ts">
   import type { PageData } from './$types';
   import ItemCard from '$lib/components/ItemCard.svelte';

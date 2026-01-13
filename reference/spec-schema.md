@@ -102,32 +102,9 @@ name: AccountAutocomplete         # stable component name
 
 Implementation mapping (props/events/types, file paths) belongs in consolidations.
 
-### Code Slots
+### No Code in Specs (v2.1)
 
-Override generator defaults with code blocks:
-
-```markdown
-## Implementation Notes
-
-```ts slot=imports
-import { VirtualizedList } from 'react-native';
-import { ItemCard } from '../components/ItemCard';
-```
-
-```tsx slot=component
-// Custom component implementation
-export function ItemList() {
-  // ...
-}
-```
-
-```ts slot=styles
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  // ...
-});
-```
-```
+Don’t embed source code in specs. If you need to record implementation mapping (types, module boundaries, adapter strategy), put it in the consolidation under `design/generated/<target>/`.
 
 ## Schema Spec Format
 

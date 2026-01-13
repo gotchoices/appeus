@@ -52,28 +52,11 @@ spec: item-list.md → route: ItemList → file: ItemList.tsx
 spec: user-profile.md → route: UserProfile → file: UserProfile.tsx
 ```
 
-## Spec Slots
+## Avoid “Spec Creep”
 
-Screen specs can include code slots that override generator defaults:
+Specs are for humans and should stay **user-observable**. Don’t embed source-code overrides in specs.
 
-```markdown
-```ts slot=imports
-import { CustomComponent } from '../components/CustomComponent';
-```
-
-```tsx slot=component
-// Custom component body
-```
-
-```ts slot=styles
-// Custom styles
-```
-```
-
-Available slots:
-- `imports` — Additional import statements
-- `component` — Component body override
-- `styles` — StyleSheet definitions
+If you need programmer-facing structure (types, modules, adapters, event wiring), put it in the consolidation under `design/generated/<target>/`.
 
 ## Deep Links
 
@@ -133,7 +116,7 @@ apps/<target>/src/
 ## Agent Guidance
 
 1. Check for human spec before reading consolidation
-2. Merge spec slots with generated code
+2. Treat specs as human-readable constraints; put programmer mapping into consolidations
 3. Maintain navigation consistency
 4. Update dependency tracking after generation
 5. Run `check-stale.sh` to verify freshness
