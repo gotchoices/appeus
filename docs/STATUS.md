@@ -78,7 +78,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 #### templates/
 
-- [ ] Review `templates/specs/project.md`
+- [x] Review `templates/specs/project.md`
 - [x] (No domain templates by default in v2.1; verify domain guidance lives in `user-guides/domain.md`)
 - [ ] Review `templates/specs/screens/index.md` and `templates/specs/screens/screen-spec-template.md`
 - [ ] Review `templates/specs/components/index.md` and `templates/specs/components/component-spec-template.md`

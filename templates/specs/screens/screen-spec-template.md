@@ -1,36 +1,24 @@
 # Screen Spec: <screen-id>
 
 ---
-id: <screen-id>
-route: <RouteName>
-title: <Title>
+id: <screen-id>         # kebab-case, matches filename
+route: <RouteName>      # PascalCase route name
 variants: [happy, empty, error]
-dataRequirements:
-  - <key>: <type>
-actions:
-  - <actionName>(<params>)
-layoutHints:
-  - header:large
-acceptance:
-  - "User can <do X> and see <Y>"
-overrides:
-  slots: []  # e.g., [imports, component, styles]
 ---
 
-## Notes
-- Add clarifications, wire references, and behaviors here.
-- Keep the project’s delivery posture in mind (see `design/specs/project.md`): if this screen can grow large or must stay fast, call that out as user-observable expectations.
+## Description
 
-```ts slot=imports
-// Optional: custom imports
-```
+<What is this screen for?>
 
-```tsx slot=component
-// Optional: custom component body
-```
+## Behavior (user-observable)
 
-```ts slot=styles
-// Optional: styles
-```
+- <State / rule / constraint>
+- <Empty/error expectations>
 
+## Acceptance
 
+- "<User can ...>"
+
+## Notes (optional)
+
+- If you need code-oriented overrides/slots, keep them minimal and prefer putting programmer mapping in consolidations under `design/generated/<target>/`.
