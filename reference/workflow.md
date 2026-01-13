@@ -8,95 +8,33 @@ Appeus v2 follows a design-first workflow:
 Init Project → Discovery → Add Apps → Stories → Schema → Specs → Codegen → Run → Iterate
 ```
 
-## Phases
+## Phase Model
 
-### Phase 1: Project Initialization
-
-Run `init-project.sh` to create the project structure:
-- `AGENTS.md` — Bootstrap agent rules
-- `design/specs/project.md` — Decision document template
-- `appeus` symlink — Points to appeus installation
-
-### Phase 2: Discovery
-
-Agent guides user through `project.md`:
-- Purpose and goals
-- Target platforms (mobile, web, desktop)
-- Toolchain choices per target
-- Data strategy (local-first, cloud sync, etc.)
-- Delivery posture (prototype/MVP/production) and quality/performance expectations
-
-Do not proceed until decisions are documented.
-
-### Phase 3: Add Apps
-
-Run `add-app.sh` for each target:
-```bash
-./appeus/scripts/add-app.sh --name mobile --framework react-native
-./appeus/scripts/add-app.sh --name web --framework sveltekit
-```
-
-Creates app scaffolds in `apps/<name>/` and design folders.
-
-### Phase 4: Story Authoring
-
-Write stories per target in `design/stories/<target>/`.
-
-Stories define user-facing requirements:
-- Goal (As a user, I want...)
-- Sequence (numbered steps)
-- Acceptance criteria
-- Variants (happy, empty, error)
-
-### Phase 5: Schema Derivation
-
-For multi-target projects, agent reads ALL stories to derive a shared data model:
-- Creates/updates shared **domain contract** under `design/specs/domain/` (as needed)
-- Ensures domain contract supports all target experiences
-
-### Phase 6: Specs and Consolidations
-
-- **Stories** stay user-narrative (“what happens”).
-- **Specs** stay a human-readable UX contract (user-observable behavior: states, rules, acceptance).
-- **Consolidations** are the translator layer: programmer-facing digest (implementation mapping, edge-case completeness, dependency metadata) and are regenerable.
-- Precedence: Specs > Consolidations > Defaults
-
-### Phase 7: Code Generation
-
-Vertical slicing — generate one screen/page at a time:
-1. Refresh consolidations if stale
-2. Generate API consolidations
-3. Create mock data
-4. Generate app code
-5. Update navigation
-6. Update staleness tracking
-
-### Phase 8: Validation
-
-- Run the app with mock data
-- Generate scenarios (mobile): screenshots with deep links
-- Review with stakeholders
-- Iterate as needed
+For named development phases (and how to detect/progress them), see [Phases](phases.md)
 
 ## Precedence Rules
 
-1. **Human specs** — Always authoritative
-2. **AI consolidations** — Facts gathered from stories; regenerable
-3. **Defaults** — Framework conventions; fill gaps
+See: [Precedence](precedence.md)
 
 ## Regeneration
 
-Human-triggered only. Use:
-- `appeus/scripts/check-stale.sh` — Per-screen staleness summary
-- Then select the next slice deliberately (priority + staleness), generate/update consolidation(s), generate code, and update metadata.
+Human-triggered. Per target, the loop is:
 
-## Multi-Target Workflow
+1. **Pick target** (`--target`) and confirm phase checklist: `design/specs/<target>/STATUS.md`
+2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (prefer stale via `appeus/scripts/check-stale.sh`)
+3. **Read inputs**: target stories/specs + shared domain contract + `design/specs/project.md`
+4. **Refresh consolidation**: write/update `design/generated/<target>/screens/<Route>.md`
+5. **Generate code** under `apps/<target>/src/` (screen + navigation wiring as needed)
+6. **Update dependency registry**: ensure `design/generated/<target>/meta/outputs.json` has an entry for the route and that its `dependsOn` list is accurate enough for deterministic staleness
+   - Scripts can seed missing entries conservatively, but the agent must refine `dependsOn` to match what was actually used
+7. **Hash the declared dependencies**:
+   - `appeus/scripts/update-dep-hashes.sh --target <target> --route <Route>`
+8. **Confirm freshness** (optional): rerun `appeus/scripts/check-stale.sh --target <target>`
+9. **Run/validate** the target app (human); iterate by updating stories/specs (human lane) and regenerating
 
-When project has multiple apps:
-- Schema derivation reads from ALL target stories
-- Each target generates independently
-- Shared specs (schema, API) are respected by all targets
-- Scripts accept `--target <name>` to scope operations
+## Multiple Targets
+
+When multiple app targets exist, scripts accept `--target <name>` to scope operations.
 
 ## See Also
 

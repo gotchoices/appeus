@@ -104,7 +104,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 #### agent-rules/
 
-- [ ] Review `agent-rules/project.md`
+- [x] Review `agent-rules/project.md`
 - [ ] Review `agent-rules/bootstrap.md`
 - [ ] Review `agent-rules/design-root.md`
 - [ ] Review `agent-rules/stories.md`

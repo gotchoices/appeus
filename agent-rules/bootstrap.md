@@ -1,9 +1,8 @@
 # Agent Rules: Bootstrap
 
-> This project uses **Appeus**, a design-first workflow for building apps.
-> See `appeus/README.md` for toolkit overview.
+> This project uses [Appeus](appeus/README.md), a design-first workflow for building apps.
 
-This project has not yet completed discovery.
+This project has not yet completed discovery phase. See [phases](appeus/reference/phases.md).
 
 ## Your Task
 
@@ -14,7 +13,7 @@ Guide the user through completing `design/specs/project.md`.
 1. **Purpose** — What problem? Who are users? What’s the **delivery posture** (prototype/MVP/production)?
 2. **Platforms** — Mobile? Web? Both?
 3. **Toolchain** — Which frameworks per target?
-4. **Data Strategy** — Local-first? Cloud API? Offline?
+4. **Data Strategy** — Local-first? Cloud API? Distributed? Offline?
 5. **Quality / performance posture** — Optimize for speed or industrial-strength? Any “must stay fast” interactions?
 
 ## Supported Frameworks
@@ -32,10 +31,11 @@ Guide the user through completing `design/specs/project.md`.
 ./appeus/scripts/add-app.sh --name web --framework sveltekit
 ```
 
-Then proceed to story authoring in `design/stories/`.
+Then proceed to story authoring in `design/stories/<target>/`.
 
 After adding the first app target, phase tracking for that target should use `design/specs/<target>/STATUS.md`.
 
 ## Reference
 
 - [Workflow](appeus/reference/workflow.md)
+- [Phases](appeus/reference/phases.md)

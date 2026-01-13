@@ -135,7 +135,9 @@ If stakeholder review is needed, capture/refresh scenarios and screenshots for t
 After generating a slice, update dependency metadata for the slice and confirm it is no longer stale:
 - Update per-route hashes/registries (e.g., `scripts/update-dep-hashes.sh --route <Route>`).
   - `update-dep-hashes.sh` **requires** either `--route <Route>` or `--all` and will **not** assume `--all` by default.
-  - If the per-target registry is missing, the script will create an empty registry file; if it contains no registered outputs/routes, it will report that nothing is registered and exit (it does not infer routes).
+  - If the per-target registry is missing, the script will create it.
+  - If the registry is empty/template-like, the script may seed minimal entries from the screens index (non-destructively).
+  - If an entry exists but has an incomplete `dependsOn`, the agent should refine it; scripts can only seed a conservative list and cannot infer “true” dependencies automatically.
 - Optionally re-run staleness reporting (e.g., `check-stale.sh`) to confirm the slice is fresh.  This can also occur as the first step of selecting the next slice.
 
 ### Step 8: Commit at stable milestones

@@ -1,37 +1,26 @@
 # Agent Rules: Project Root
 
-> This project uses **Appeus**, a design-first workflow for building apps.
-> Agent rules, references, and scripts are provided by the `appeus/` folder.
-> See `appeus/README.md` for toolkit overview.
+> This project uses [Appeus](appeus/README.md), a design-first workflow for building apps.
+> Agent rules, references, and scripts are provided by links to the `appeus/` folder.
 
 ## Orientation
 
-| Area | AGENTS.md | Purpose |
-|------|-----------|---------|
-| Design surface | `design/AGENTS.md` | Stories, specs, consolidations |
-| App source | `apps/<name>/AGENTS.md` | Generated code |
+Stories, specs, consolidations maintained in [design surface](./design).
+Code generated in [app source](./apps/) (`apps/<target>/`).
+See [project config](./design/specs/project.md).
 
-Project config: `design/specs/project.md`
+## Precedence
 
-## Precedence (Global)
-
-1. **Human specs** — authoritative
-2. **AI consolidations** — regenerable
-3. **Framework defaults** — fill gaps
+See: [Precedence](appeus/reference/precedence.md)
 
 ## User Commands
 
 | User Says | Action |
 |-----------|--------|
-| "generate" / "generate a slice" | Choose target → choose a slice from `design/specs/<target>/screens/index.md` (prefer stale per `check-stale.sh`) → generate/refresh consolidations → generate code |
-| "what's next" | Choose target → consult `design/specs/<target>/STATUS.md` → run `check-stale.sh` → summarize + suggest next smallest step |
-| "generate scenarios/images" | See `design/AGENTS.md` |
+| "generate" / "generate a slice" | See [generation](appeus/reference/generation.md) |
+| "what's next" | Determine phase and/or next slice to work on, see [workflow](appeus/reference/workflow.md) |
+| "generate scenarios/images" | See [scenarios](appeus/reference/scenarios.md) |
 
 Target selection:
-- If exactly **one** app target exists, default to it.
-- If multiple targets exist, ask the user which `--target` to operate on.
-
-## Key References
-
-- [Workflow](appeus/reference/workflow.md)
-- [Generation](appeus/reference/generation.md)
+- If exactly one target exists, default to it.
+- If multiple targets exist, ask which `--target` to operate on.
