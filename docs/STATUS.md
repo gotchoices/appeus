@@ -134,6 +134,9 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Review `reference/testing.md`
 - [x] Review agent workflow refs: `reference/*-agent-workflow.md`
 - [x] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
+- [x] Review `reference/phases.md`
+- [x] Review `reference/precedence.md`
+- [x] Review `reference/staleness.md`
 
 #### agent-rules/
 

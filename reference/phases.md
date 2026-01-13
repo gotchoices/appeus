@@ -21,7 +21,7 @@
   - `design/specs/<target>/navigation.md` exists and matches the screens plan
   - `design/specs/<target>/screens/index.md` is populated enough to pick a slice
 - **Domain Contract** (as needed)
-  - `design/specs/domain/` exists with whatever minimal shared docs are required (e.g. schema/api/rules)
+  - `design/specs/domain/` exists with whatever minimal shared docs are required (e.g. schema,ops,rules,interfaces)
 - **Screen / Component Slicing**
   - The project is iterating screen-by-screen with consolidations under `design/generated/<target>/`
   - Staleness metadata exists under `design/generated/<target>/meta/outputs.json`

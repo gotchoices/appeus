@@ -81,13 +81,6 @@ Build from `design/specs/<target>/navigation.md` plus `design/specs/<target>/scr
 
 ## Scripts
 
-- `check-stale.sh` — Summarize which routes are stale for a target (and why)
-- `update-dep-hashes.sh` — Recompute `depHashes` for a target/route using the declared `dependsOn`
-
-## See Also
-
-- [Workflow](workflow.md)
-- [Generation](generation.md)
-- [Codegen](codegen.md)
+Use `appeus/scripts/check-stale.sh` to summarize which routes are stale for a target (and why), and `appeus/scripts/update-dep-hashes.sh` to recompute `depHashes` for a target/route using the declared `dependsOn`.
 
 
