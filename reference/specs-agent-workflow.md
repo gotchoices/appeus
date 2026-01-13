@@ -6,7 +6,7 @@ This doc is intentionally focused on spec handling only. For the overall per-sli
 
 ## Paths
 
-| Type | Canonical Path (v2.1) |
+| Type | Canonical Path |
 |------|------------------------|
 | Screen specs | `design/specs/<target>/screens/*.md` |
 | Navigation | `design/specs/<target>/navigation.md` |
@@ -50,7 +50,7 @@ After any spec change:
 - Regenerate consolidation before codegen
 - Run `check-stale.sh --target <target>` to verify
 
-## No Code in Specs (v2.1)
+## No Code in Specs
 
 Don’t embed code in specs. If the user needs a “how we’ll implement this” note, put it in the consolidation under `design/generated/<target>/`.
 

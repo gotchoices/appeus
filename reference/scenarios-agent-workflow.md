@@ -10,7 +10,7 @@ How to generate scenario documents with screenshots.
 
 ## Paths
 
-| Content | Canonical Path (v2.1) |
+| Content | Canonical Path |
 |---------|------------------------|
 | Images config | `design/generated/<target>/images/index.md` |
 | Screenshots | `design/generated/<target>/images/*.png` |

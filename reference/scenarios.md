@@ -1,17 +1,12 @@
 # Scenarios and Screenshots
 
-How to create reviewable scenario documents with clickable screenshots.
+Appeus methodology for creating reviewable scenario documents with clickable screenshots.
 
-## Goal
-
-Produce scenario docs that:
-- Show the app flow visually
-- Link screenshots to deep links for live testing
-- Enable stakeholder review without running the app
+Scenarios are a storyboard layer for review and testing: screenshots are embedded in markdown and link to deep links that open the app in a specific UI state (typically via mock variants; see [Mock Variants](mock-variants.md)).
 
 ## Paths
 
-| Content | Canonical Path (v2.1) |
+| Content | Canonical Path |
 |---------|------------------------|
 | Images config | `design/generated/<target>/images/index.md` |
 | Screenshots | `design/generated/<target>/images/*.png` |
@@ -60,12 +55,14 @@ The capture script builds links as:
 
 Example: `myapp://screen/ItemList?variant=happy&category=books`
 
+Variant semantics are described in [Mock Variants](mock-variants.md); deep link structure is described in `reference/codegen.md` under “Deep Links”.
+
 ## Capture Scripts
 
 ### Batch Capture
 
 ```bash
-appeus/scripts/build-images.sh [--reuse] [--window] [--force] [--target <name>]
+appeus/scripts/build-images.sh [--reuse] [--window] [--force] [--target <target>]
 ```
 
 Options:
@@ -189,18 +186,4 @@ Opens scenarios rendered via markserv; images appear inline.
 appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/myapp/scenarios
 ```
 
-Generates static HTML in `design/generated/site/` and syncs to destination.
-
-## Agent Guidance
-
-1. Generate scenarios after screens stabilize
-2. Use consistent variant names across all screenshots
-3. Link each screenshot to its deep link
-4. Update scenario docs when screens change
-5. Re-run `build-images.sh` when code changes
-
-## See Also
-
-- [Mock Variants](mock-variants.md)
-- [Generation Workflow](generation.md)
-- [Deep Links](codegen.md#deep-links)
+Generates static HTML in `design/generated/<target>/site/` and syncs to destination.

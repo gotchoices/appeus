@@ -4,7 +4,7 @@ How Appeus decides what is stale (per target + per route), and how dependency me
 
 This is a tactical reference. For the overall per-slice loop, see [Workflow](workflow.md). For code output details, see [Codegen](codegen.md).
 
-## Canonical Paths (v2.1)
+## Canonical Paths
 
 - Consolidations: `design/generated/<target>/screens/<Route>.md`
 - Dependency registry: `design/generated/<target>/meta/outputs.json`

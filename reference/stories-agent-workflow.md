@@ -6,7 +6,7 @@ This doc is intentionally focused on story processing only. For the overall per-
 
 ## Paths
 
-| Content | Canonical Path (v2.1) |
+| Content | Canonical Path |
 |---------|------------------------|
 | Stories | `design/stories/<target>/*.md` |
 | Screen specs | `design/specs/<target>/screens/*.md` |

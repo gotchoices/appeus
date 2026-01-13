@@ -1,4 +1,4 @@
-# Precedence Rules (v2.1)
+# Precedence Rules
 
 When artifacts disagree, resolve conflicts using this precedence order:
 
