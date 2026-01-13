@@ -166,9 +166,9 @@ Standards for user-guides:
 
 - [x] Review `user-guides/domain.md`
 - [x] Review `user-guides/target-spec.md` (renamed from `user-guides/navigation.md`)
-- [ ] Review `user-guides/scenarios.md`
-- [ ] Review `user-guides/specs.md`
-- [ ] Review `user-guides/stories.md`
+- [x] Review `user-guides/scenarios.md`
+- [x] Review `user-guides/specs.md`
+- [x] Review `user-guides/stories.md`
 
 #### framework adapters and stubs
 

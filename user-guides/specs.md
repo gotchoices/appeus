@@ -1,17 +1,32 @@
-# User Guide: Specs
+# Specs Human User Guide
 
-Specs are human-authored documents that take precedence over AI consolidations.
+Specs are human-authored documents describing the **user-observable UX contract**. Specs take precedence over agent-generated consolidations.
 
 ## Location
 
-| Type | Canonical (v2.1) |
+| Type | Location |
 |------|------------------|
-| Screens | `specs/<target>/screens/*.md` |
-| Navigation | `specs/<target>/navigation.md` |
-| Domain contract (as needed) | `specs/domain/*.md` (shared) |
-| Global | `specs/<target>/global/*` |
+| Project decisions | `design/specs/project.md` |
+| Domain contract (shared, as needed) | `design/specs/domain/*.md` |
+| Target specs root | `design/specs/<target>/` |
+| Screens | `design/specs/<target>/screens/*.md` |
+| Components | `design/specs/<target>/components/*.md` |
+| Navigation | `design/specs/<target>/navigation.md` |
+| Global | `design/specs/<target>/global/*` |
 
-## Screen Specs
+For how the per-target folder is organized, see `appeus/user-guides/target-spec.md`.
+
+## What belongs in specs (what vs how)
+
+Specs should stay **human-readable** and describe outcomes:
+- states (loading/empty/error)
+- constraints and rules the user experiences
+- navigation expectations
+- acceptance criteria
+
+Avoid implementation mapping (types, modules, adapters). That belongs in consolidations under `design/generated/<target>/`.
+
+## Screen spec example
 
 ```yaml
 ---
@@ -29,26 +44,22 @@ Display a list of items with search and filter.
 - Shows item name and price
 - Tap to view details
 - Pull to refresh
-
-```ts slot=imports
-import { VirtualizedList } from 'react-native';
-```
 ```
 
-## Code Slots
-
-Override generated code with slots:
-- `imports` — Additional imports
-- `component` — Component body
-- `styles` — StyleSheet
+If you want to record “how we plan to implement this”, ask the agent to put that mapping into the slice consolidation under `design/generated/<target>/screens/<Route>.md`.
 
 ## Tips
 
 - Keep prose clear and outcome-focused
-- Use frontmatter for structured data
-- Spec overrides consolidation — be authoritative
-- Naming: kebab-case files, PascalCase routes
+- Use frontmatter for stable identifiers (id/route/variants)
+- Keep route names stable (PascalCase)
+- Keep filenames kebab-case
 
 ## After Changes
 
 Changing a spec makes consolidations stale. The agent will refresh them before regenerating code.
+
+## How to use the agent with specs
+
+- If you ask “generate”, the agent should read stories and specs first, refresh the consolidation for the slice, then generate code.
+- If the agent is blocked, it should ask you for missing user-observable details and help you add them to specs.
