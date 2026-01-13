@@ -12,8 +12,7 @@ List reusable UI components for this target.
 
 | Component Name | Spec File | Used By | Status |
 |----------------|----------|---------|--------|
-| AccountAutocomplete | account-autocomplete.md | TransactionEntry | draft |
-| TransactionResultsTable | transaction-results-table.md | TransactionEntry | draft |
+| <ComponentName> | <spec-file>.md | <Screen/Area> | draft |
 
 ## Notes
 
