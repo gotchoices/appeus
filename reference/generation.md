@@ -1,12 +1,8 @@
 # Generation Workflow
 
-Detailed reference for code generation, staleness detection, and dependency tracking.
+Detailed reference for code generation (per target, per slice).
 
-## Two Workflows
-
-### 1. Code Generation
-
-Transform stories and specs into app code.
+For staleness detection and dependency metadata, see [Staleness](staleness.md). For scenarios/screenshots, see [Scenarios](scenarios.md).
 
 ## What Goes Where (Anti-“Spec Creep” Guardrail)
 
@@ -39,121 +35,18 @@ Before committing to “quick and simple” vs “scalable and robust” impleme
 
 **Steps (vertical slice):**
 1. Refresh screen consolidation if dependencies are stale
-2. Refresh API consolidations if needed
+2. Ensure domain contract docs are adequate (as needed)
 3. Generate/update mock data
 4. Generate app code (screen + navigation)
 5. Update staleness tracking
 
 **Scripts:**
-- `check-stale.sh` — Per-screen staleness summary
-  - Then the agent/user selects the slice deliberately (priority + staleness), generates consolidation(s), generates code, and updates metadata.
+- Slice selection is deliberate (priority + staleness). Use `check-stale.sh` as input; see [Staleness](staleness.md).
 
 **Trigger phrases:**
 - "generate code"
 - "regenerate next slice"
 - "generate ItemList screen"
-
-### 2. Scenario Generation
-
-Capture screenshots with deep links for stakeholder review.
-
-**Inputs:**
-- Running app with deep link support
-- Screen routes and variants
-
-**Outputs:**
-- Screenshots: `design/generated/<target>/images/`
-- Scenario docs: `design/generated/<target>/scenarios/`
-
-**Steps:**
-1. Determine target images (missing or stale)
-2. Capture screenshots via deep link
-3. Generate scenario Markdown with embedded images
-4. (Optional) Publish as HTML
-
-**Scripts:**
-- `android-screenshot.sh` — Capture single screenshot
-- `build-images.sh` — Batch capture
-- `preview-scenarios.sh` — Local preview
-- `publish-scenarios.sh` — Publish to web
-
-**Trigger phrases:**
-- "generate scenarios"
-- "refresh scenarios for ItemList"
-
-## Staleness and Dependencies
-
-### Dependency Metadata
-
-Consolidations include frontmatter tracking dependencies:
-
-```yaml
----
-provides: ["screen:ItemList"]
-dependsOn:
-  - design/stories/<target>/01-browsing.md
-  - design/specs/<target>/screens/item-list.md
-  - design/specs/<target>/navigation.md
-  - design/specs/domain/schema.md
-depHashes:
-  design/specs/<target>/screens/item-list.md: "sha256:abc123..."
-  design/specs/domain/schema.md: "sha256:def456..."
----
-```
-
-### Dependency Registry
-
-Central tracking in `design/generated/<target>/meta/outputs.json`:
-
-```json
-{
-  "outputs": [
-    {
-      "route": "ItemList",
-      "output": "apps/mobile/src/screens/ItemList.tsx",
-      "dependsOn": [
-        "design/generated/<target>/screens/ItemList.md",
-        "design/specs/<target>/screens/item-list.md",
-        "design/specs/<target>/navigation.md"
-      ],
-      "depHashes": {
-        "design/specs/<target>/screens/item-list.md": "sha256:..."
-      }
-    }
-  ]
-}
-```
-
-### Staleness Detection
-
-**Hash-based (preferred):**
-1. Compute sha256 for each dependsOn file
-2. Compare to saved depHashes
-3. Mismatch = stale
-
-**Fallback (mtime-based):**
-When metadata missing, compare file modification times:
-- Inputs: stories, specs, navigation, domain contract (as needed)
-- Outputs: consolidations, app code
-- Stale if any input mtime > output mtime
-
-## Vertical Slice Selection
-
-### Navigation Graph
-
-Build from `design/specs/<target>/navigation.md` plus the screens index.
-
-### Selection Order
-
-1. First stale screen reachable from root
-2. Stale neighbors (navigable from fresh screens)
-3. Remaining stale screens
-
-### Definition of Stale
-
-A screen is stale if:
-- Consolidation is stale or missing
-- Any output (code, mock) is stale or missing
 
 ## Generation Flow (Per Slice)
 
@@ -185,9 +78,9 @@ Generate screen and update navigation:
 
 ### Step 5: Update Status
 
-- Run `update-dep-hashes.sh --route <Route>`
-- Run `check-stale.sh` to confirm freshness
-- Status written to `design/generated/status.json`
+- Update dependency metadata:
+  - Run `update-dep-hashes.sh --target <target> --route <Route>`
+  - Optionally rerun `check-stale.sh --target <target>` to confirm freshness
 
 ## Conventions
 
@@ -233,4 +126,6 @@ When multiple app targets exist, scripts accept `--target <target>` to scope ope
 - [Workflow Overview](workflow.md)
 - [Scaffold Structure](scaffold.md)
 - [Codegen Details](codegen.md)
+- [Staleness and Dependencies](staleness.md)
+- [Scenarios and Screenshots](scenarios.md)
 - [Mocking Strategy](mocking.md)

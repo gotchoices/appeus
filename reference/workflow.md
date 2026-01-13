@@ -40,6 +40,6 @@ When multiple app targets exist, scripts accept `--target <name>` to scope opera
 
 - [Scaffold Structure](scaffold.md)
 - [Generation Details](generation.md)
-- [Staleness and Dependencies](generation.md#staleness-and-dependencies)
+- [Staleness and Dependencies](staleness.md)
 - [Design Phases](phases.md)
 - [Precedence](precedence.md)
