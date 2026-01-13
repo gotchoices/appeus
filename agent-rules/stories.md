@@ -4,8 +4,7 @@ You are in `design/stories/`. User stories define requirements.
 
 ## Paths
 
-- Single-app: `stories/*.md`
-- Multi-app: `stories/<target>/*.md`
+- Per-target (canonical v2.1): `stories/<target>/*.md`
 
 ## Story Structure
 
@@ -30,8 +29,8 @@ As a <user>, I want <action> so that <benefit>.
 ## Workflow
 
 1. Read story for requirements
-2. Identify screens, update `specs/screens/index.md`
-3. Create consolidations in `generated/screens/`
+2. Identify screens, update `specs/<target>/screens/index.md`
+3. Create consolidations in `generated/<target>/screens/`
 4. On request, generate code
 
 ## Naming

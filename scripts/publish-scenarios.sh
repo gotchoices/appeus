@@ -3,12 +3,12 @@ set -euo pipefail
 
 # publish-scenarios.sh
 # Package scenarios site and optionally rsync to a remote destination.
-# Supports both single-app and multi-app project structures.
+# Appeus v2.1 canonical: per-target layout only.
 #
 # Usage:
 #   appeus/scripts/publish-scenarios.sh [--target <name>] [--dest user@host:/path] [--dry-run]
 #
-# In multi-app projects, --target is required.
+# If exactly one target exists, --target defaults to it. If multiple targets exist, --target is required.
 #
 # Env:
 #   APPEUS_PUBLISH_DEST can provide the default destination
@@ -33,7 +33,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRYRUN=1; shift ;;
     -h|--help)
       echo "Usage: $0 [--target <name>] [--dest user@host:/path] [--dry-run]"
-      echo "  --target  App target (required for multi-app projects)"
+      echo "  --target  App target (required if multiple targets exist)"
       echo "  --dest    rsync destination"
       echo "  --dry-run Print rsync command without executing"
       exit 0
@@ -42,31 +42,37 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Detect single-app vs multi-app mode
-is_single_app_mode() {
-  if [ -d "${DESIGN_DIR}/specs/screens" ]; then
-    local target_count
-    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$target_count" = "0" ]; then
-      return 0
-    fi
-  fi
-  return 1
+list_targets() {
+  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "domain" \
+    ! -name "schema" \
+    ! -name "api" \
+    ! -name "global" \
+    ! -name "screens" \
+    ! -name "components" \
+    -exec basename {} \; 2>/dev/null
 }
 
-# Determine paths based on mode
-if is_single_app_mode; then
-  GEN_DIR="${DESIGN_DIR}/generated"
-else
-  if [ -z "$TARGET" ]; then
-    echo "Error: Multi-app project detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" -exec basename {} \; 2>/dev/null
+if [ -z "$TARGET" ]; then
+  targets="$(list_targets || true)"
+  if [ -z "${targets}" ]; then
+    echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
     exit 1
   fi
-  GEN_DIR="${DESIGN_DIR}/generated/${TARGET}"
+  target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
+  if [ "${target_count}" = "1" ]; then
+    TARGET=$(printf "%s\n" "${targets}" | head -n 1)
+    echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
+  else
+    echo "Error: Multiple targets detected. --target is required." >&2
+    echo ""
+    echo "Available targets:"
+    printf "%s\n" "${targets}"
+    exit 1
+  fi
 fi
+
+GEN_DIR="${DESIGN_DIR}/generated/${TARGET}"
 
 SCEN_DIR="${GEN_DIR}/scenarios"
 IMG_DIR="${GEN_DIR}/images"

@@ -4,8 +4,7 @@ Scenarios are visual walkthroughs with screenshots and deep links.
 
 ## Location
 
-- Single-app: `design/generated/scenarios/*.md`
-- Multi-app: `design/generated/<target>/scenarios/*.md`
+`design/generated/<target>/scenarios/*.md`
 
 ## Usage
 

@@ -4,10 +4,10 @@ How to generate navigation code from specs.
 
 ## Paths
 
-| Content | Single-App | Multi-App |
-|---------|------------|-----------|
-| Navigation spec | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Navigation code | `apps/<name>/src/navigation/*` | `apps/<name>/src/navigation/*` |
+| Content | Canonical Path (v2.1) |
+|---------|------------------------|
+| Navigation spec | `design/specs/<target>/navigation.md` |
+| Navigation code | `apps/<target>/src/navigation/*` (framework-specific) |
 
 ## Inputs
 
@@ -31,7 +31,7 @@ How to generate navigation code from specs.
 
 ### 1. Read Navigation Spec
 
-Parse `design/specs/navigation.md` for:
+Parse `design/specs/<target>/navigation.md` for:
 - Sitemap structure (tabs, stacks)
 - Route definitions
 - Deep link patterns

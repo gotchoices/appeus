@@ -3,13 +3,13 @@ set -euo pipefail
 
 # update-dep-hashes.sh
 # Recomputes SHA256 hashes for dependsOn files and updates outputs.json depHashes.
-# Supports both single-app and multi-app project structures.
+# Appeus v2.1 canonical: per-target layout only.
 #
 # Usage:
 #   appeus/scripts/update-dep-hashes.sh [--target <name>] --route <RouteName>
 #   appeus/scripts/update-dep-hashes.sh [--target <name>] --all
 #
-# In multi-app projects, --target is required when multiple targets exist.
+# If exactly one target exists, --target defaults to it. If multiple targets exist, --target is required.
 
 SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-root.sh
@@ -76,9 +76,8 @@ extract_routes_from_index() {
 
 # Infer a conservative dependsOn list for a route (broad but safe).
 infer_depends_on_for_route() {
-  local mode="$1"   # legacy-single | target
-  local target="$2" # empty for legacy-single
-  local route="$3"
+  local target="$1"
+  local route="$2"
 
   local deps=()
 
@@ -92,31 +91,17 @@ infer_depends_on_for_route() {
     done < <(find "${PROJECT_DIR}/design/specs/domain" -type f -name "*.md" -print0 2>/dev/null || true)
   fi
 
-  if [ "${mode}" = "legacy-single" ]; then
-    [ -f "${PROJECT_DIR}/design/specs/navigation.md" ] && deps+=("design/specs/navigation.md")
-    [ -f "${PROJECT_DIR}/design/specs/screens/index.md" ] && deps+=("design/specs/screens/index.md")
-    # All stories (legacy)
-    if [ -d "${PROJECT_DIR}/design/stories" ]; then
-      while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${PROJECT_DIR}/design/stories" -type f -name "*.md" -print0 2>/dev/null || true)
-    fi
-    # Per-screen spec (legacy)
-    local kebab
-    kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
-    [ -f "${PROJECT_DIR}/design/specs/screens/${kebab}.md" ] && deps+=("design/specs/screens/${kebab}.md")
-    [ -f "${PROJECT_DIR}/design/specs/screens/${route}.md" ] && deps+=("design/specs/screens/${route}.md")
-  else
-    [ -f "${PROJECT_DIR}/design/specs/${target}/navigation.md" ] && deps+=("design/specs/${target}/navigation.md")
-    [ -f "${PROJECT_DIR}/design/specs/${target}/screens/index.md" ] && deps+=("design/specs/${target}/screens/index.md")
-    # All stories for target
-    if [ -d "${PROJECT_DIR}/design/stories/${target}" ]; then
-      while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${PROJECT_DIR}/design/stories/${target}" -type f -name "*.md" -print0 2>/dev/null || true)
-    fi
-    # Per-screen spec
-    local kebab
-    kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
-    [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${kebab}.md" ] && deps+=("design/specs/${target}/screens/${kebab}.md")
-    [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${route}.md" ] && deps+=("design/specs/${target}/screens/${route}.md")
+  [ -f "${PROJECT_DIR}/design/specs/${target}/navigation.md" ] && deps+=("design/specs/${target}/navigation.md")
+  [ -f "${PROJECT_DIR}/design/specs/${target}/screens/index.md" ] && deps+=("design/specs/${target}/screens/index.md")
+  # All stories for target
+  if [ -d "${PROJECT_DIR}/design/stories/${target}" ]; then
+    while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${PROJECT_DIR}/design/stories/${target}" -type f -name "*.md" -print0 2>/dev/null || true)
   fi
+  # Per-screen spec
+  local kebab
+  kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+  [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${kebab}.md" ] && deps+=("design/specs/${target}/screens/${kebab}.md")
+  [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${route}.md" ] && deps+=("design/specs/${target}/screens/${route}.md")
 
   # Unique + stable order
   printf "%s\n" "${deps[@]}" | awk 'NF && !seen[$0]++'
@@ -124,8 +109,7 @@ infer_depends_on_for_route() {
 
 ensure_outputs_registry_seeded() {
   local registry="$1"
-  local mode="$2"   # legacy-single | target
-  local target="$3" # empty for legacy-single
+  local target="$2"
 
   # If outputs is empty, seed from screens index.
   local count
@@ -135,11 +119,7 @@ ensure_outputs_registry_seeded() {
   fi
 
   local index_file=""
-  if [ "${mode}" = "legacy-single" ]; then
-    index_file="${PROJECT_DIR}/design/specs/screens/index.md"
-  else
-    index_file="${PROJECT_DIR}/design/specs/${target}/screens/index.md"
-  fi
+  index_file="${PROJECT_DIR}/design/specs/${target}/screens/index.md"
 
   local routes
   routes="$(extract_routes_from_index "${index_file}" || true)"
@@ -151,7 +131,7 @@ ensure_outputs_registry_seeded() {
   while IFS= read -r r; do
     [ -z "$r" ] && continue
     local deps_json
-    deps_json=$(infer_depends_on_for_route "${mode}" "${target}" "$r" | jq -R . | jq -s .)
+    deps_json=$(infer_depends_on_for_route "${target}" "$r" | jq -R . | jq -s .)
     local tmp
     tmp=$(mktemp)
     jq --arg route "$r" --argjson deps "$deps_json" '
@@ -167,16 +147,15 @@ ensure_outputs_registry_seeded() {
 
 ensure_route_entry() {
   local registry="$1"
-  local mode="$2"   # legacy-single | target
-  local target="$3" # empty for legacy-single
-  local route="$4"
+  local target="$2"
+  local route="$3"
 
   if jq -e --arg r "$route" 'any(.outputs[]?; .route == $r)' "$registry" >/dev/null 2>&1; then
     return 0
   fi
 
   local deps_json
-  deps_json=$(infer_depends_on_for_route "${mode}" "${target}" "$route" | jq -R . | jq -s .)
+  deps_json=$(infer_depends_on_for_route "${target}" "$route" | jq -R . | jq -s .)
   local tmp
   tmp=$(mktemp)
   jq --arg route "$route" --argjson deps "$deps_json" '
@@ -185,41 +164,25 @@ ensure_route_entry() {
   mv "$tmp" "$registry"
 }
 
-# Detect single-app vs multi-app mode
-is_single_app_mode() {
-  if [ -d "${DESIGN_DIR}/specs/screens" ]; then
-    local target_count
-    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "domain" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$target_count" = "0" ]; then
-      return 0
-    fi
+# Determine outputs.json path (per-target)
+if [ -z "$TARGET" ]; then
+  targets="$(list_targets || true)"
+  if [ -z "${targets}" ]; then
+    die "No targets found under design/specs/. Add an app first (scripts/add-app.sh)."
   fi
-  return 1
-}
-
-# Determine outputs.json path
-if is_single_app_mode; then
-  OUTPUTS_JSON="${DESIGN_DIR}/generated/meta/outputs.json"
-else
-  if [ -z "$TARGET" ]; then
-    targets="$(list_targets || true)"
-    if [ -z "${targets}" ]; then
-      die "No targets found under design/specs/. Add an app first (scripts/add-app.sh)."
-    fi
-    target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
-    if [ "${target_count}" = "1" ]; then
-      TARGET=$(printf "%s\n" "${targets}" | head -n 1)
-      echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
-    else
-      echo "Error: Multiple targets detected. --target is required." >&2
-      echo ""
-      echo "Available targets:"
-      printf "%s\n" "${targets}"
-      exit 1
-    fi
+  target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
+  if [ "${target_count}" = "1" ]; then
+    TARGET=$(printf "%s\n" "${targets}" | head -n 1)
+    echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
+  else
+    echo "Error: Multiple targets detected. --target is required." >&2
+    echo ""
+    echo "Available targets:"
+    printf "%s\n" "${targets}"
+    exit 1
   fi
-  OUTPUTS_JSON="${DESIGN_DIR}/generated/${TARGET}/meta/outputs.json"
 fi
+OUTPUTS_JSON="${DESIGN_DIR}/generated/${TARGET}/meta/outputs.json"
 
 if [[ ! -f "$OUTPUTS_JSON" ]]; then
   echo "Creating empty outputs.json at ${OUTPUTS_JSON}"
@@ -228,20 +191,12 @@ if [[ ! -f "$OUTPUTS_JSON" ]]; then
 fi
 
 # If the registry exists but is empty/template-like, seed it from the screens index (non-destructive).
-if is_single_app_mode; then
-  ensure_outputs_registry_seeded "$OUTPUTS_JSON" "legacy-single" ""
-else
-  ensure_outputs_registry_seeded "$OUTPUTS_JSON" "target" "$TARGET"
-fi
+ensure_outputs_registry_seeded "$OUTPUTS_JSON" "$TARGET"
 
 update_route() {
   local route="$1"
   # Ensure there is a route entry; if missing, add it (non-destructive).
-  if is_single_app_mode; then
-    ensure_route_entry "$OUTPUTS_JSON" "legacy-single" "" "$route"
-  else
-    ensure_route_entry "$OUTPUTS_JSON" "target" "$TARGET" "$route"
-  fi
+  ensure_route_entry "$OUTPUTS_JSON" "$TARGET" "$route"
   local deps
   deps=$(jq -r --arg r "$route" '.outputs[] | select(.route==$r).dependsOn[]?' "$OUTPUTS_JSON" 2>/dev/null || true)
   

@@ -8,8 +8,7 @@ Consolidations are the **translator layer**: gather facts from stories/specs int
 
 ## Paths
 
-- Single-app: `generated/screens/*.md`
-- Multi-app: `generated/<target>/screens/*.md`
+- Per-target (canonical v2.1): `generated/<target>/screens/*.md`
 
 ## Metadata
 
@@ -19,7 +18,7 @@ Include dependency tracking in each consolidation:
 ---
 dependsOn:
   - design/stories/01-browsing.md
-  - design/specs/screens/item-list.md
+  - design/specs/<target>/screens/item-list.md
 depHashes:
   design/stories/01-browsing.md: abc123...
 ---

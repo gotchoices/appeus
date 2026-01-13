@@ -27,7 +27,7 @@ Project config: `design/specs/project.md`
 | "what's next" | `check-stale.sh`, summarize, suggest |
 | "add an app" | `add-app.sh --name <name> --framework <framework>` |
 
-For multi-app: add `--target <name>` to scripts.
+If you need a script to operate on a specific app, pass `--target <name>` (it defaults when only one target exists).
 
 ## Key References
 

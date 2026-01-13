@@ -6,20 +6,19 @@ Detailed reference for generating app code from specs and consolidations.
 
 ### Human Specs (Authoritative)
 
-| Type | Single-App Path | Multi-App Path |
-|------|-----------------|----------------|
-| Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
-| Component specs | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
-| Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Domain contract | `design/specs/domain/*.md` (as needed) | `design/specs/domain/*.md` (shared, as needed) |
-| Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
+| Type | Canonical Path (v2.1) |
+|------|------------------------|
+| Screen specs | `design/specs/<target>/screens/*.md` |
+| Component specs | `design/specs/<target>/components/*.md` |
+| Navigation | `design/specs/<target>/navigation.md` |
+| Domain contract (as needed) | `design/specs/domain/*.md` |
+| Global | `design/specs/<target>/global/*` |
 
 ### AI Consolidations (Regenerable)
 
-| Type | Single-App Path | Multi-App Path |
-|------|-----------------|----------------|
-| Screen consolidations | `design/generated/screens/*.md` | `design/generated/<target>/screens/*.md` |
-| API consolidations | `design/generated/api/*.md` | `design/generated/api/*.md` (shared) |
+| Type | Canonical Path (v2.1) |
+|------|------------------------|
+| Screen consolidations | `design/generated/<target>/screens/*.md` |
 
 ## Outputs
 

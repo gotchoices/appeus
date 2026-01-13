@@ -4,12 +4,12 @@ Specs are human-authored documents that take precedence over AI consolidations.
 
 ## Location
 
-| Type | Single-App | Multi-App |
-|------|------------|-----------|
-| Screens | `specs/screens/*.md` | `specs/<target>/screens/*.md` |
-| Navigation | `specs/navigation.md` | `specs/<target>/navigation.md` |
-| Domain contract (as needed) | `specs/domain/*.md` | `specs/domain/*.md` (shared) |
-| Global | `specs/global/*` | `specs/<target>/global/*` |
+| Type | Canonical (v2.1) |
+|------|------------------|
+| Screens | `specs/<target>/screens/*.md` |
+| Navigation | `specs/<target>/navigation.md` |
+| Domain contract (as needed) | `specs/domain/*.md` (shared) |
+| Global | `specs/<target>/global/*` |
 
 ## Screen Specs
 

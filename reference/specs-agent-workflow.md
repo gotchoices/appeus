@@ -4,12 +4,12 @@ How to process human-authored specs and keep consolidations synchronized.
 
 ## Paths
 
-| Type | Single-App | Multi-App |
-|------|------------|-----------|
-| Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
-| Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Domain contract (as needed) | `design/specs/domain/*.md` | `design/specs/domain/*.md` (shared) |
-| Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
+| Type | Canonical Path (v2.1) |
+|------|------------------------|
+| Screen specs | `design/specs/<target>/screens/*.md` |
+| Navigation | `design/specs/<target>/navigation.md` |
+| Domain contract (as needed) | `design/specs/domain/*.md` |
+| Global | `design/specs/<target>/global/*` |
 
 ## Principles
 

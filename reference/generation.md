@@ -29,7 +29,7 @@ Before committing to “quick and simple” vs “scalable and robust” impleme
 - “Component `AccountAutocomplete` exposes `onSelect(accountId)`.” → **consolidation**
 
 **Inputs:**
-- Stories: `design/stories/` or `design/stories/<target>/`
+- Stories: `design/stories/<target>/`
 - Specs: `design/specs/` (screens, navigation, global, target specs, and shared `domain/` when needed)
 
 **Outputs:**
@@ -104,7 +104,7 @@ depHashes:
 
 ### Dependency Registry
 
-Central tracking in `design/generated/meta/outputs.json` (single-app) or `design/generated/<target>/meta/outputs.json` (multi-app):
+Central tracking in `design/generated/<target>/meta/outputs.json`:
 
 ```json
 {
@@ -160,7 +160,7 @@ When metadata missing, compare file modification times:
 
 ### Navigation Graph
 
-Build from `design/specs/navigation.md` (single-app) or `design/specs/<target>/navigation.md` (multi-app) plus screens index.
+Build from `design/specs/<target>/navigation.md` plus the screens index.
 
 ### Selection Order
 

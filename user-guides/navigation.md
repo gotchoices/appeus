@@ -4,8 +4,7 @@ Define your app's sitemap and deep links in the navigation spec.
 
 ## Location
 
-- Single-app: `design/specs/navigation.md`
-- Multi-app: `design/specs/<target>/navigation.md`
+`design/specs/<target>/navigation.md`
 
 ## Structure
 

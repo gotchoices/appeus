@@ -49,13 +49,13 @@ Once decisions are documented, add an app scaffold:
 
 This creates:
 - `apps/<name>/` — Framework scaffold with AGENTS.md
-- `design/stories/` — Folder for user stories
-- `design/specs/screens/` — Folder for screen specs
-- `design/specs/navigation.md` — Navigation structure
+- `design/stories/<name>/` — Folder for user stories (per-target)
+- `design/specs/<name>/screens/` — Folder for screen specs (per-target)
+- `design/specs/<name>/navigation.md` — Navigation structure (per-target)
 
 ## Step 4: Write Stories
 
-Create your first story in `design/stories/`:
+Create your first story in `design/stories/<target>/`:
 
 ```markdown
 # 01-first-feature.md
@@ -83,9 +83,9 @@ As a user, I want to see a list of items so that I can browse available options.
 
 Ask the agent to:
 1. Read your stories and propose a data schema
-2. Create screen consolidations in `design/generated/screens/`
-3. Draft screen specs in `design/specs/screens/`
-4. Update `design/specs/navigation.md` with routes
+2. Create screen consolidations in `design/generated/<target>/screens/`
+3. Draft screen specs in `design/specs/<target>/screens/`
+4. Update `design/specs/<target>/navigation.md` with routes
 
 Review and refine the specs. Your specs take precedence over AI consolidations.
 
@@ -137,7 +137,7 @@ To add a second app (e.g., web after mobile):
 ./appeus/scripts/add-app.sh --name web --framework sveltekit
 ```
 
-The script automatically reorganizes the folder structure from single-app to multi-app layout.
+Appeus v2.1 uses a single canonical per-target layout; targets always live under `apps/<name>/` and design artifacts are per-target under `design/*/<name>/`.
 
 ## Environment Variables
 

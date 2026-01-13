@@ -6,8 +6,8 @@ Appeus is a design-first workflow that turns user stories into running applicati
 
 - **Design-first:** Project decisions are documented before any framework code is generated
 - **Multi-target:** A single project can contain multiple apps (mobile, web, desktop)
-- **Progressive structure:** Single-app projects use flat layouts; multi-app projects use per-target subdirectories
-- **Shared schema:** Data model and API specs are shared across targets
+- **Canonical per-target structure (v2.1):** Apps always live under `apps/<target>/` and design artifacts are per-target under `design/*/<target>/`
+- **Shared domain contract (as needed):** Shared schema/api/rules/interfaces live under `design/specs/domain/`
 - **Framework adapters:** Support for React Native, SvelteKit, and more
 
 ## Core Workflow

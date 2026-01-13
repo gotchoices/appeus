@@ -3,12 +3,12 @@ set -euo pipefail
 
 # build-images.sh
 # Capture screenshots for stale/missing scenario images (Android).
-# Supports both single-app and multi-app project structures.
+# Appeus v2.1 canonical: per-target layout only.
 #
 # Usage:
 #   appeus/scripts/build-images.sh [--target <name>] [--reuse] [--window] [--force]
 #
-# In multi-app projects, --target is required.
+# If exactly one target exists, --target defaults to it. If multiple targets exist, --target is required.
 #
 # Env overrides:
 #   APPEUS_ANDROID_AVD   (default: Medium_Phone_API_34)
@@ -38,7 +38,7 @@ while [[ $# -gt 0 ]]; do
     --force) FORCE=1; shift ;;
     -h|--help)
       echo "Usage: $0 [--target <name>] [--reuse] [--window] [--force]"
-      echo "  --target  App target (required for multi-app projects)"
+      echo "  --target  App target (required if multiple targets exist)"
       echo "  --reuse   Reuse running emulator (fail if none)"
       echo "  --window  Show emulator window (not headless)"
       echo "  --force   Recapture all screenshots, even if fresh"
@@ -55,40 +55,38 @@ if ! command -v yq &>/dev/null; then
   exit 1
 fi
 
-# Detect single-app vs multi-app mode
-is_single_app_mode() {
-  if [ -d "${DESIGN_DIR}/specs/screens" ]; then
-    local target_count
-    target_count=$(find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$target_count" = "0" ]; then
-      return 0
-    fi
-  fi
-  return 1
+list_targets() {
+  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "domain" \
+    ! -name "schema" \
+    ! -name "api" \
+    ! -name "global" \
+    ! -name "screens" \
+    ! -name "components" \
+    -exec basename {} \; 2>/dev/null
 }
 
-# Determine paths based on mode
-if is_single_app_mode; then
-  GENERATED_DIR="${DESIGN_DIR}/generated"
-  
-  # Find the app directory
-  APP_DIR=$(find "${PROJECT_DIR}/apps" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
-  if [ -z "$APP_DIR" ]; then
-    SRC_DIR="${PROJECT_DIR}/src"
-  else
-    SRC_DIR="${APP_DIR}/src"
-  fi
-else
-  if [ -z "$TARGET" ]; then
-    echo "Error: Multi-app project detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d ! -name "screens" ! -name "schema" ! -name "api" ! -name "global" -exec basename {} \; 2>/dev/null
+if [ -z "$TARGET" ]; then
+  targets="$(list_targets || true)"
+  if [ -z "${targets}" ]; then
+    echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
     exit 1
   fi
-  GENERATED_DIR="${DESIGN_DIR}/generated/${TARGET}"
-  SRC_DIR="${PROJECT_DIR}/apps/${TARGET}/src"
+  target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
+  if [ "${target_count}" = "1" ]; then
+    TARGET=$(printf "%s\n" "${targets}" | head -n 1)
+    echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
+  else
+    echo "Error: Multiple targets detected. --target is required." >&2
+    echo ""
+    echo "Available targets:"
+    printf "%s\n" "${targets}"
+    exit 1
+  fi
 fi
+
+GENERATED_DIR="${DESIGN_DIR}/generated/${TARGET}"
+SRC_DIR="${PROJECT_DIR}/apps/${TARGET}/src"
 
 helper="${SCRIPT_DIR}/android-screenshot.sh"
 outdir="${GENERATED_DIR}/images"

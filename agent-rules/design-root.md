@@ -12,8 +12,7 @@ You are in the design surface (`design/`).
 
 ## Paths
 
-- **Single-app:** `stories/*.md`, `specs/screens/*.md`
-- **Multi-app:** `stories/<target>/*.md`, `specs/<target>/screens/*.md`
+- **Per-target (canonical v2.1):** `stories/<target>/*.md`, `specs/<target>/screens/*.md`
 - **Shared (when needed):** `specs/domain/*.md`
 
 ## User Commands
@@ -27,7 +26,7 @@ You are in the design surface (`design/`).
 | "what's next" | `check-stale.sh`, summarize |
 | "preview scenarios" | `preview-scenarios.sh` |
 
-For multi-app: add `--target <name>`.
+If you need a script to operate on a specific app, pass `--target <name>` (it defaults when only one target exists).
 
 ## Workflow
 

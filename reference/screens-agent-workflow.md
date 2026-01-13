@@ -4,11 +4,11 @@ How to generate screen code from specs and consolidations.
 
 ## Paths
 
-| Content | Single-App | Multi-App |
-|---------|------------|-----------|
-| Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
-| Consolidations | `design/generated/screens/*.md` | `design/generated/<target>/screens/*.md` |
-| Screen code | `apps/<name>/src/screens/*.tsx` | `apps/<name>/src/screens/*.tsx` |
+| Content | Canonical Path (v2.1) |
+|---------|------------------------|
+| Screen specs | `design/specs/<target>/screens/*.md` |
+| Consolidations | `design/generated/<target>/screens/*.md` |
+| Screen code | `apps/<target>/src/screens/*.tsx` (framework-specific) |
 
 ## Principles
 
@@ -21,15 +21,14 @@ How to generate screen code from specs and consolidations.
 ### 1. Check Spec
 
 Look for a human spec at:
-- `design/specs/screens/<screen-id>.md` (single-app)
-- `design/specs/<target>/screens/<screen-id>.md` (multi-app)
+- `design/specs/<target>/screens/<screen-id>.md`
 
 If spec exists, it takes precedence.
 
 ### 2. Read Consolidation
 
 Merge with consolidation if present:
-- `design/generated/screens/<Screen>.md`
+- `design/generated/<target>/screens/<Screen>.md`
 - Contains aggregated facts from stories
 - Includes dependency metadata
 
@@ -40,12 +39,12 @@ When user requests regeneration:
 - Fill gaps from consolidation
 - Use framework defaults for remaining structure
 - Write to `apps/<name>/src/screens/<Screen>.tsx`
-- Embed AppeusMeta header
+- Update dependency metadata (consolidation frontmatter + `design/generated/<target>/meta/outputs.json`)
 
 ### 4. Update Navigation
 
 Keep navigation consistent:
-- Read `design/specs/navigation.md` or `design/specs/<target>/navigation.md`
+- Read `design/specs/<target>/navigation.md`
 - Update `apps/<name>/src/navigation/`
 - Verify route names match screen outputs
 - Configure deep links

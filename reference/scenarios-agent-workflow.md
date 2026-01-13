@@ -10,12 +10,12 @@ How to generate scenario documents with screenshots.
 
 ## Paths
 
-| Content | Single-App | Multi-App |
-|---------|------------|-----------|
-| Images config | `design/generated/images/index.md` | `design/generated/<target>/images/index.md` |
-| Screenshots | `design/generated/images/*.png` | `design/generated/<target>/images/*.png` |
-| Scenario docs | `design/generated/scenarios/*.md` | `design/generated/<target>/scenarios/*.md` |
-| Screen code | `apps/<name>/src/screens/*.tsx` | `apps/<name>/src/screens/*.tsx` |
+| Content | Canonical Path (v2.1) |
+|---------|------------------------|
+| Images config | `design/generated/<target>/images/index.md` |
+| Screenshots | `design/generated/<target>/images/*.png` |
+| Scenario docs | `design/generated/<target>/scenarios/*.md` |
+| Screen code | `apps/<target>/src/screens/*.tsx` (framework-specific) |
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ How to generate scenario documents with screenshots.
 
 ### 1. Configure Screenshots
 
-Edit `design/generated/images/index.md` frontmatter:
+Edit `design/generated/<target>/images/index.md` frontmatter:
 
 ```yaml
 ---
@@ -66,7 +66,7 @@ Options:
 - `--reuse` — Use running emulator
 - `--window` — Show emulator (not headless)
 - `--force` — Recapture even if fresh
-- `--target` — Target name for multi-app
+- `--target` — Target name (defaults when only one target exists)
 
 The script:
 - Reads config from `images/index.md`
@@ -79,6 +79,7 @@ The script:
 For each story, create scenario doc:
 
 **Location:** `design/generated/scenarios/<story-id>.md`
+**Location:** `design/generated/<target>/scenarios/<story-id>.md`
 
 **Structure:**
 

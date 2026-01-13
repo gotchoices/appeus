@@ -13,7 +13,7 @@ Define engine-facing procedures and data shapes needed by screens and stories.
 | Domain contract (human) | `design/specs/domain/*.md` | Yes |
 | Mock data | `mock/data/*` | Yes |
 
-Domain contract files are shared across targets in multi-app projects (create only what you need).
+Domain contract files are shared across targets (create only what you need).
 
 ## Sources
 

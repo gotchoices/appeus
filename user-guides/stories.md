@@ -4,8 +4,7 @@ Stories define user requirements. The agent derives screens and specs from your 
 
 ## Location
 
-- Single-app: `design/stories/*.md`
-- Multi-app: `design/stories/<target>/*.md`
+`design/stories/<target>/*.md`
 
 ## Structure
 
@@ -45,7 +44,7 @@ So that <benefit>
 3. Refine specs as needed
 4. Request code generation when ready
 
-## Multi-App Projects
+## Multiple Targets
 
 For projects with multiple targets:
 - Write separate stories per target

@@ -4,11 +4,11 @@ How to process user stories and derive screens/navigation.
 
 ## Paths
 
-| Content | Single-App | Multi-App |
-|---------|------------|-----------|
-| Stories | `design/stories/*.md` | `design/stories/<target>/*.md` |
-| Screen specs | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
-| Consolidations | `design/generated/screens/*.md` | `design/generated/<target>/screens/*.md` |
+| Content | Canonical Path (v2.1) |
+|---------|------------------------|
+| Stories | `design/stories/<target>/*.md` |
+| Screen specs | `design/specs/<target>/screens/*.md` |
+| Consolidations | `design/generated/<target>/screens/*.md` |
 
 ## Workflow
 
@@ -23,7 +23,7 @@ Parse the story for:
 ### 2. Check Existing Specs
 
 Look for related specs and consolidations:
-- Screen specs in `design/specs/screens/` or `design/specs/<target>/screens/`
+- Screen specs in `design/specs/<target>/screens/`
 - Navigation spec
 - Schema specs (for data requirements)
 
@@ -38,7 +38,7 @@ Determine what the story implies:
 ### 4. Update Consolidations
 
 If story affects multiple screens or adds to existing screens:
-- Create/refresh consolidations in `design/generated/screens/`
+- Create/refresh consolidations in `design/generated/<target>/screens/`
 - Include dependency metadata (dependsOn, depHashes)
 
 ### 5. Suggest Scenarios
@@ -56,12 +56,11 @@ When user requests code generation:
 - Update navigation
 - Create mock data
 
-## Multi-Target Considerations
+## Cross-Target Considerations
 
-For projects with multiple apps:
-- Check `design/specs/project.md` for target information
-- Stories in one target may imply schema changes affecting all targets
-- Derive shared schema by reading stories from ALL targets
+When multiple targets exist:
+- Check `design/specs/project.md` for target/platform expectations
+- A story in one target may imply shared domain contract updates in `design/specs/domain/`
 
 ## See Also
 

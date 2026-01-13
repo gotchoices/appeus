@@ -12,7 +12,7 @@ Define entities, fields, relationships, validation rules.
 
 ## When to Derive
 
-For multi-app projects: read ALL target stories, identify entities, propose schema specs.
+Read stories across targets (as needed) and propose shared domain schema docs under `design/specs/domain/`.
 
 ## Workflow
 

@@ -40,7 +40,7 @@ Creates app scaffolds in `apps/<name>/` and design folders.
 
 ### Phase 4: Story Authoring
 
-Write stories in `design/stories/` (single-app) or `design/stories/<target>/` (multi-app).
+Write stories per target in `design/stories/<target>/`.
 
 Stories define user-facing requirements:
 - Goal (As a user, I want...)

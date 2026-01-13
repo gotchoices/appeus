@@ -11,12 +11,12 @@ Produce scenario docs that:
 
 ## Paths
 
-| Content | Single-App | Multi-App |
-|---------|------------|-----------|
-| Images config | `design/generated/images/index.md` | `design/generated/<target>/images/index.md` |
-| Screenshots | `design/generated/images/*.png` | `design/generated/<target>/images/*.png` |
-| Scenario docs | `design/generated/scenarios/*.md` | `design/generated/<target>/scenarios/*.md` |
-| Published HTML | `design/generated/site/` | `design/generated/<target>/site/` |
+| Content | Canonical Path (v2.1) |
+|---------|------------------------|
+| Images config | `design/generated/<target>/images/index.md` |
+| Screenshots | `design/generated/<target>/images/*.png` |
+| Scenario docs | `design/generated/<target>/scenarios/*.md` |
+| Published HTML | `design/generated/<target>/site/` |
 
 ## Images Configuration
 
@@ -72,7 +72,7 @@ Options:
 - `--reuse` — Use existing emulator if running
 - `--window` — Show emulator window (not headless)
 - `--force` — Recapture even if fresh
-- `--target` — Target name for multi-app projects
+- `--target` — Target name (defaults when only one target exists)
 
 ### Android Helper
 
@@ -106,8 +106,7 @@ An image is stale if:
 
 ### Location
 
-- Single-app: `design/generated/scenarios/<story-id>.md`
-- Multi-app: `design/generated/<target>/scenarios/<story-id>.md`
+`design/generated/<target>/scenarios/<story-id>.md`
 
 ### Structure
 

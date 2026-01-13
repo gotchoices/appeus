@@ -23,14 +23,14 @@ Also keep the project’s **delivery posture** in mind (from `design/specs/proje
 
 ## Spec Types
 
-| Type | Single-App Path | Multi-App Path |
-|------|-----------------|----------------|
-| Project | `design/specs/project.md` | `design/specs/project.md` |
-| Domain contract | `design/specs/domain/*.md` (as needed) | `design/specs/domain/*.md` (shared, as needed) |
-| Screen | `design/specs/screens/*.md` | `design/specs/<target>/screens/*.md` |
-| Component | `design/specs/components/*.md` | `design/specs/<target>/components/*.md` |
-| Navigation | `design/specs/navigation.md` | `design/specs/<target>/navigation.md` |
-| Global | `design/specs/global/*` | `design/specs/<target>/global/*` |
+| Type | Canonical Path (v2.1) |
+|------|------------------------|
+| Project | `design/specs/project.md` |
+| Domain contract (as needed) | `design/specs/domain/*.md` |
+| Screen | `design/specs/<target>/screens/*.md` |
+| Component | `design/specs/<target>/components/*.md` |
+| Navigation | `design/specs/<target>/navigation.md` |
+| Global | `design/specs/<target>/global/*` |
 
 ## Screen Spec Format
 
