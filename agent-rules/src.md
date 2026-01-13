@@ -2,9 +2,11 @@
 
 You are in an app's source tree (`apps/<target>/`).
 
-## Framework
+## What to confirm first
 
-Check `design/specs/project.md` for framework, then see:
+- Target is explicit (`<target>`).
+- The phase checklist: `design/specs/<target>/STATUS.md` (phase model: [phases](appeus/reference/phases.md)).
+- Framework selection in `design/specs/project.md`, then use the framework reference for folder conventions:
 
 | Framework | Reference |
 |-----------|-----------|
@@ -12,17 +14,17 @@ Check `design/specs/project.md` for framework, then see:
 | SvelteKit | [frameworks/sveltekit.md](appeus/reference/frameworks/sveltekit.md) |
 | NativeScript Svelte | [frameworks/nativescript-svelte.md](appeus/reference/frameworks/nativescript-svelte.md) |
 
-## Modification
+## Edits in app code
 
-- Do not modify without regeneration request
-- All edits derived from specs and consolidations
-- Do not inject metadata into source headers; metadata lives in consolidations + JSON registries
+- Only write code when the user requests regeneration.
+- Code edits should be derived from the consolidation for the slice (`design/generated/<target>/screens/<Route>.md`) plus authoritative specs/stories.
+- Do not inject metadata into source headers; staleness metadata lives in consolidation frontmatter + `design/generated/<target>/meta/outputs.json`.
 
 ## After Regeneration
 
 1. Ensure `design/generated/<target>/meta/outputs.json` reflects the slice’s `dependsOn`
-2. Run `update-dep-hashes.sh --target <target> --route <Route>`
-3. Verify with `check-stale.sh --target <target>`
+2. Run `appeus/scripts/update-dep-hashes.sh --target <target> --route <Route>`
+3. Optionally verify with `appeus/scripts/check-stale.sh --target <target>`
 
 ## Mock Variants
 
@@ -30,16 +32,4 @@ Variants come via deep links/URL params. Branch in data adapters, not UI.
 
 See [mock-variants.md](appeus/reference/mock-variants.md)
 
-## Components (Prefer Reuse)
-
-If screen/route files are getting large, extract reusable UI into the app’s components folder:
-
-- SvelteKit: `src/lib/components/`
-- React Native: `src/components/`
-- NativeScript Svelte: `app/components/`
-
-## References
-
-- [Codegen](appeus/reference/codegen.md)
-- [Generation](appeus/reference/generation.md)
-- [Testing](appeus/reference/testing.md)
+For code generation methodology, see [generation](appeus/reference/generation.md) and [codegen](appeus/reference/codegen.md). For staleness rules, see [staleness](appeus/reference/staleness.md). For per-slice testing expectations, see [testing](appeus/reference/testing.md).

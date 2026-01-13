@@ -2,11 +2,11 @@
 
 > This project uses [Appeus](appeus/README.md), a design-first workflow for building apps.
 
-This project has not yet completed discovery phase. See [phases](appeus/reference/phases.md).
+This project has not yet completed the bootstrap/discovery phase (phase model: [phases](appeus/reference/phases.md)).
 
 ## Your Task
 
-Guide the user through completing `design/specs/project.md`.
+Guide the user through completing `design/specs/project.md`, then help them add the first target app.
 
 ## Discovery Questions
 
@@ -35,7 +35,6 @@ Then proceed to story authoring in `design/stories/<target>/`.
 
 After adding the first app target, phase tracking for that target should use `design/specs/<target>/STATUS.md`.
 
-## Reference
+Adding the first app also repoints the root `AGENTS.md` from `appeus/agent-rules/bootstrap.md` to `appeus/agent-rules/project.md`.
 
-- [Workflow](appeus/reference/workflow.md)
-- [Phases](appeus/reference/phases.md)
+For the regeneration loop after discovery, see [workflow](appeus/reference/workflow.md) and [scaffold](appeus/reference/scaffold.md).

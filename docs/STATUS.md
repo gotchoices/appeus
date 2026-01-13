@@ -139,24 +139,36 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Review `reference/staleness.md`
 
 #### agent-rules/
+Standards for agent-rules files:
+- Contains pointers to data relevant to the folder it is associated with
+- Intended to guide agents, not-necessarily humans
+- Primarily an index into deeper treatment of topics
+- Hyperlinks into reference docs for more detailed treatment
 
 - [x] Review `agent-rules/project.md`
-- [ ] Review `agent-rules/bootstrap.md`
-- [ ] Review `agent-rules/design-root.md`
-- [ ] Review `agent-rules/stories.md`
-- [ ] Review `agent-rules/specs.md`
-- [ ] Review `agent-rules/consolidations.md`
-- [ ] Review `agent-rules/scenarios.md`
-- [ ] Review `agent-rules/src.md`
-- [ ] Review `agent-rules/domain.md`
-- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `agent-rules/`
+- [x] Review `agent-rules/bootstrap.md`
+- [x] Review `agent-rules/design-root.md`
+- [x] Review `agent-rules/stories.md`
+- [x] Review `agent-rules/specs.md`
+- [x] Review `agent-rules/consolidations.md`
+- [x] Review `agent-rules/scenarios.md`
+- [x] Review `agent-rules/src.md`
+- [x] Review `agent-rules/domain.md`
+- [x] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `agent-rules/`
 
 #### user-guides/
+Standards for user-guides:
+- Human readable guides to help the user know what to do in the applicable folder
+- Not meant for AI consumption
+- Not unnecessarily wordy, but clear and fully descriptive
+- Applicable to the folder they live in
+- Include hyperlinks to deeper topics (can even link into appeus/docs if necessary/helpful)
 
-- [ ] Review `user-guides/stories.md`
-- [ ] Review `user-guides/specs.md`
+- [ ] Review `user-guides/domain.md`
 - [ ] Review `user-guides/navigation.md`
 - [ ] Review `user-guides/scenarios.md`
+- [ ] Review `user-guides/specs.md`
+- [ ] Review `user-guides/stories.md`
 
 #### framework adapters and stubs
 

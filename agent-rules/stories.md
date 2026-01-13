@@ -1,42 +1,25 @@
 # Agent Rules: Stories
 
-You are in `design/stories/`. User stories define requirements.
+You are in `design/stories/`. Stories are the human-authored narrative of **what happens**.
 
-## Paths
+## Canonical paths
 
-- Per-target (canonical v2.1): `stories/<target>/*.md`
+- Stories live per target: `design/stories/<target>/*.md`
 
-## Story Structure
+## What belongs in stories
 
-```markdown
-# Story Title
+- User narrative and acceptance criteria (user-observable outcomes)
+- Edge cases and alternates that affect UX
 
-## Goal
-As a <user>, I want <action> so that <benefit>.
+Avoid UI implementation detail and programmer mapping; that belongs in specs and consolidations (artifact lanes: `appeus/reference/generation.md`).
 
-## Sequence
-1. User does X
-2. System responds with Y
+## What to do next (index)
 
-## Acceptance
-- Criterion 1
-- Criterion 2
-
-## Variants
-- happy, empty, error
-```
-
-## Workflow
-
-1. Read story for requirements
-2. Identify screens, update `specs/<target>/screens/index.md`
-3. Create consolidations in `generated/<target>/screens/`
-4. On request, generate code
+- If the target is unclear, ask which `--target <target>` is being worked on.
+- If the story implies a new screen/route, ensure `design/specs/<target>/screens/index.md` and `design/specs/<target>/navigation.md` are updated (format: `appeus/reference/spec-schema.md`).
+- If the story implies shared domain behavior, capture it in `design/specs/domain/*.md` (workflow: `appeus/reference/domain-agent-workflow.md`).
+- For the full story-to-generation lane method, see `appeus/reference/stories-agent-workflow.md`.
 
 ## Naming
 
 Stories: numbered for order (`01-browsing.md`)
-
-## Reference
-
-- [Stories Workflow](appeus/reference/stories-agent-workflow.md)
