@@ -1,6 +1,6 @@
 # Mock Variants
 
-How to use mock data variants for development, testing, and scenarios.
+How to use mock data variants for scenarios and deterministic UI states.
 
 ## Purpose
 
@@ -9,8 +9,9 @@ Variants allow scenarios to deep link into the app and select different mock dat
 ## Guidelines
 
 1. **Variants are mock-only** — Production builds ignore variant parameters
-2. **Read from deep links** — Parse variant from URL, don't hardcode
-3. **Isolate mock logic** — Keep in `src/mock/*`, UI reads via context
+2. **Selected only via deep links** — Parse variant from the deep link URL; do not select via other channels
+3. **Not part of data interfaces** — Do not add `variant` parameters to standard data access functions
+4. **Isolate mock logic** — Keep variant branching at the data adapter boundary (not in UI components)
 
 ## Deep Link Format
 
@@ -33,80 +34,22 @@ myapp://screen/UserProfile?variant=error&id=123
 | `empty` | Empty state | No items, placeholder UI |
 | `error` | Error state | Failed load, error message |
 
-## Implementation
+## Method (Appeus)
 
-### Mock Configuration
+Variants are a side-channel used for deterministic UI states (screenshots/tests). The method is:
 
-```typescript
-// src/mock/config.ts
-export const mockMode = __DEV__ || process.env.MOCK_MODE === 'true';
-```
+1. The deep link is parsed.
+2. The `variant` is extracted and stored in a global/mock-only location.
+3. The UI runs a normal data fetch (no variant parameters).
+4. The data layer sees mock mode is enabled, reads the stored variant, and loads `mock/data/<namespace>.<variant>.json`.
 
-### Variant Context
-
-```typescript
-// src/mock/VariantContext.tsx
-import { createContext, useContext, useState, useEffect } from 'react';
-import { Linking } from 'react-native';
-
-const VariantContext = createContext({ variant: 'happy', setVariant: () => {} });
-
-export function VariantProvider({ children }) {
-  const [variant, setVariant] = useState('happy');
-
-  useEffect(() => {
-    // Parse variant from initial URL
-    Linking.getInitialURL().then(url => {
-      if (url) {
-        const match = url.match(/variant=(\w+)/);
-        if (match) setVariant(match[1]);
-      }
-    });
-
-    // Listen for link events
-    const sub = Linking.addEventListener('url', ({ url }) => {
-      const match = url.match(/variant=(\w+)/);
-      if (match) setVariant(match[1]);
-    });
-
-    return () => sub.remove();
-  }, []);
-
-  return (
-    <VariantContext.Provider value={{ variant, setVariant }}>
-      {children}
-    </VariantContext.Provider>
-  );
-}
-
-export const useVariant = () => useContext(VariantContext);
-```
-
-### Data Adapter Usage
-
-```typescript
-// src/data/items.ts
-import { mockMode } from '../mock/config';
-import { useVariant } from '../mock/VariantContext';
-
-export function useItems() {
-  const { variant } = useVariant();
-  
-  if (mockMode) {
-    // Load mock data based on variant
-    return useMockItems(variant);
-  }
-  
-  // Production: call real API
-  return useRealItems();
-}
-```
+Mock vs production selection is controlled by a single mock-mode setting (described in [Mocking Strategy](mocking.md)).
 
 ## Agent Notes
 
 When generating code:
 - Do NOT thread `variant` through production engine calls
-- Pass `variant` via context/params only in mock mode
+- Pass `variant` “on the side” (context/global/mock-only store) only in mock mode
 - Keep mock branching at the data adapter level, not in UI components
 
 ## Scenario Usage

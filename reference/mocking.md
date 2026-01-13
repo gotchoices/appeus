@@ -1,20 +1,10 @@
 # Mocking Strategy
 
-How Appeus handles mock data for development and testing.
+How Appeus organizes mock data so agents can generate code and scenarios deterministically.
 
-## Overview
+## Mock data location
 
-Mock data enables:
-- Development without a backend
-- Testing edge cases (empty states, errors)
-- Scenario screenshots with controlled data
-- Stakeholder demos
-
-## Approach
-
-### Local JSON Files
-
-Mock data lives in `mock/data/`:
+Mock data lives in `mock/data/` (shared across targets):
 
 ```
 mock/data/
@@ -25,14 +15,26 @@ mock/data/
 └── ...
 ```
 
-### Variant Selection
+## Variant selection
 
-Variants are selected via:
-- Deep link query: `myapp://screen/ItemList?variant=empty`
-- HTTP header: `X-Mock-Variant: empty`
-- Context/state in the app
+Variants are selected via a deep link query parameter, e.g. `myapp://screen/ItemList?variant=empty` (details and constraints: [Mock Variants](mock-variants.md)).
 
-### Standard Variants
+## Mock mode switch (one setting)
+
+Each target app should have a single, centralized “mock mode” setting that selects between:
+- **Mock mode**: data adapters load from `mock/data/*.json`
+- **Production mode**: data adapters call the real backend/local store
+
+This setting should be read by the data layer, not threaded through UI components.
+
+## Data layer boundary (UI stays ignorant)
+
+- Screens and components should call a stable data layer API that does not expose “mock” or “variant” parameters.
+- The data layer decides where data comes from (mock vs production) based on the mock mode switch.
+
+In mock mode, the data layer may consult the current variant (see [Mock Variants](mock-variants.md)) to choose `mock/data/<namespace>.<variant>.json`.
+
+## Standard variants
 
 | Variant | Purpose |
 |---------|---------|
@@ -41,78 +43,25 @@ Variants are selected via:
 | `error` | Error response, error UI |
 | `loading` | (Optional) Simulated slow response |
 
-## Mock Server (Optional)
+## Data shape alignment
 
-For dynamic mocking, a tiny Express server can serve JSON:
+Mock data should match the app’s domain contract as written in `design/specs/domain/*.md` (schema + operations + invariants), not the app’s internal types.
 
-```javascript
-// mock/server/index.js
-const express = require('express');
-const app = express();
-
-app.get('/api/:namespace', (req, res) => {
-  const variant = req.query.variant || req.headers['x-mock-variant'] || 'happy';
-  const file = `./data/${req.params.namespace}.${variant}.json`;
-  res.sendFile(file, { root: __dirname + '/..' });
-});
-
-app.listen(3001);
-```
-
-## Client Integration
-
-Data adapters in `apps/<target>/src/data/` read mock data:
-
-```typescript
-// src/data/items.ts
-import { mockMode, getVariant } from '../mock';
-
-export async function fetchItems() {
-  if (mockMode) {
-    const variant = getVariant();
-    const data = await import(`../../mock/data/items.${variant}.json`);
-    return data.default;
-  }
-  // Production: call real API
-  return fetch('/api/items').then(r => r.json());
-}
-```
+When the domain contract changes, the corresponding mock data should be treated as stale (staleness model: [Staleness](staleness.md)).
 
 ## Mock Metadata
 
-Each namespace has a `.meta.json` tracking dependencies:
+Each namespace may include a `.meta.json` to document which files the mock data depends on.
 
 ```json
 {
   "namespace": "items",
-  "dependsOn": ["design/specs/domain/api.md"],
+  "dependsOn": ["design/specs/domain/schema.md"],
   "depHashes": {
-    "design/specs/domain/api.md": "sha256:..."
+    "design/specs/domain/schema.md": "sha256:..."
   },
   "variants": ["happy", "empty", "error"]
 }
 ```
 
-## Access Patterns
-
-| Scenario | How to Access |
-|----------|---------------|
-| Local development | Device/simulator hits laptop via LAN |
-| Team/staging | Cloudflare Tunnel, ngrok, or ssh tunnel |
-| CI/testing | Static JSON bundled with app |
-
-## Data Shape Alignment
-
-Mock data must match the API portion of the domain contract in `design/specs/domain/`:
-
-1. Agent reads API spec for endpoint shape
-2. Generates mock data matching that shape
-3. Updates meta.json with dependency
-
-When API spec changes, mock data is stale and should be regenerated.
-
-## See Also
-
-- [Mock Variants](mock-variants.md)
-- [Domain contract](../agent-rules/domain.md)
-- [Generation Workflow](generation.md)
+For domain work, see the domain contract guide at `design/specs/domain/` (agent entry: `appeus/agent-rules/domain.md`).

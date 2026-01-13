@@ -1,6 +1,6 @@
-# Scaffold Structure (v2.1 Canonical)
+# Scaffold Structure
 
-Appeus v2.1 uses a **single canonical layout**: everything is **per-target**, and targets always live under `apps/<target>/`.
+Appeus uses a single canonical layout: everything is **per-target**, and targets always live under `apps/<target>/`.
 
 ## Canonical Layout
 
@@ -8,7 +8,8 @@ Example targets: `mobile`, `web`.
 
 ```
 project/
-├── AGENTS.md → appeus/agent-rules/bootstrap.md (until first app) → appeus/agent-rules/project.md (after add-app)
+├── AGENTS.md → `appeus/agent-rules/bootstrap.md` (after `init-project.sh`)
+│            → `appeus/agent-rules/project.md` (after first `add-app.sh`)
 ├── appeus → /path/to/appeus-root
 ├── .gitignore                    # Ignores appeus symlinks
 │
@@ -86,7 +87,6 @@ AGENTS.md files are symlinks that point to appeus agent-rules. They belong in fo
 
 ## Notes
 
-- `design/generated/*` is fully regenerable — do not hand-edit.
-- App code lives in `apps/<target>/…` — framework-specific layout under that folder.
-- `design/specs/domain/` is optional and should remain minimal; it exists to hold shared “domain contract” docs when needed.
-- If a project’s filesystem looks confusing (mixed layouts, missing folders, legacy paths), see `appeus/CHANGELOG.md` → **“Migration to v2.1”** for a practical reorganization checklist.
+- `design/generated/*` is regenerable; treat it as derived output.
+- `design/specs/domain/` is optional; use it for shared “domain contract” docs when needed.
+- If a project’s filesystem looks inconsistent, see the migration section in `appeus/CHANGELOG.md`.

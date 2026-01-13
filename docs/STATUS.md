@@ -113,17 +113,23 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Decide what to do with `reference/*-agent-workflow.md` docs: keep only those with unique lane-specific detail; merge or slim the rest.
 
 **Standards to apply during per-file review**
-- Keep language **human-readable**; push programmer mapping into consolidations.
-- Prefer concise checklists and examples over long prose.
-- Links from agent-rules should feel “right-sized”: agent-rules stays brief; reference holds depth.
+- Document fully explains the assigned topic in human-readable language
+- Includes material description of appeus-approved methodology
+- Does not review practices that are otherwise known from good practices (i.e. how to code)
+- Document is consistent with appeus/docs/*.md (v2.1 standards)
+- Document does not need to speak of "v2.1" explicitly (all documents present represent the current version inherently)
+- Document does not contain fluff, decorative language, obvious language
+- In-line, in-context hyperlinks preferred over bottom References (where such inline context already exists in the file)
+- Prefer concise, descriptive checklists and examples over long prose.
+- Links from agent-rules should feel “right-sized”: agent-rules stays brief (topical index); reference holds depth/content.
 
 - [x] Review `reference/workflow.md`
-- [ ] Review `reference/scaffold.md`
-- [ ] Review `reference/generation.md`
-- [ ] Review `reference/codegen.md`
+- [x] Review `reference/scaffold.md`
+- [x] Review `reference/generation.md`
+- [x] Review `reference/codegen.md`
 - [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
 - [ ] Review `reference/spec-schema.md`
-- [ ] Review `reference/mocking.md` + `reference/mock-variants.md`
+- [x] Review `reference/mocking.md` + `reference/mock-variants.md`
 - [ ] Review `reference/scenarios.md`
 - [ ] Review `reference/testing.md`
 - [ ] Review agent workflow refs: `reference/*-agent-workflow.md`

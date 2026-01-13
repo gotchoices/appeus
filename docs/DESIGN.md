@@ -49,6 +49,12 @@ Built to accommodate multiple apps (“targets”) in one project. The user init
 
 9. **Peer review** — Stories can be developed into scenarios: storyboards like the original stories, augmented with screenshots from the app in various (mock) data states.
 
+   Mocking and variants are a UI validation mechanism:
+   - A target app should have a single “mock mode” switch (mock vs production).
+   - Variants apply to mock data only and are selected via deep links (primarily for screenshots/testing).
+   - Screens/components should not accept `variant` parameters or otherwise know whether data is mock vs production.
+   - The data layer decides mock vs production; in mock mode, it may consult the selected variant “on the side” (global/context) to load the appropriate `mock/data/<namespace>.<variant>.json`.
+
 ## Design Phases
 The user and agent will work in various phases of the project, some phases are specific to a particular target.  Others are shared across all targets of the project.
   - Initial project and Appeus scaffold (shared): the user creates a workspace and installs Appeus.

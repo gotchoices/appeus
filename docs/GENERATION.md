@@ -43,6 +43,7 @@ An Appeus project consists of [several phases](./DESIGN.md#design-phases). Some 
   Agent generated storyboards with screenshots based on stories:
   - This optional phase is helpful if other team members will be reviewing the proposed screens and navigation.
   - It is possible that the screens so far are prototypical and data is still mocked.
+  - Variants apply to mock data only and are selected via deep links to present the UI in specific sample states (screenshots/testing), without polluting production data interfaces.
   - A local review may be generated for the user using `scripts/preview-scenarios.sh`.
   - Or a review may be made available more publicly as HTML using `scripts/publish-scenarios.sh`, assuming an available web server.
   - Based on review, the user may iterate back to stories/navigation/specs and repeat phases to refine the app; further refinements should be tracked in the target checklist.
@@ -253,8 +254,8 @@ Mock data often has a companion metadata file describing what variants exist and
 ```json
 {
   "namespace": "LogEntries",
-  "dependsOn": ["design/specs/domain/api.md"],
-  "depHashes": { "design/specs/domain/api.md": "sha256:..." },
+  "dependsOn": ["design/specs/domain/<file>.md"],
+  "depHashes": { "design/specs/domain/<file>.md": "sha256:..." },
   "variants": ["happy", "empty", "error"]
 }
 ```

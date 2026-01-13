@@ -2,7 +2,7 @@
 
 ## Overview
 
-Appeus v2.1 follows a design-first workflow:
+Appeus follows a design-first workflow:
 
 ```
 Init Project → Discovery → Add Apps → Stories → Navigation → Domain (as needed) → Slice → Validate → Iterate
@@ -10,7 +10,7 @@ Init Project → Discovery → Add Apps → Stories → Navigation → Domain (a
 
 ## Phase Model
 
-For named development phases (and how to detect/progress them), see [Phases](phases.md)
+For named development phases (and how to detect/progress them), see [Phases](phases.md).
 
 ## Precedence Rules
 
@@ -22,7 +22,7 @@ Human-triggered. Per target, the loop is:
 
 1. **Pick target** (`--target`) and confirm phase checklist: `design/specs/<target>/STATUS.md`
 2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (prefer stale via `appeus/scripts/check-stale.sh`)
-3. **Read inputs**: target stories/specs + shared domain contract + `design/specs/project.md`
+3. **Read inputs**: target stories/specs + shared domain contract (as needed) + `design/specs/project.md`
 4. **Refresh consolidation**: write/update `design/generated/<target>/screens/<Route>.md`
 5. **Generate code** under `apps/<target>/src/` (screen + navigation wiring as needed)
 6. **Update dependency registry**: ensure `design/generated/<target>/meta/outputs.json` has an entry for the route and that its `dependsOn` list is accurate enough for deterministic staleness
@@ -34,7 +34,7 @@ Human-triggered. Per target, the loop is:
 
 ## Multiple Targets
 
-When multiple app targets exist, scripts accept `--target <name>` to scope operations.
+When multiple app targets exist, scripts accept `--target <target>` to scope operations.
 
 ## See Also
 
