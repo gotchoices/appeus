@@ -114,5 +114,5 @@ When API spec changes, mock data is stale and should be regenerated.
 ## See Also
 
 - [Mock Variants](mock-variants.md)
-- [API Specs](../agent-rules/api.md)
+- [Domain contract](../agent-rules/domain.md)
 - [Generation Workflow](generation.md)

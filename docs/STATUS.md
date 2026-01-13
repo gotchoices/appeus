@@ -104,7 +104,6 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 #### agent-rules/
 
-- [ ] Review `agent-rules/root.md`
 - [ ] Review `agent-rules/project.md`
 - [ ] Review `agent-rules/bootstrap.md`
 - [ ] Review `agent-rules/design-root.md`
@@ -113,7 +112,7 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `agent-rules/consolidations.md`
 - [ ] Review `agent-rules/scenarios.md`
 - [ ] Review `agent-rules/src.md`
-- [ ] Review `agent-rules/api.md` + `agent-rules/schema.md` (decide whether these should become a single `domain.md` in v2.1)
+- [ ] Review `agent-rules/domain.md`
 - [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `agent-rules/`
 
 #### reference/
