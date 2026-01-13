@@ -41,3 +41,4 @@ screenshots:
 ## Reference
 
 - [Scenarios](appeus/reference/scenarios.md)
+- [Scenarios workflow](appeus/reference/scenarios-agent-workflow.md)

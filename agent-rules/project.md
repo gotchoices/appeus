@@ -21,6 +21,11 @@ See: [Precedence](appeus/reference/precedence.md)
 | "what's next" | Determine phase and/or next slice to work on, see [workflow](appeus/reference/workflow.md) |
 | "generate scenarios/images" | See [scenarios](appeus/reference/scenarios.md) |
 
+## References
+
+- [Scaffold](appeus/reference/scaffold.md)
+- [Testing](appeus/reference/testing.md)
+
 Target selection:
 - If exactly one target exists, default to it.
 - If multiple targets exist, ask which `--target` to operate on.

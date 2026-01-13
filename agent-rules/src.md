@@ -1,6 +1,6 @@
 # Agent Rules: App Source
 
-You are in an app's source tree (`apps/<name>/`).
+You are in an app's source tree (`apps/<target>/`).
 
 ## Framework
 
@@ -16,13 +16,13 @@ Check `design/specs/project.md` for framework, then see:
 
 - Do not modify without regeneration request
 - All edits derived from specs and consolidations
-- Embed AppeusMeta header in generated files
+- Do not inject metadata into source headers; metadata lives in consolidations + JSON registries
 
 ## After Regeneration
 
-1. Update `design/generated/meta/outputs.json`
-2. Run `update-dep-hashes.sh --route <Route>`
-3. Verify with `check-stale.sh`
+1. Ensure `design/generated/<target>/meta/outputs.json` reflects the slice’s `dependsOn`
+2. Run `update-dep-hashes.sh --target <target> --route <Route>`
+3. Verify with `check-stale.sh --target <target>`
 
 ## Mock Variants
 
@@ -42,3 +42,4 @@ If screen/route files are getting large, extract reusable UI into the app’s co
 
 - [Codegen](appeus/reference/codegen.md)
 - [Generation](appeus/reference/generation.md)
+- [Testing](appeus/reference/testing.md)

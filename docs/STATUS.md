@@ -102,6 +102,33 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Remove all runtime-asset references to deleted scripts (`reference/`, `agent-rules/`, docs)
 - [x] Legacy scripts removed: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
 
+#### reference/
+
+**Reference review goals (v2.1)**
+- [ ] Ensure every reference doc is reachable from an `agent-rules/*.md` hyperlink (directly, or via a small “index” link).
+- [ ] Ensure each reference doc covers a **single topic**; split or trim where one file mixes multiple topics (notably generation vs scenarios vs staleness).
+- [ ] De-duplicate repeated guidance across reference docs (keep global rules in `reference/phases.md` + `reference/precedence.md` + `reference/workflow.md`).
+- [ ] Normalize to v2.1 canonical paths and terms everywhere (`<target>`, `design/*/<target>/`, `design/specs/domain/`, no progressive structure).
+- [ ] Remove legacy/contradictory guidance (e.g., “generated code headers”, deleted scripts, `apps/<name>` placeholders).
+- [ ] Decide what to do with `reference/*-agent-workflow.md` docs: keep only those with unique lane-specific detail; merge or slim the rest.
+
+**Standards to apply during per-file review**
+- Keep language **human-readable**; push programmer mapping into consolidations.
+- Prefer concise checklists and examples over long prose.
+- Links from agent-rules should feel “right-sized”: agent-rules stays brief; reference holds depth.
+
+- [x] Review `reference/workflow.md`
+- [ ] Review `reference/scaffold.md`
+- [ ] Review `reference/generation.md`
+- [ ] Review `reference/codegen.md`
+- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
+- [ ] Review `reference/spec-schema.md`
+- [ ] Review `reference/mocking.md` + `reference/mock-variants.md`
+- [ ] Review `reference/scenarios.md`
+- [ ] Review `reference/testing.md`
+- [ ] Review agent workflow refs: `reference/*-agent-workflow.md`
+- [ ] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
+
 #### agent-rules/
 
 - [x] Review `agent-rules/project.md`
@@ -114,20 +141,6 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [ ] Review `agent-rules/src.md`
 - [ ] Review `agent-rules/domain.md`
 - [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `agent-rules/`
-
-#### reference/
-
-- [ ] Review `reference/workflow.md`
-- [ ] Review `reference/scaffold.md`
-- [ ] Review `reference/generation.md`
-- [ ] Review `reference/codegen.md`
-- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
-- [ ] Review `reference/spec-schema.md`
-- [ ] Review `reference/mocking.md` + `reference/mock-variants.md`
-- [ ] Review `reference/scenarios.md`
-- [ ] Review `reference/testing.md`
-- [ ] Review agent workflow refs: `reference/*-agent-workflow.md`
-- [ ] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
 
 #### user-guides/
 

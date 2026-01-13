@@ -2,10 +2,10 @@
 
 ## Overview
 
-Appeus v2 follows a design-first workflow:
+Appeus v2.1 follows a design-first workflow:
 
 ```
-Init Project → Discovery → Add Apps → Stories → Schema → Specs → Codegen → Run → Iterate
+Init Project → Discovery → Add Apps → Stories → Navigation → Domain (as needed) → Slice → Validate → Iterate
 ```
 
 ## Phase Model
@@ -41,3 +41,5 @@ When multiple app targets exist, scripts accept `--target <name>` to scope opera
 - [Scaffold Structure](scaffold.md)
 - [Generation Details](generation.md)
 - [Staleness and Dependencies](generation.md#staleness-and-dependencies)
+- [Design Phases](phases.md)
+- [Precedence](precedence.md)

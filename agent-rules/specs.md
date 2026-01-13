@@ -41,3 +41,5 @@ Spec changes make consolidations stale. Refresh consolidation before regeneratin
 
 - [Spec Schema](appeus/reference/spec-schema.md)
 - [Specs Workflow](appeus/reference/specs-agent-workflow.md)
+- [Screens workflow](appeus/reference/screens-agent-workflow.md)
+- [Navigation workflow](appeus/reference/navigation-agent-workflow.md)
