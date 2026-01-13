@@ -9,22 +9,8 @@ language: ts           # ts | js
 packageManager: yarn   # yarn | npm | pnpm
 ```
 
-## React Native (if applicable)
-
-```yaml
-runtime: bare          # bare | expo
-navigation: react-navigation
-state: zustand         # zustand | redux | jotai
-http: fetch            # fetch | axios
-```
-
-## SvelteKit (if applicable)
-
-```yaml
-adapter: auto          # auto | node | static
-```
-
 ## Notes
 
-- Adjust values as needed for your project
-- Regenerate after changes
+- Keep this file high-level and human-readable; avoid implementation mapping.
+- Specify platform (React-Native, NativeScript, Svelte, etc)
+- Specify other tools used in implementation

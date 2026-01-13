@@ -8,7 +8,7 @@ So that <benefit/value>
 Context: <optional additional context, prerequisites, user state, domain knowledge>
 
 ## Sequence
-Write numbered steps focusing on WHAT, not UI HOW.
+Write numbered steps focusing on **WHAT happens** (user goals + outcomes), not UI HOW.
 
 1. <User accomplishes first goal or takes first action>
 2. <What happens as a result — from user's perspective>
@@ -20,9 +20,10 @@ Write numbered steps focusing on WHAT, not UI HOW.
 
 Guidance:
 - Focus on user goals and functional outcomes
-- Avoid UI specifics (“taps button”, positions, colors)
-- Include what user provides/receives, not how it’s displayed
-- Describe what happens, not how it looks
+- Mention **inputs/outputs** (what the user provides and what they receive)
+- Avoid implementation choices and internal architecture
+- UI mentions are OK only when **user-observable** (“user selects an item”, not “tap the blue button”)
+- Include empty/error cases when they matter
 
 Numbering Convention:
 - Use dotted notation (3.1, 3.2) for sub-steps within a main step that return to the next step
@@ -42,12 +43,13 @@ Alternative Path B: <full replacement>
 ## Acceptance Criteria
 - [ ] <specific, testable criterion>
 - [ ] <another criterion>
-- [ ] <performance requirement>
-- [ ] <error handling requirement>
-- [ ] <usability requirement>
+- [ ] <empty/error handling requirement (if applicable)>
+- [ ] <performance/usability requirement (if applicable)>
 
 ---
 
-Note: Agents will derive screens/specs from stories. Human specs in `design/specs/*` override consolidations.
+Notes:
+- Write stories per target under `design/stories/<target>/`.
+- Agents will derive screens/specs/consolidations from stories. Human specs in `design/specs/` override consolidations.
 
 

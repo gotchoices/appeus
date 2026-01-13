@@ -1,36 +1,15 @@
 # Dependencies Spec
 
-This file documents the key dependencies for the app target.
-Actual packages vary by framework; examples below are illustrative.
+This file documents notable dependency decisions for this target.
 
-## React Native (example)
-
-```yaml
-deps:
-  - "@react-navigation/native": "^6"
-  - "@react-navigation/native-stack": "^6"
-  - "zustand": "^4"
-  - "expo-linking": "^6"
-  - "expo": "^51"
-devDeps:
-  - "typescript": "^5"
-  - "eslint": "^9"
-  - "vitest": "^2"
-```
-
-## SvelteKit (example)
+## Dependencies (optional)
 
 ```yaml
 deps:
-  - "@sveltejs/kit": "^2"
-  - "svelte": "^5"
+  - "<package>": "<version or range>"
 devDeps:
-  - "typescript": "^5"
-  - "vite": "^5"
-  - "vitest": "^2"
+  - "<package>": "<version or range>"
 ```
 
 ## Notes
-
-- Versions are indicative; adjust per project and framework.
-- Consult `design/specs/project.md` for framework choice.
+- Keep this minimal; specify only if the specific package matters

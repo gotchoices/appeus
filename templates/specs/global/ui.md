@@ -1,41 +1,21 @@
 # UI Spec
 
-iconSet: ionicons            # ionicons | material-community | feather
-uiKit: none                  # none | react-native-paper | tamagui | native-base
-theme: system                # system | light | dark
+This file is a **human-readable decision record** for UI conventions.
 
-colors:
-  # Light mode
-  backgroundLight: "#ffffff"
-  surfaceLight:    "#ffffff"
-  textPrimaryLight:   "#111111"
-  textSecondaryLight: "#555555"
-  borderLight:     "#dddddd"
-  bannerErrorLight: "#ffeeee"
-  # Dark mode
-  backgroundDark: "#000000"
-  surfaceDark:    "#111111"
-  textPrimaryDark:   "#eeeeee"
-  textSecondaryDark: "#bbbbbb"
-  borderDark:     "#333333"
-  bannerErrorDark: "#330000"
+## Decisions
 
-spacing: [4, 8, 12, 16, 20, 24]
+- **Theme**: system | light | dark
+- **Icon set**: <name>
+- **UI kit** (if any): <name>
 
-typography:
-  title:
-    size: 20
-    weight: 600
-  body:
-    size: 16
-    weight: 400
-  small:
-    size: 12
-    weight: 400
+## Tokens (optional)
 
-notes:
-- Semantic names map to framework components; refine over time.
-- For icons, choose names from the selected icon set; adjust per platform if needed.
-- Navigation theming can adopt these colors via the framework's theming system.
+- **Color tokens**: <semantic names, not raw palette dumps>
+- **Spacing scale**: <e.g., 4/8/12/16>
+- **Typography**: <names + brief intent>
+
+## Notes
+
+- Keep this minimal; implementation details belong in consolidations or code.
 
 
