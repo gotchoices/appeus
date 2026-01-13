@@ -48,14 +48,9 @@ When user requests regeneration:
 After any spec change:
 - Consolidation becomes stale
 - Regenerate consolidation before codegen
-- Run `check-stale.sh --target <target>` to verify
+- Optionally run `appeus/scripts/check-stale.sh --target <target>` to verify
 
 ## No Code in Specs
 
 Don’t embed code in specs. If the user needs a “how we’ll implement this” note, put it in the consolidation under `design/generated/<target>/`.
-
-## See Also
-
-- [Spec Schema](spec-schema.md)
-- [Generation Workflow](generation.md)
-- [Codegen Guide](codegen.md)
+Use `reference/spec-schema.md` for recommended spec structure and `reference/codegen.md` for code output rules.

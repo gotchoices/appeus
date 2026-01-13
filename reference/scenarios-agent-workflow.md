@@ -2,6 +2,8 @@
 
 How to generate scenario documents with screenshots.
 
+For scenario structure and screenshot methodology, see `reference/scenarios.md`. Variant semantics are described in `reference/mock-variants.md`. Deep link structure is described in `reference/codegen.md` under “Deep Links”.
+
 ## When to Generate
 
 - After screen/navigation are stable for the feature
@@ -59,7 +61,7 @@ screenshots:
 Run the capture script:
 
 ```bash
-appeus/scripts/build-images.sh --reuse --window [--target mobile]
+appeus/scripts/build-images.sh --reuse --window [--target <target>]
 ```
 
 Options:
@@ -162,9 +164,3 @@ appeus/scripts/preview-scenarios.sh --port 8080
 ```bash
 appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/scenarios
 ```
-
-## See Also
-
-- [Scenarios Reference](scenarios.md)
-- [Mock Variants](mock-variants.md)
-- [Deep Links](codegen.md#deep-links)

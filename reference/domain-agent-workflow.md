@@ -4,6 +4,8 @@ Lane-specific guidance for maintaining the **shared domain contract** under `des
 
 This doc is intentionally focused on domain work only. For the overall per-slice loop, see [Workflow](workflow.md).
 
+For spec structure conventions, see `reference/spec-schema.md`.
+
 ## What belongs in the domain contract (human)
 
 Create only what you need, and keep it human-readable:
@@ -33,11 +35,4 @@ Create only what you need, and keep it human-readable:
 4. **Keep programmer mapping out of specs**:
    - put adapters/types/module structure in consolidations under `design/generated/<target>/`.
 
-## See Also
-
-- [Domain guide (human)](../user-guides/domain.md)
-- [Spec schema](spec-schema.md)
-- [Mocking](mocking.md)
-- [Mock variants](mock-variants.md)
-
-
+If the slice depends on deterministic UI states (screenshots/testing), use mock variants as described in `reference/mock-variants.md` and keep mock data aligned to the domain contract as described in `reference/mocking.md`.

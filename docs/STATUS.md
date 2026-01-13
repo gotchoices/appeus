@@ -127,13 +127,13 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Review `reference/scaffold.md`
 - [x] Review `reference/generation.md`
 - [x] Review `reference/codegen.md`
-- [ ] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
+- [x] Replace remaining `specs/schema` + `specs/api` references with `specs/domain` across `reference/` (+ remove references to deleted scripts)
 - [x] Review `reference/spec-schema.md`
 - [x] Review `reference/mocking.md` + `reference/mock-variants.md`
 - [x] Review `reference/scenarios.md`
-- [ ] Review `reference/testing.md`
-- [ ] Review agent workflow refs: `reference/*-agent-workflow.md`
-- [ ] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
+- [x] Review `reference/testing.md`
+- [x] Review agent workflow refs: `reference/*-agent-workflow.md`
+- [x] Review framework refs: `reference/frameworks/react-native.md`, `reference/frameworks/sveltekit.md`, `reference/frameworks/nativescript-svelte.md`
 
 #### agent-rules/
 

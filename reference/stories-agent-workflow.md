@@ -51,11 +51,7 @@ Propose scenarios and variants for testing:
 
 ### 6. Generate Code (On Request)
 
-When user requests code generation:
-- Refresh consolidations if stale
-- Generate screen code
-- Update navigation
-- Create mock data
+When the user requests generation, follow `reference/generation.md` (methodology) and `reference/codegen.md` (code output rules).
 
 ## Cross-Target Considerations
 
@@ -63,8 +59,4 @@ When multiple targets exist:
 - Check `design/specs/project.md` for target/platform expectations
 - A story in one target may imply shared domain contract updates in `design/specs/domain/`
 
-## See Also
-
-- [Story Template](../templates/stories/story-template.md)
-- [Generation Workflow](generation.md)
-- [Spec Schema](spec-schema.md)
+If stories imply domain contract changes, record them in `design/specs/domain/*.md` (workflow: `reference/domain-agent-workflow.md`).

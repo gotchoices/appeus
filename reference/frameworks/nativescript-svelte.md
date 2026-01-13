@@ -1,12 +1,8 @@
-# NativeScript Svelte Framework Guide
+# NativeScript Svelte Framework Reference
 
-This document provides specific guidance for generating NativeScript Svelte applications within an Appeus project.
+Framework-specific conventions for NativeScript Svelte targets in an Appeus project.
 
-## Overview
-
-NativeScript Svelte (Svelte Native) combines Svelte's reactive component model with NativeScript's native mobile capabilities. It provides truly native iOS and Android apps using Svelte syntax.
-
-## Project Structure
+## Directory Structure
 
 ```
 apps/<target>/
@@ -15,195 +11,28 @@ apps/<target>/
 │   ├── app.ts              # Entry point
 │   ├── components/         # Reusable components
 │   ├── pages/              # Page components
-│   ├── services/           # Business logic
 │   └── data/               # Data adapters
 ├── nativescript.config.ts  # NativeScript config
 ├── package.json
 └── tsconfig.json
 ```
 
-## Codegen Conventions
+Pages are placed under `apps/<target>/app/pages/` and components under `apps/<target>/app/components/`.
 
-### Components
+## Navigation
 
-- Components: PascalCase (`UserProfile.svelte`)
-- Pages: PascalCase in `pages/` folder
-- Use `.svelte` extension
-
-### Navigation
-
-NativeScript Svelte uses frame-based navigation:
-
-```svelte
-<script>
-  import { navigate } from 'svelte-native'
-  import DetailPage from './pages/DetailPage.svelte'
-  
-  function goToDetail() {
-    navigate({ page: DetailPage, props: { id: '123' } })
-  }
-</script>
-```
-
-### Native Components
-
-Use NativeScript components with Svelte syntax:
-
-```svelte
-<page>
-  <actionBar title="My App" />
-  <stackLayout>
-    <label text="Hello World" />
-    <button text="Tap Me" on:tap={handleTap} />
-  </stackLayout>
-</page>
-```
+NativeScript Svelte uses frame-based navigation. Page-to-page navigation should map to the routes declared in `design/specs/<target>/navigation.md` (methodology: `reference/spec-schema.md` → navigation format).
 
 ## Deep Linking
 
-NativeScript handles deep links via the application module:
+Deep link handling should be wired from `apps/<target>/app/app.ts` and should map `myapp://screen/<Route>` into the correct page for scenario/testing usage (deep link structure: `reference/codegen.md` → “Deep Links”).
 
-```typescript
-// app/app.ts
-import { Application } from '@nativescript/core'
+## Mock mode + variants (NativeScript Svelte)
 
-Application.on('customUrlScheme', (args) => {
-  const url = args.url // e.g., myapp://screen/UserProfile?variant=happy
-  // Parse and navigate
-})
-```
+- The app has a single mock-mode switch (mock vs production).
+- Variants are mock-only and are selected via deep links.
+- Pages/components should not accept `variant` parameters or “know” whether data is mock vs production.
+- The data layer decides mock vs production; in mock mode it consults the current variant “on the side” and loads `mock/data/<namespace>.<variant>.json`.
 
-### URL Format
-
-```
-myapp://screen/<PageName>?variant=<name>&param=value
-```
-
-## Mock Variants
-
-Handle variants via URL parameters or app state:
-
-```svelte
-<script>
-  import { onMount } from 'svelte'
-  import { getMockData } from '../data/mockAdapter'
-  
-  export let variant = 'happy'
-  
-  let data = []
-  
-  onMount(async () => {
-    data = await getMockData('items', variant)
-  })
-</script>
-```
-
-### Data Adapter Pattern
-
-```typescript
-// app/data/mockAdapter.ts
-import { Http } from '@nativescript/core'
-
-const MOCK_SERVER = 'http://localhost:3456'
-
-export async function getMockData(namespace: string, variant: string) {
-  const response = await Http.getJSON(`${MOCK_SERVER}/${namespace}.${variant}.json`)
-  return response
-}
-```
-
-## Styling
-
-NativeScript uses CSS with some platform-specific properties:
-
-```svelte
-<style>
-  .title {
-    font-size: 24;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .container {
-    padding: 16;
-    background-color: #fff;
-  }
-</style>
-```
-
-## State Management
-
-Use Svelte stores for state:
-
-```typescript
-// app/stores/user.ts
-import { writable } from 'svelte/store'
-
-export const currentUser = writable(null)
-export const isLoading = writable(false)
-```
-
-```svelte
-<script>
-  import { currentUser } from '../stores/user'
-</script>
-
-{#if $currentUser}
-  <label text={$currentUser.name} />
-{/if}
-```
-
-## Platform-Specific Code
-
-Use NativeScript's platform detection:
-
-```svelte
-<script>
-  import { isIOS, isAndroid } from '@nativescript/core'
-</script>
-
-{#if isIOS}
-  <label text="iOS specific" />
-{:else if isAndroid}
-  <label text="Android specific" />
-{/if}
-```
-
-## Running the App
-
-```bash
-# Preview on device (via NativeScript Playground app)
-ns preview
-
-# Run on iOS simulator
-ns run ios
-
-# Run on Android emulator
-ns run android
-
-# Build for production
-ns build ios --release
-ns build android --release
-```
-
-## Common Issues
-
-### Environment Setup
-
-Run `ns doctor` to verify your environment is configured correctly.
-
-### Hot Reload
-
-NativeScript Svelte supports hot module replacement. If changes aren't reflecting, try:
-```bash
-ns clean
-ns run <platform>
-```
-
-## See Also
-
-- [Svelte Native Documentation](https://svelte.nativescript.org/)
-- [NativeScript Documentation](https://docs.nativescript.org/)
-- [Mock Variants](../mock-variants.md)
-- [Generation Workflow](../generation.md)
+Variant and mock-mode methodology is defined in `reference/mock-variants.md` and `reference/mocking.md`.
 
