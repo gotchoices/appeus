@@ -64,7 +64,7 @@ PY
   fi
 fi
 
-echo "Appeus v2: Detaching from project: ${PROJECT_DIR}"
+echo "Appeus v2.1: Detaching from project: ${PROJECT_DIR}"
 if [ "${DRY_RUN}" = "1" ]; then
   echo "(dry-run)"
 fi

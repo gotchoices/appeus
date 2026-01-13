@@ -10,7 +10,7 @@ set -euo pipefail
 # Usage:
 #   appeus/scripts/android-screenshot.sh \
 #     --deeplink "myapp://screen/ItemList?variant=happy" \
-#     --output "./design/generated/images/item-list-happy.png" \
+#     --output "./design/generated/<target>/images/item-list-happy.png" \
 #     --app-id "com.example.myapp" \
 #     --avd "Medium_Phone_API_34" \
 #     --delay 3 \

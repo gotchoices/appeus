@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Appeus v2: Initialize a new project with design-first structure.
+# Appeus v2.1: Initialize a new project with design-first structure.
 # Run this in an empty or existing project folder.
 #
 # Usage:
@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 [--no-git]"
       echo ""
-      echo "Initialize an Appeus v2 project in the current directory."
+      echo "Initialize an Appeus v2.1 project in the current directory."
       echo ""
       echo "Options:"
       echo "  --no-git    Skip git initialization"
@@ -108,7 +108,7 @@ write_if_missing() {
   fi
 }
 
-echo "Appeus v2: Initializing project in $(pwd)"
+echo "Appeus v2.1: Initializing project in $(pwd)"
 echo ""
 
 # 1. Create appeus symlink
@@ -239,7 +239,7 @@ echo "2. Add your first app:"
 echo "   ./appeus/scripts/add-app.sh --name mobile --framework react-native"
 echo "   ./appeus/scripts/add-app.sh --name web --framework sveltekit"
 echo ""
-echo "3. Write stories in design/stories/"
+echo "3. Write stories per target in design/stories/<target>/"
 echo ""
 echo "Supported frameworks: react-native, sveltekit"
 echo ""

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Appeus v2: Add an app to the project.
+# Appeus v2.1: Add an app to the project.
 #
 # Usage:
 #   ./appeus/scripts/add-app.sh --name <name> --framework <framework> [--refresh]
@@ -79,7 +79,7 @@ while [[ $# -gt 0 ]]; do
       echo "  APPEUS_PM=yarn|npm|pnpm   Package manager (default: yarn)"
       echo "  APPEUS_RUNTIME=expo|bare  RN runtime (default: bare, RN only)"
       echo "  APPEUS_RN_VERSION=X.Y.Z   RN version (default: 0.82.1, RN only)"
-        echo "  APPEUS_APP_GIT=1          Keep per-app git repo if scaffold initializes one (default: 0 = remove)"
+      echo "  APPEUS_APP_GIT=1          Keep per-app git repo if scaffold initializes one (default: 0 = remove)"
       echo ""
       echo "Examples:"
       echo "  $0 --name mobile --framework react-native"
@@ -130,7 +130,7 @@ if [ -d "${PROJECT_DIR}/apps/${APP_NAME}" ]; then
   fi
 fi
 
-echo "Appeus v2: Adding app '${APP_NAME}' with framework '${FRAMEWORK}'"
+echo "Appeus v2.1: Adding app '${APP_NAME}' with framework '${FRAMEWORK}'"
 echo ""
 
 # v2.1 canonical: we do not migrate a “flat” design layout.
@@ -161,7 +161,7 @@ fi
 ln -snf "../../../appeus/agent-rules/stories.md" "${PROJECT_DIR}/design/stories/${APP_NAME}/AGENTS.md"
 ln -snf "../../../appeus/agent-rules/specs.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/AGENTS.md"
 ln -snf "../../../appeus/agent-rules/consolidations.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/AGENTS.md"
-ln -snf "../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios/AGENTS.md"
+ln -snf "../../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios/AGENTS.md"
 
 # Copy templates
 if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/screens/index.md" ]; then

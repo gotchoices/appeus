@@ -89,15 +89,15 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 
 #### scripts/
 
-- [ ] Review `scripts/init-project.sh`
-- [ ] Review `scripts/add-app.sh`
-- [ ] Review `scripts/check-stale.sh`
-- [ ] Review `scripts/update-dep-hashes.sh`
-- [ ] Review `scripts/build-images.sh`
-- [ ] Review `scripts/android-screenshot.sh`
-- [ ] Review `scripts/preview-scenarios.sh`
-- [ ] Review `scripts/publish-scenarios.sh`
-- [ ] Review `scripts/lib/project-root.sh`
+- [x] Review `scripts/init-project.sh`
+- [x] Review `scripts/add-app.sh`
+- [x] Review `scripts/check-stale.sh`
+- [x] Review `scripts/update-dep-hashes.sh`
+- [x] Review `scripts/build-images.sh`
+- [x] Review `scripts/android-screenshot.sh`
+- [x] Review `scripts/preview-scenarios.sh`
+- [x] Review `scripts/publish-scenarios.sh`
+- [x] Review `scripts/lib/project-root.sh`
 - [x] Remove deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh` (deleted in v2.1)
 - [ ] Remove all runtime-asset references to deleted scripts (`reference/`, `agent-rules/`, docs)
 - [x] Legacy scripts removed: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
