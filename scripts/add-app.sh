@@ -163,6 +163,9 @@ ln -snf "../../../appeus/agent-rules/specs.md" "${PROJECT_DIR}/design/specs/${AP
 ln -snf "../../../appeus/agent-rules/consolidations.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/AGENTS.md"
 ln -snf "../../../../appeus/agent-rules/scenarios.md" "${PROJECT_DIR}/design/generated/${APP_NAME}/scenarios/AGENTS.md"
 
+# Link human guide for per-target specs folder
+ln -snf "../../../appeus/user-guides/target-spec.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/README.md"
+
 # Copy templates
 if [ ! -f "${PROJECT_DIR}/design/specs/${APP_NAME}/screens/index.md" ]; then
   cp "${APPEUS_DIR}/templates/specs/screens/index.md" "${PROJECT_DIR}/design/specs/${APP_NAME}/screens/index.md"

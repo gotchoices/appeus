@@ -142,6 +142,14 @@ ensure_symlink "../../../appeus/user-guides/domain.md" "${PROJECT_DIR}/design/sp
 ensure_symlink "../../appeus/user-guides/stories.md" "${PROJECT_DIR}/design/stories/README.md"
 ensure_symlink "../../appeus/user-guides/specs.md" "${PROJECT_DIR}/design/specs/README.md"
 
+# If targets already exist, ensure each per-target specs folder has a human guide.
+for d in "${PROJECT_DIR}/design/specs/"*; do
+  [ -d "$d" ] || continue
+  base="$(basename "$d")"
+  [ "$base" = "domain" ] && continue
+  ensure_symlink "../../../appeus/user-guides/target-spec.md" "${d}/README.md"
+done
+
 # 10. Create apps directory
 ensure_dir "${PROJECT_DIR}/apps"
 

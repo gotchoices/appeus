@@ -164,8 +164,8 @@ Standards for user-guides:
 - Applicable to the folder they live in
 - Include hyperlinks to deeper topics (can even link into appeus/docs if necessary/helpful)
 
-- [ ] Review `user-guides/domain.md`
-- [ ] Review `user-guides/navigation.md`
+- [x] Review `user-guides/domain.md`
+- [x] Review `user-guides/target-spec.md` (renamed from `user-guides/navigation.md`)
 - [ ] Review `user-guides/scenarios.md`
 - [ ] Review `user-guides/specs.md`
 - [ ] Review `user-guides/stories.md`
@@ -224,7 +224,7 @@ Standards for user-guides:
 - [x] `user-guides/stories.md` — Updated for v2
 - [x] `user-guides/specs.md` — Updated for v2
 - [x] `user-guides/scenarios.md` — Updated for v2
-- [x] `user-guides/navigation.md` — Updated for v2
+- [x] `user-guides/target-spec.md` — Renamed from `user-guides/navigation.md` and broadened to cover per-target specs
 
 ## v1 Flaws Fixed
 
