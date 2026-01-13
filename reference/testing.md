@@ -23,7 +23,7 @@ Keep tests pragmatic and fast.
 - Data adapter logic
 - Formatting utilities
 
-**Location:** `apps/<name>/__tests__/` or colocated `*.test.ts`
+**Location:** `apps/<target>/__tests__/` or colocated `*.test.ts`
 
 ```typescript
 // apps/mobile/src/utils/__tests__/variant.test.ts
@@ -47,7 +47,7 @@ test('defaults to happy when no variant', () => {
 - User interactions
 - Accessibility
 
-**Location:** `apps/<name>/src/screens/__tests__/`
+**Location:** `apps/<target>/src/screens/__tests__/`
 
 ```typescript
 // apps/mobile/src/screens/__tests__/ItemList.test.tsx
@@ -76,7 +76,7 @@ test('shows empty state when no items', () => {
 - Navigation
 - Variant-driven mocks
 
-**Location:** `apps/<name>/e2e/`
+**Location:** `apps/<target>/e2e/`
 
 ```typescript
 // apps/mobile/e2e/itemList.e2e.ts
@@ -138,7 +138,7 @@ For projects with multiple apps:
 | Mobile (RN) | Jest + RNTL | Detox |
 | Web (SvelteKit) | Vitest + Testing Library | Playwright |
 
-Each target has its own test configuration in `apps/<name>/`.
+Each target has its own test configuration in `apps/<target>/`.
 
 ## CI Integration
 

@@ -24,7 +24,7 @@ This folder holds the **shared domain contract** (only when needed): data model,
 
 - [Domain guide (human)](appeus/user-guides/domain.md)
 - [Spec schema](appeus/reference/spec-schema.md)
-- [API workflow](appeus/reference/api-agent-workflow.md)
+- [Domain workflow](appeus/reference/domain-agent-workflow.md)
 - [Mocking](appeus/reference/mocking.md)
 
 

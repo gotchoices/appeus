@@ -33,8 +33,8 @@ Before committing to “quick and simple” vs “scalable and robust” impleme
 - Specs: `design/specs/` (screens, navigation, global, target specs, and shared `domain/` when needed)
 
 **Outputs:**
-- Consolidations: `design/generated/screens/` or `design/generated/<target>/screens/`
-- App code: `apps/<name>/src/screens/`, `apps/<name>/src/navigation/`
+- Consolidations: `design/generated/<target>/screens/`
+- App code: `apps/<target>/src/screens/`, `apps/<target>/src/navigation/`
 - Mock data: `mock/data/`
 
 **Steps (vertical slice):**
@@ -62,8 +62,8 @@ Capture screenshots with deep links for stakeholder review.
 - Screen routes and variants
 
 **Outputs:**
-- Screenshots: `design/generated/images/` or `design/generated/<target>/images/`
-- Scenario docs: `design/generated/scenarios/` or `design/generated/<target>/scenarios/`
+- Screenshots: `design/generated/<target>/images/`
+- Scenario docs: `design/generated/<target>/scenarios/`
 
 **Steps:**
 1. Determine target images (missing or stale)
@@ -90,14 +90,13 @@ Consolidations include frontmatter tracking dependencies:
 ```yaml
 ---
 provides: ["screen:ItemList"]
-needs: ["api:Items", "schema:Item"]
 dependsOn:
-  - design/stories/01-browsing.md
-  - design/specs/screens/item-list.md
-  - design/specs/navigation.md
+  - design/stories/<target>/01-browsing.md
+  - design/specs/<target>/screens/item-list.md
+  - design/specs/<target>/navigation.md
   - design/specs/domain/schema.md
 depHashes:
-  design/specs/screens/item-list.md: "sha256:abc123..."
+  design/specs/<target>/screens/item-list.md: "sha256:abc123..."
   design/specs/domain/schema.md: "sha256:def456..."
 ---
 ```
@@ -113,34 +112,16 @@ Central tracking in `design/generated/<target>/meta/outputs.json`:
       "route": "ItemList",
       "output": "apps/mobile/src/screens/ItemList.tsx",
       "dependsOn": [
-        "design/generated/screens/ItemList.md",
-        "design/specs/screens/item-list.md",
-        "design/specs/navigation.md"
+        "design/generated/<target>/screens/ItemList.md",
+        "design/specs/<target>/screens/item-list.md",
+        "design/specs/<target>/navigation.md"
       ],
       "depHashes": {
-        "design/specs/screens/item-list.md": "sha256:..."
+        "design/specs/<target>/screens/item-list.md": "sha256:..."
       }
     }
   ]
 }
-```
-
-### Generated Code Headers
-
-Optional inline metadata for human readers:
-
-```typescript
-/* AppeusMeta:
-{
-  "target": "mobile",
-  "dependsOn": [
-    "design/generated/screens/ItemList.md",
-    "design/specs/navigation.md"
-  ],
-  "depHashes": { ... },
-  "generatedAt": "2025-12-07T12:34:56Z"
-}
-*/
 ```
 
 ### Staleness Detection
@@ -152,7 +133,7 @@ Optional inline metadata for human readers:
 
 **Fallback (mtime-based):**
 When metadata missing, compare file modification times:
-- Inputs: stories, specs, navigation, schema
+- Inputs: stories, specs, navigation, domain contract (as needed)
 - Outputs: consolidations, app code
 - Stale if any input mtime > output mtime
 
@@ -178,17 +159,15 @@ A screen is stale if:
 
 ### Step 1: Screen Consolidation
 
-Refresh `design/generated/screens/<Screen>.md`:
+Refresh `design/generated/<target>/screens/<Route>.md`:
 - Read stories that reference this screen
 - Read spec if exists
 - Merge with navigation and global specs
 - Write consolidation with complete dependsOn/depHashes
 
-### Step 2: API Consolidations
+### Step 2: Domain Contract (as needed)
 
-For each namespace in screen's `needs`:
-- Refresh `design/generated/api/<Namespace>.md`
-- Derive from stories, schema specs, screen specs
+Ensure shared domain docs under `design/specs/domain/` are adequate for this slice.
 
 ### Step 3: Mock Data
 
@@ -201,9 +180,8 @@ Generate/refresh mock files:
 ### Step 4: App Code
 
 Generate screen and update navigation:
-- Screen: `apps/<name>/src/screens/<Screen>.tsx` (or equivalent)
-- Navigation: Update `apps/<name>/src/navigation/`
-- Embed AppeusMeta header
+- Screen: `apps/<target>/src/screens/<Screen>.tsx` (or equivalent)
+- Navigation: Update `apps/<target>/src/navigation/`
 
 ### Step 5: Update Status
 
@@ -223,7 +201,7 @@ Generate screen and update navigation:
 
 ### Mapping
 
-Maintain in `design/specs/screens/index.md`:
+Maintain in `design/specs/<target>/screens/index.md`:
 
 ```markdown
 | Screen Name | Route | Spec File | Status |
@@ -238,24 +216,17 @@ Maintain in `design/specs/screens/index.md`:
 2. Consolidate first if stale; then generate code
 3. Never overwrite human stories or specs
 4. If asked to “improve/normalize” stories or specs, keep them user-observable; put programmer-facing structure in consolidations
-5. For multi-target: derive schema from ALL stories first
+5. For multi-target: ensure shared domain docs under `design/specs/domain/` remain compatible across targets
 6. After each slice, re-run `check-stale.sh`
 7. Stop when clean or on user request
 
 ## Precedence
 
-Always respect:
-1. **Human specs, stories** — Authoritative, never overwritten
-2. **AI consolidations** — Regenerable, derived from stories, specs
-3. **Defaults** — Framework conventions
+See: [Precedence](precedence.md)
 
-## Multi-Target Considerations
+## Multiple Targets
 
-For projects with multiple apps:
-- Schema specs are shared; read all target stories before deriving
-- API specs are shared; all targets call the same endpoints
-- Each target has its own consolidations, scenarios, status
-- Scripts accept `--target <name>` to scope operations
+When multiple app targets exist, scripts accept `--target <target>` to scope operations.
 
 ## See Also
 

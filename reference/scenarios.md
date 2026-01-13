@@ -79,7 +79,7 @@ Options:
 ```bash
 appeus/scripts/android-screenshot.sh \
   --deeplink "myapp://screen/ItemList?variant=happy" \
-  --output "./design/generated/images/item-list-happy.png" \
+  --output "./design/generated/<target>/images/item-list-happy.png" \
   --app-id "com.example.myapp"
 ```
 
@@ -161,7 +161,7 @@ The image is clickable, linking to the app deep link.
 
 ## Scenario Index
 
-Location: `design/generated/scenarios/index.md`
+Location: `design/generated/<target>/scenarios/index.md`
 
 Purpose: Linear path for stakeholders to review the app end-to-end.
 

@@ -2,6 +2,8 @@
 
 How to process user stories and derive screens/navigation.
 
+This doc is intentionally focused on story processing only. For the overall per-slice loop, see [Workflow](workflow.md).
+
 ## Paths
 
 | Content | Canonical Path (v2.1) |
@@ -25,15 +27,14 @@ Parse the story for:
 Look for related specs and consolidations:
 - Screen specs in `design/specs/<target>/screens/`
 - Navigation spec
-- Schema specs (for data requirements)
+- Domain contract (for data requirements), when needed
 
 ### 3. Identify Implications
 
 Determine what the story implies:
 - New screens needed
 - Navigation changes
-- Data requirements (schema)
-- API endpoints needed
+- Data requirements (domain contract), when needed
 
 ### 4. Update Consolidations
 

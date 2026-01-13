@@ -78,7 +78,6 @@ The script:
 
 For each story, create scenario doc:
 
-**Location:** `design/generated/scenarios/<story-id>.md`
 **Location:** `design/generated/<target>/scenarios/<story-id>.md`
 
 **Structure:**
@@ -128,7 +127,7 @@ When loading fails, user sees error message with retry option.
 
 ### 4. Update Scenario Index
 
-Maintain `design/generated/scenarios/index.md`:
+Maintain `design/generated/<target>/scenarios/index.md`:
 
 ```markdown
 # Scenarios
@@ -145,10 +144,10 @@ Review order for stakeholders:
 
 | Artifact | Path |
 |----------|------|
-| Screenshots | `design/generated/images/*.png` |
-| Image config | `design/generated/images/index.md` |
-| Scenario docs | `design/generated/scenarios/*.md` |
-| Scenario index | `design/generated/scenarios/index.md` |
+| Screenshots | `design/generated/<target>/images/*.png` |
+| Image config | `design/generated/<target>/images/index.md` |
+| Scenario docs | `design/generated/<target>/scenarios/*.md` |
+| Scenario index | `design/generated/<target>/scenarios/index.md` |
 
 ## Preview and Publish
 

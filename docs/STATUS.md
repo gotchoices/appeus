@@ -99,18 +99,18 @@ Each runtime asset should be reviewed **one at a time** for compliance with v2.1
 - [x] Review `scripts/publish-scenarios.sh`
 - [x] Review `scripts/lib/project-root.sh`
 - [x] Remove deprecated scripts: `scripts/generate-next.sh`, `scripts/regenerate.sh` (deleted in v2.1)
-- [ ] Remove all runtime-asset references to deleted scripts (`reference/`, `agent-rules/`, docs)
+- [x] Remove all runtime-asset references to deleted scripts (`reference/`, `agent-rules/`, docs)
 - [x] Legacy scripts removed: `scripts/rn-init.sh`, `scripts/setup-appeus.sh`
 
 #### reference/
 
 **Reference review goals (v2.1)**
-- [ ] Ensure every reference doc is reachable from an `agent-rules/*.md` hyperlink (directly, or via a small “index” link).
+- [x] Ensure every reference doc is reachable from an `agent-rules/*.md` hyperlink (directly, or via a small “index” link).
 - [ ] Ensure each reference doc covers a **single topic**; split or trim where one file mixes multiple topics (notably generation vs scenarios vs staleness).
-- [ ] De-duplicate repeated guidance across reference docs (keep global rules in `reference/phases.md` + `reference/precedence.md` + `reference/workflow.md`).
-- [ ] Normalize to v2.1 canonical paths and terms everywhere (`<target>`, `design/*/<target>/`, `design/specs/domain/`, no progressive structure).
+- [x] De-duplicate repeated guidance across reference docs (keep global rules in `reference/phases.md` + `reference/precedence.md` + `reference/workflow.md`).
+- [x] Normalize to v2.1 canonical paths and terms everywhere (`<target>`, `design/*/<target>/`, `design/specs/domain/`, no progressive structure).
 - [ ] Remove legacy/contradictory guidance (e.g., “generated code headers”, deleted scripts, `apps/<name>` placeholders).
-- [ ] Decide what to do with `reference/*-agent-workflow.md` docs: keep only those with unique lane-specific detail; merge or slim the rest.
+- [x] Decide what to do with `reference/*-agent-workflow.md` docs: keep only those with unique lane-specific detail; merge or slim the rest.
 
 **Standards to apply during per-file review**
 - Keep language **human-readable**; push programmer mapping into consolidations.

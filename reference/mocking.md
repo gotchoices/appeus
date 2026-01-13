@@ -61,7 +61,7 @@ app.listen(3001);
 
 ## Client Integration
 
-Data adapters in `apps/<name>/src/data/` read mock data:
+Data adapters in `apps/<target>/src/data/` read mock data:
 
 ```typescript
 // src/data/items.ts

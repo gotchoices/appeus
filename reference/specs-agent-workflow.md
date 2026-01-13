@@ -2,6 +2,8 @@
 
 How to process human-authored specs and keep consolidations synchronized.
 
+This doc is intentionally focused on spec handling only. For the overall per-slice loop, see [Workflow](workflow.md) and [Precedence](precedence.md).
+
 ## Paths
 
 | Type | Canonical Path (v2.1) |
@@ -30,16 +32,16 @@ Parse the spec for:
 ### 2. Update Consolidations
 
 Refresh the corresponding consolidation to reflect spec constraints:
-- Update `design/generated/screens/<id>.md`
+- Update `design/generated/<target>/screens/<Route>.md`
 - Include spec in dependsOn
-- Update depHashes
+- Ensure the per-target registry exists and reflects the slice’s `dependsOn`: `design/generated/<target>/meta/outputs.json`
 
 ### 3. Generate Code (On Request)
 
 When user requests regeneration:
 - Read spec and consolidation
 - Apply spec slots to generated code
-- Write to `apps/<name>/src/screens/`
+- Write to `apps/<target>/src/` (framework-specific)
 - Update navigation
 
 ### 4. Keep Synchronized
@@ -47,7 +49,7 @@ When user requests regeneration:
 After any spec change:
 - Consolidation becomes stale
 - Regenerate consolidation before codegen
-- Run `check-stale.sh` to verify
+- Run `check-stale.sh --target <target>` to verify
 
 ## Code Slots
 

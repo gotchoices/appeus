@@ -24,9 +24,9 @@ Detailed reference for generating app code from specs and consolidations.
 
 | Type | Path |
 |------|------|
-| Screen code | `apps/<name>/src/screens/<Screen>.tsx` |
-| Navigation | `apps/<name>/src/navigation/*` |
-| Data adapters | `apps/<name>/src/data/*` |
+| Screen code | `apps/<target>/src/screens/<Screen>.tsx` |
+| Navigation | `apps/<target>/src/navigation/*` |
+| Data adapters | `apps/<target>/src/data/*` |
 | Mock data | `mock/data/<namespace>.<variant>.json` |
 
 ## Rules
@@ -90,35 +90,20 @@ Parameters:
 - `variant` — Mock data variant (happy, empty, error)
 - Additional params as needed by the screen
 
-## AppeusMeta Header
+## Dependency Tracking (v2.1)
 
-Generated files include metadata for staleness tracking:
+Dependency tracking lives in per-target JSON metadata under:
 
-```typescript
-/* AppeusMeta:
-{
-  "target": "mobile",
-  "route": "ItemList",
-  "dependsOn": [
-    "design/generated/screens/ItemList.md",
-    "design/specs/screens/item-list.md",
-    "design/specs/navigation.md"
-  ],
-  "depHashes": {
-    "design/generated/screens/ItemList.md": "sha256:abc123...",
-    "design/specs/screens/item-list.md": "sha256:def456..."
-  },
-  "generatedAt": "2025-12-07T12:34:56Z"
-}
-*/
-```
+- `design/generated/<target>/meta/outputs.json`
+
+This keeps source files free of injected metadata and allows scripts to repair/init missing registries automatically.
 
 ## Framework-Specific Output
 
 ### React Native
 
 ```
-apps/<name>/src/
+apps/<target>/src/
 ├── screens/
 │   ├── ItemList.tsx
 │   └── UserProfile.tsx
@@ -133,7 +118,7 @@ apps/<name>/src/
 ### SvelteKit
 
 ```
-apps/<name>/src/
+apps/<target>/src/
 ├── routes/
 │   ├── items/
 │   │   └── +page.svelte

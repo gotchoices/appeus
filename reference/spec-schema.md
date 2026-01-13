@@ -243,7 +243,7 @@ Scheme: `myapp://`
 
 ## Mapping Index
 
-Maintain in `design/specs/screens/index.md`:
+Maintain in `design/specs/<target>/screens/index.md`:
 
 ```markdown
 # Screens Index
@@ -257,9 +257,7 @@ Maintain in `design/specs/screens/index.md`:
 
 ## Precedence
 
-1. **Human specs** — Always authoritative
-2. **AI consolidations** — Facts gathered from stories; regenerable
-3. **Defaults** — Framework conventions
+See: [Precedence](precedence.md)
 
 After spec changes, refresh corresponding consolidations before codegen.
 

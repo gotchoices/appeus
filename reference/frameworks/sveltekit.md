@@ -5,7 +5,7 @@ Framework-specific conventions for SvelteKit apps in Appeus.
 ## Directory Structure
 
 ```
-apps/<name>/
+apps/<target>/
 ├── src/
 │   ├── routes/            # File-based routing
 │   │   ├── +page.svelte   # Home page

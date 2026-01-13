@@ -9,7 +9,7 @@ NativeScript Svelte (Svelte Native) combines Svelte's reactive component model w
 ## Project Structure
 
 ```
-apps/<name>/
+apps/<target>/
 ├── app/
 │   ├── App.svelte          # Root component
 │   ├── app.ts              # Entry point

@@ -5,7 +5,7 @@ Framework-specific conventions for React Native apps in Appeus.
 ## Directory Structure
 
 ```
-apps/<name>/
+apps/<target>/
 ├── src/
 │   ├── screens/           # Screen components
 │   ├── navigation/        # React Navigation setup
