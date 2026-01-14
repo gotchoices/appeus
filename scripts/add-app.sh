@@ -4,12 +4,12 @@ set -euo pipefail
 # Appeus v2.1: Add an app to the project.
 #
 # Usage:
-#   ./appeus/scripts/add-app.sh --name <name> --framework <framework> [--refresh]
+#   ./appeus/scripts/add-app.sh --target <target> --framework <framework> [--refresh]
 #
 # Examples:
-#   ./appeus/scripts/add-app.sh --name mobile --framework react-native
-#   ./appeus/scripts/add-app.sh --name web --framework sveltekit
-#   ./appeus/scripts/add-app.sh --name mobile --framework react-native --refresh
+#   ./appeus/scripts/add-app.sh --target mobile --framework react-native
+#   ./appeus/scripts/add-app.sh --target web --framework sveltekit
+#   ./appeus/scripts/add-app.sh --target mobile --framework react-native --refresh
 #
 # Options:
 #   --refresh   Idempotent mode: refresh symlinks and add missing templates
@@ -29,7 +29,8 @@ SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 
 # Defaults
-APP_NAME=""
+TARGET=""
+APP_NAME="" # internal alias: keep the rest of the script stable
 FRAMEWORK=""
 REFRESH_MODE=0
 KEEP_APP_GIT="${APPEUS_APP_GIT:-0}" # 1 = keep per-app git repo (if scaffold creates one)
@@ -50,14 +51,19 @@ strip_nested_git_repo() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --name) APP_NAME="$2"; shift 2 ;;
+    --target) TARGET="$2"; shift 2 ;;
+    --name)
+      # Back-compat alias. Prefer --target.
+      echo "Warning: --name is deprecated; use --target instead." >&2
+      TARGET="$2"; shift 2
+      ;;
     --framework) FRAMEWORK="$2"; shift 2 ;;
     --refresh) REFRESH_MODE=1; shift ;;
     -h|--help)
-      echo "Usage: $0 --name <name> --framework <framework> [--refresh]"
+      echo "Usage: $0 --target <target> --framework <framework> [--refresh]"
       echo ""
       echo "Options:"
-      echo "  --name       App name (e.g., mobile, web)"
+      echo "  --target     Target name (e.g., mobile, web)"
       echo "  --framework  Framework to use"
       echo "  --refresh    Idempotent mode: refresh symlinks, add missing templates,"
       echo "               skip framework scaffold if app already exists"
@@ -82,9 +88,9 @@ while [[ $# -gt 0 ]]; do
       echo "  APPEUS_APP_GIT=1          Keep per-app git repo if scaffold initializes one (default: 0 = remove)"
       echo ""
       echo "Examples:"
-      echo "  $0 --name mobile --framework react-native"
-      echo "  $0 --name mobile --framework react-native --refresh"
-      echo "  APPEUS_RUNTIME=expo $0 --name mobile --framework react-native"
+      echo "  $0 --target mobile --framework react-native"
+      echo "  $0 --target mobile --framework react-native --refresh"
+      echo "  APPEUS_RUNTIME=expo $0 --target mobile --framework react-native"
       exit 0
       ;;
     *)
@@ -96,10 +102,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate arguments
-if [ -z "$APP_NAME" ]; then
-  echo "Error: --name is required" >&2
+if [ -z "$TARGET" ]; then
+  echo "Error: --target is required" >&2
   exit 1
 fi
+
+# Internal alias used throughout the script
+APP_NAME="$TARGET"
 
 if [ -z "$FRAMEWORK" ]; then
   echo "Error: --framework is required" >&2
@@ -120,17 +129,17 @@ APP_EXISTS=0
 if [ -d "${PROJECT_DIR}/apps/${APP_NAME}" ]; then
   APP_EXISTS=1
   if [ "$REFRESH_MODE" = "0" ]; then
-    echo "Error: App '${APP_NAME}' already exists at apps/${APP_NAME}/" >&2
+    echo "Error: Target '${APP_NAME}' already exists at apps/${APP_NAME}/" >&2
     echo "" >&2
     echo "To refresh symlinks and add missing templates without re-scaffolding:" >&2
-    echo "  $0 --name ${APP_NAME} --framework ${FRAMEWORK} --refresh" >&2
+    echo "  $0 --target ${APP_NAME} --framework ${FRAMEWORK} --refresh" >&2
     exit 1
   else
-    echo "Refresh mode: App '${APP_NAME}' exists, will refresh symlinks and templates"
+    echo "Refresh mode: Target '${APP_NAME}' exists, will refresh symlinks and templates"
   fi
 fi
 
-echo "Appeus v2.1: Adding app '${APP_NAME}' with framework '${FRAMEWORK}'"
+echo "Appeus v2.1: Adding target '${APP_NAME}' with framework '${FRAMEWORK}'"
 echo ""
 
 # v2.1 canonical: we do not migrate a “flat” design layout.

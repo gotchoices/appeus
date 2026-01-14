@@ -2,12 +2,12 @@
 
 Appeus is a design-first workflow that turns user stories into running applications. Instead of scaffolding a framework and then bolting on design, Appeus starts with design decisions and stories, then instantiates the appropriate app scaffolds.
 
-## What's New in v2
+## What's New in v2.1
 
 - **Design-first:** Project decisions are documented before any framework code is generated
 - **Multi-target:** A single project can contain multiple apps (mobile, web, desktop)
-- **Canonical per-target structure (v2.1):** Apps always live under `apps/<target>/` and design artifacts are per-target under `design/*/<target>/`
-- **Shared domain contract (as needed):** Shared schema/api/rules/interfaces live under `design/specs/domain/`
+- **Canonical per-target structure:** Apps always live under `apps/<target>/` and design artifacts are per-target under `design/*/<target>/`
+- **Shared domain contract (as needed):** Shared schema/operations/rules/interfaces live under `design/specs/domain/`
 - **Framework adapters:** Support for React Native, SvelteKit, and more
 
 ## Core Workflow
@@ -16,7 +16,7 @@ Appeus is a design-first workflow that turns user stories into running applicati
 2. **Discovery** — Agent guides you through toolchain and architecture decisions
 3. **Add apps** — Scaffold one or more apps based on your decisions
 4. **Write stories** — Define user stories per target
-5. **Derive schema** — Agent extracts shared data model from all stories
+5. **Domain contract** — Capture shared schema/operations/rules/interfaces (when multiple targets share concepts)
 6. **Generate code** — Vertical slicing: one screen/page at a time
 7. **Review via scenarios** — Screenshots with deep links for stakeholder review
 
@@ -55,5 +55,5 @@ See `QUICKSTART.md` for step-by-step instructions.
 
 ## Version History
 
-- **v2** (current) — Design-first, multi-target support
+- **v2.1** (current) — Canonical per-target layout + consolidated domain contract
 - **v1** — RN-first workflow (available on `v1` branch)

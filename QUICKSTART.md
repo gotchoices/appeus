@@ -1,6 +1,6 @@
 # Quickstart
 
-This guide walks you through creating a new project with Appeus v2.
+This guide walks you through creating a new project with Appeus.
 
 ## Prerequisites
 
@@ -41,17 +41,17 @@ Once decisions are documented, add an app scaffold:
 
 ```bash
 # For React Native mobile app
-./appeus/scripts/add-app.sh --name mobile --framework react-native
+./appeus/scripts/add-app.sh --target mobile --framework react-native
 
 # For SvelteKit web app
-./appeus/scripts/add-app.sh --name web --framework sveltekit
+./appeus/scripts/add-app.sh --target web --framework sveltekit
 ```
 
 This creates:
-- `apps/<name>/` — Framework scaffold with AGENTS.md
-- `design/stories/<name>/` — Folder for user stories (per-target)
-- `design/specs/<name>/screens/` — Folder for screen specs (per-target)
-- `design/specs/<name>/navigation.md` — Navigation structure (per-target)
+- `apps/<target>/` — Framework scaffold with AGENTS.md
+- `design/stories/<target>/` — Folder for user stories (per-target)
+- `design/specs/<target>/` — Folder for per-target specs (navigation, screens, components, global)
+- `design/specs/<target>/STATUS.md` — Per-target phase checklist
 
 ## Step 4: Write Stories
 
@@ -79,13 +79,13 @@ As a user, I want to see a list of items so that I can browse available options.
 - error: Failed to load, error message shown
 ```
 
-## Step 5: Derive Schema and Specs
+## Step 5: Write Specs (and Domain Contract as Needed)
 
 Ask the agent to:
-1. Read your stories and propose a data schema
-2. Create screen consolidations in `design/generated/<target>/screens/`
-3. Draft screen specs in `design/specs/<target>/screens/`
-4. Update `design/specs/<target>/navigation.md` with routes
+1. Read your stories and propose the target’s navigation + screens
+2. Create/update consolidations in `design/generated/<target>/`
+3. Draft/update specs in `design/specs/<target>/` (navigation, screens, components, global)
+4. If multiple targets share concepts, draft the shared domain contract in `design/specs/domain/`
 
 Review and refine the specs. Your specs take precedence over AI consolidations.
 
@@ -98,9 +98,9 @@ Ask the agent to generate code for the next vertical slice:
 ```
 
 The agent will:
-1. Check staleness (`check-stale.sh`)
+1. Check staleness (`./appeus/scripts/check-stale.sh --target <target>`)
 2. Refresh consolidations if needed
-3. Generate screen code in `apps/<name>/src/`
+3. Generate screen code in `apps/<target>/src/`
 4. Update navigation
 5. Generate mock data in `mock/data/`
 
@@ -134,10 +134,10 @@ Use deep links to test specific screens with mock variants.
 To add a second app (e.g., web after mobile):
 
 ```bash
-./appeus/scripts/add-app.sh --name web --framework sveltekit
+./appeus/scripts/add-app.sh --target web --framework sveltekit
 ```
 
-Appeus v2.1 uses a single canonical per-target layout; targets always live under `apps/<name>/` and design artifacts are per-target under `design/*/<name>/`.
+Appeus uses a single canonical per-target layout; targets always live under `apps/<target>/` and design artifacts are per-target under `design/*/<target>/`.
 
 ## Environment Variables
 
@@ -162,8 +162,8 @@ Re-run after updating appeus to pick up new features.
 
 ## Next Steps
 
-- Read `reference/scenarios.md` for screenshot workflow
-- See `docs/DESIGN.md` for architecture details
-- Check `docs/STATUS.md` for what's implemented
+- Read `./appeus/reference/scenarios.md` for screenshot workflow
+- See `./appeus/docs/DESIGN.md` for architecture details
+- Check `./appeus/docs/STATUS.md` for what's implemented
 
 The AGENTS.md files throughout the project guide your AI agent. When in doubt, ask the agent "What should I do next?"
