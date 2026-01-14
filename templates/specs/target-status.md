@@ -6,6 +6,7 @@ Phases are defined in `appeus/docs/DESIGN.md` (authoritative).
 
 ## Bootstrap / Discovery (shared)
 - [ ] `design/specs/project.md` is complete enough to proceed
+- [ ] (Mobile targets) Apply the app id (Android `applicationId`, iOS bundle id) in the native build trees (from `design/specs/project.md`, e.g. `org.sereus.health`)
 
 ## Story Generation (this target)
 - [ ] Stories exist under `design/stories/<target>/` and describe the intended experience

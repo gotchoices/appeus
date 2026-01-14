@@ -30,6 +30,14 @@ This document captures key decisions for the project. Complete this during the d
 
 <describe if mobile and web have different UX, or if they're responsive versions of the same>
 
+## Identity (publisher + app id)
+
+These values are used to form stable application identifiers (especially for mobile).
+
+- **Publisher id (reverse-DNS domain)**: `<e.g. org.sereus>`
+- **Preferred app name**: `<e.g. health>`
+- **Default mobile app id (reverse-DNS)**: `<e.g. org.sereus.health>`
+
 ## Apps
 
 List the apps to be built:
