@@ -45,23 +45,49 @@ PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
 
 die() { echo "Error: $*" >&2; exit 1; }
 
-PYTHON=""
-if command -v python3 >/dev/null 2>&1; then
-  PYTHON="python3"
-fi
+on_interrupt() {
+  echo "" >&2
+  echo "Interrupted." >&2
+  exit 130
+}
+trap on_interrupt INT
+
+# Portable realpath implementation in bash (macOS readlink lacks -f).
+# Resolves symlink chains and normalizes ".." / "." via `cd -P` + `pwd -P`.
+realpath_portable() {
+  local path="$1"
+
+  if [ -z "$path" ]; then
+    return 1
+  fi
+
+  # Make absolute early (relative paths are relative to current working dir).
+  case "$path" in
+    /*) ;;
+    *) path="$(pwd -P)/$path" ;;
+  esac
+
+  # Resolve symlink chain if present.
+  while [ -L "$path" ]; do
+    local dir target
+    dir="$(cd -P "$(dirname "$path")" 2>/dev/null && pwd -P)" || return 1
+    target="$(readlink "$path" 2>/dev/null)" || return 1
+    case "$target" in
+      /*) path="$target" ;;
+      *) path="$dir/$target" ;;
+    esac
+  done
+
+  # Normalize path lexically via filesystem resolution of the parent directory.
+  local parent base
+  parent="$(cd -P "$(dirname "$path")" 2>/dev/null && pwd -P)" || return 1
+  base="$(basename "$path")"
+  printf '%s/%s\n' "$parent" "$base"
+}
 
 TOOLKIT_REALPATH=""
 if [ -L "${PROJECT_DIR}/appeus" ]; then
-  if [ -n "${PYTHON}" ]; then
-    TOOLKIT_REALPATH="$("${PYTHON}" - <<'PY' "${PROJECT_DIR}/appeus"
-import os,sys
-print(os.path.realpath(sys.argv[1]))
-PY
-)"
-  else
-    # Best-effort fallback: treat any symlink whose link target contains "appeus/" as detachable
-    TOOLKIT_REALPATH=""
-  fi
+  TOOLKIT_REALPATH="$(realpath_portable "${PROJECT_DIR}/appeus" 2>/dev/null || true)"
 fi
 
 echo "Appeus v2.1: Detaching from project: ${PROJECT_DIR}"
@@ -79,20 +105,17 @@ should_remove_link() {
   # Never consider anything inside the toolkit itself (if it's a real dir in the project).
   # Note: if ${PROJECT_DIR}/appeus is a symlink, find will still traverse it unless pruned elsewhere.
   case "$link" in
-    "${PROJECT_DIR}/appeus"|"${PROJECT_DIR}/appeus/"*) return 0 ;; # allow removing the root symlink itself
+    "${PROJECT_DIR}/appeus") return 0 ;; # allow removing the root symlink itself
+    "${PROJECT_DIR}/appeus/"*) return 1 ;; # never remove anything within the toolkit checkout
   esac
 
   local link_target
   link_target="$(readlink "$link" 2>/dev/null || true)"
 
   # If we can resolve the toolkit path, only remove links that resolve into it.
-  if [ -n "${TOOLKIT_REALPATH}" ] && [ -n "${PYTHON}" ]; then
+  if [ -n "${TOOLKIT_REALPATH}" ]; then
     local resolved
-    resolved="$("${PYTHON}" - <<'PY' "$link"
-import os,sys
-print(os.path.realpath(sys.argv[1]))
-PY
-)"
+    resolved="$(realpath_portable "$link" 2>/dev/null || true)"
     case "$resolved" in
       "${TOOLKIT_REALPATH}"|"${TOOLKIT_REALPATH}/"*) return 0 ;;
     esac
@@ -122,7 +145,20 @@ while IFS= read -r -d '' link; do
   fi
 done < <(
   find "${PROJECT_DIR}" \
-    \( -path "${PROJECT_DIR}/.git" -o -path "${PROJECT_DIR}/.git/*" -o -path "${PROJECT_DIR}/node_modules" -o -path "${PROJECT_DIR}/node_modules/*" \) -prune -o \
+    \( \
+      -name .git -o \
+      -name node_modules -o \
+      -name Pods -o \
+      -name DerivedData -o \
+      -name .gradle -o \
+      -name build -o \
+      -name dist -o \
+      -name .next -o \
+      -name .turbo -o \
+      -name .expo -o \
+      -name .cache -o \
+      -name .venv \
+    \) -prune -o \
     -type l -print0
 )
 
