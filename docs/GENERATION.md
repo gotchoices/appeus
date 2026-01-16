@@ -100,7 +100,7 @@ This section describes the **code-generation loop** for a single target.  It app
 
 The user may name the slice directly (“generate ItemList”), or the agent may choose a candidate from the screens index:
 - Prefer a screen reachable from the current navigation root.
-- Prefer missing/stale screens first (optionally using `check-stale.sh`).
+- Prefer missing/stale screens first (strongly recommended: consult `check-stale.sh`, unless you are intentionally regenerating a specific route, or you just ran it to confirm freshness and nothing has changed since).
 
 ### Step 2: Read authoritative inputs
 
@@ -139,7 +139,7 @@ After generating a slice, update dependency metadata for the slice and confirm i
   - If the per-target registry is missing, the script will create it.
   - If the registry is empty/template-like, the script may seed minimal entries from the screens index (non-destructively).
   - If an entry exists but has an incomplete `dependsOn`, the agent should refine it; scripts can only seed a conservative list and cannot infer “true” dependencies automatically.
-- Optionally re-run staleness reporting (e.g., `check-stale.sh`) to confirm the slice is fresh.  This can also occur as the first step of selecting the next slice.
+- Optionally re-run staleness reporting (e.g., `check-stale.sh`) to confirm the slice is fresh. If you just ran it for verification and no inputs changed, you do not need to re-run it at the start of the next slice.
 
 ### Step 8: Commit at stable milestones
 
@@ -215,7 +215,7 @@ This section summarizes the scripts involved in generation and staleness trackin
 | `scripts/publish-scenarios.sh` | Publish scenarios as HTML | Optional; requires a publication destination |
 
 Notes:
-- Scripts operate per-target; pass `--target <name>` when a project has multiple app targets.
+- Scripts operate per-target; pass `--target <target>` when a project has multiple app targets.
 - If required metadata is missing or template-like, scripts should initialize/repair it for the active `<target>`.
 
 ## Metadata formats (frontmatter / JSON registries / mocks)

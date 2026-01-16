@@ -27,8 +27,8 @@ Guide the user through completing `design/specs/project.md`, then help them add 
 ## After Discovery
 
 ```bash
-./appeus/scripts/add-app.sh --name mobile --framework react-native
-./appeus/scripts/add-app.sh --name web --framework sveltekit
+./appeus/scripts/add-app.sh --target mobile --framework react-native
+./appeus/scripts/add-app.sh --target web --framework sveltekit
 ```
 
 Then proceed to story authoring in `design/stories/<target>/`.

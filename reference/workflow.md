@@ -21,7 +21,7 @@ See: [Precedence](precedence.md)
 Human-triggered. Per target, the loop is:
 
 1. **Pick target** (`--target`) and confirm phase checklist: `design/specs/<target>/STATUS.md`
-2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (prefer stale via `appeus/scripts/check-stale.sh`)
+2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (strongly recommended: use `appeus/scripts/check-stale.sh --target <target>` unless you are intentionally targeting a specific route, or you just ran it to confirm freshness and nothing has changed since)
 3. **Read inputs**: target stories/specs + shared domain contract (as needed) + `design/specs/project.md`
 4. **Refresh consolidation**: write/update `design/generated/<target>/screens/<Route>.md`
 5. **Generate code** under `apps/<target>/src/` (screen + navigation wiring as needed)

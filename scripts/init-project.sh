@@ -111,11 +111,57 @@ write_if_missing() {
 echo "Appeus v2.1: Initializing project in $(pwd)"
 echo ""
 
+# Detect whether this looks like an existing Appeus-guided project with at least one target already present.
+HAS_EXISTING_TARGET=0
+if [ -d "${PROJECT_DIR}/apps" ]; then
+  for d in "${PROJECT_DIR}/apps/"*; do
+    [ -d "$d" ] || continue
+    HAS_EXISTING_TARGET=1
+    break
+  done
+fi
+if [ "${HAS_EXISTING_TARGET}" = "0" ] && [ -d "${PROJECT_DIR}/design/specs" ]; then
+  for d in "${PROJECT_DIR}/design/specs/"*; do
+    [ -d "$d" ] || continue
+    base="$(basename "$d")"
+    [ "$base" = "domain" ] && continue
+    if [ -f "${d}/STATUS.md" ]; then
+      HAS_EXISTING_TARGET=1
+      break
+    fi
+  done
+fi
+
 # 1. Create appeus symlink
 ensure_symlink "$APPEUS_DIR" "${PROJECT_DIR}/appeus"
 
-# 2. Create root AGENTS.md pointing to bootstrap (discovery phase)
-ensure_symlink "appeus/agent-rules/bootstrap.md" "${PROJECT_DIR}/AGENTS.md"
+# 2. Create/repair root AGENTS.md.
+# Default to bootstrap for truly-new projects, but if a target already exists then default to project rules.
+ROOT_RULE_TARGET="appeus/agent-rules/bootstrap.md"
+if [ "${HAS_EXISTING_TARGET}" = "1" ]; then
+  ROOT_RULE_TARGET="appeus/agent-rules/project.md"
+fi
+
+if [ -L "${PROJECT_DIR}/AGENTS.md" ]; then
+  current="$(readlink "${PROJECT_DIR}/AGENTS.md" 2>/dev/null || true)"
+  if [ "${HAS_EXISTING_TARGET}" = "1" ] && [ "${current}" = "appeus/agent-rules/bootstrap.md" ]; then
+    ensure_symlink "${ROOT_RULE_TARGET}" "${PROJECT_DIR}/AGENTS.md"
+    echo "Note: Existing target(s) detected; root AGENTS.md set to project rules."
+    echo "  (If you want discovery mode, repoint it to appeus/agent-rules/bootstrap.md.)"
+    echo ""
+  else
+    log_skipped "${PROJECT_DIR}/AGENTS.md (exists)"
+  fi
+elif [ -e "${PROJECT_DIR}/AGENTS.md" ]; then
+  log_skipped "${PROJECT_DIR}/AGENTS.md (exists, not a symlink)"
+else
+  ensure_symlink "${ROOT_RULE_TARGET}" "${PROJECT_DIR}/AGENTS.md"
+  if [ "${HAS_EXISTING_TARGET}" = "1" ]; then
+    echo "Note: Existing target(s) detected; root AGENTS.md set to project rules."
+    echo "  (If you want discovery mode, repoint it to appeus/agent-rules/bootstrap.md.)"
+    echo ""
+  fi
+fi
 
 # 3. Create design folder structure
 ensure_dir "${PROJECT_DIR}/design"
