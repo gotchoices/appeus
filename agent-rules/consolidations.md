@@ -58,16 +58,4 @@ Keep this digest aligned with the project posture in `design/specs/project.md` (
 
 ## Workflow (critical)
 
-Before generating code, ensure the consolidation is fresh:
-
-1. Identify the target + route slice.
-2. Read authoritative inputs in precedence order (specs → stories → domain → existing consolidation).
-3. Write/update `design/generated/<target>/screens/<Route>.md` with the digest + dependency metadata.
-4. Generate code only after the consolidation reflects current intent (methodology: `appeus/reference/generation.md` and `appeus/reference/codegen.md`).
-
-## Don’t
-
-- Don’t overwrite or “upgrade” human specs/stories.
-- Don’t embed source metadata in app code; use JSON registries and consolidation frontmatter instead.
-- Don’t hand-edit generated artifacts—regenerate instead.
-
+When generating slices, follow the [appeus workflow](../reference/workflow.md) and the [generation methodology](../reference/generation.md) and [code generation guide](../reference/codegen.md).

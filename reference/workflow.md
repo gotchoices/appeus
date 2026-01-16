@@ -21,7 +21,7 @@ See: [Precedence](precedence.md)
 Human-triggered. Per target, the loop is:
 
 1. **Pick target** (`--target`) and confirm phase checklist: `design/specs/<target>/STATUS.md`
-2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (strongly recommended: use `appeus/scripts/check-stale.sh --target <target>` unless you are intentionally targeting a specific route, or you just ran it to confirm freshness and nothing has changed since)
+2. **Pick a slice** (screen/route) from `design/specs/<target>/screens/index.md` (use `appeus/scripts/check-stale.sh --target <target>` unless you are intentionally targeting a specific route, or you recently ran it to confirm freshness and nothing has changed since)
 3. **Read inputs**: target stories/specs + shared domain contract (as needed) + `design/specs/project.md`
 4. **Refresh consolidation**: write/update `design/generated/<target>/screens/<Route>.md`
 5. **Generate code** under `apps/<target>/src/` (screen + navigation wiring as needed)
@@ -29,7 +29,7 @@ Human-triggered. Per target, the loop is:
    - Scripts can seed missing entries conservatively, but the agent must refine `dependsOn` to match what was actually used
 7. **Hash the declared dependencies**:
    - `appeus/scripts/update-dep-hashes.sh --target <target> --route <Route>`
-8. **Confirm freshness** (optional): rerun `appeus/scripts/check-stale.sh --target <target>`
+8. **Confirm freshness** (recommended): rerun `appeus/scripts/check-stale.sh --target <target>`
 9. **Run/validate** the target app (human); iterate by updating stories/specs (human lane) and regenerating
 
 ## Multiple Targets

@@ -30,8 +30,6 @@ Specs are a **user-observable UX contract**. If you find yourself writing progra
 - Routes: PascalCase (`ItemList`)
 - Mapping: `design/specs/<target>/screens/index.md`
 
-## After Changes
+## Workflow (critical)
 
-Spec changes make consolidations stale. Refresh consolidations before regenerating code (workflow: `appeus/reference/specs-agent-workflow.md`; staleness: `appeus/reference/staleness.md`).
-
-For code generation, see `appeus/reference/generation.md` and `appeus/reference/codegen.md`.
+When generating slices, follow the [appeus workflow](../reference/workflow.md) and the [generation methodology](../reference/generation.md) and [code generation guide](../reference/codegen.md).

@@ -26,8 +26,8 @@ You are in the design surface (`design/`).
 
 - Working on stories: see `design/stories/AGENTS.md` → `agent-rules/stories.md`
 - Working on specs: see `design/specs/AGENTS.md` → `agent-rules/specs.md` (spec format: [spec schema](appeus/reference/spec-schema.md))
-- Working on consolidations/metadata: see `design/generated/AGENTS.md` → `agent-rules/consolidations.md` (staleness model: [staleness](appeus/reference/staleness.md))
-- Regenerating code: see [workflow](appeus/reference/workflow.md), [generation](appeus/reference/generation.md), and [codegen](appeus/reference/codegen.md)
+- When checking for staleness follow [staleness checking procedure](appeus/reference/staleness.md).
+- Regenerating code: follow procedures in [workflow](appeus/reference/workflow.md), [generation](appeus/reference/generation.md), and [codegen](appeus/reference/codegen.md)
 - Scenarios/screenshots: see [scenarios](appeus/reference/scenarios.md) and `design/generated/<target>/scenarios/AGENTS.md` → `agent-rules/scenarios.md`
 
 ## Guardrail
