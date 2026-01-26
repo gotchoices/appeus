@@ -29,7 +29,7 @@ Human-triggered. Per target, the loop is:
    - Scripts can seed missing entries conservatively, but the agent must refine `dependsOn` to match what was actually used
 7. **Hash the declared dependencies**:
    - `appeus/scripts/update-dep-hashes.sh --target <target> --route <Route>`
-8. **Confirm freshness** (recommended): rerun `appeus/scripts/check-stale.sh --target <target>`
+8. **Confirm freshness** (optional): rerun `appeus/scripts/check-stale.sh --target <target>`
 9. **Run/validate** the target app (human); iterate by updating stories/specs (human lane) and regenerating
 
 ## Multiple Targets
