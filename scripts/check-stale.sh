@@ -129,6 +129,10 @@ if command -v jq >/dev/null 2>&1; then
       if [ -d "${STORIES_DIR}" ]; then
         while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${STORIES_DIR}" -type f -name "*.md" -print0 2>/dev/null || true)
       fi
+      # The consolidation is what code is generated from. Listed unconditionally:
+      # it usually does not exist yet when a route is first seeded, and dependsOn
+      # is seeded only once.
+      deps+=("design/generated/${TARGET}/screens/${ROUTE}.md")
       # `${a[@]+"${a[@]}"}` keeps `set -u` happy on empty arrays (bash 3.2, macOS default).
       deps_json=$(printf "%s\n" ${deps[@]+"${deps[@]}"} | awk 'NF && !seen[$0]++' | jq -R . | jq -s .)
       tmp=$(mktemp)

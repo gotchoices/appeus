@@ -14,6 +14,11 @@ clone, checkout, or stash pop) read as fresh, and a touched-but-unchanged file r
 Recovery for existing projects: run `appeus/scripts/update-dep-hashes.sh --target <t> --all` once so
 routes have hashes to compare; until then they use the mtime fallback and say so.
 
+Seeded `dependsOn` lists also now include the route's consolidation
+(`design/generated/<target>/screens/<Route>.md`), so editing a consolidation marks its generated code
+stale. Existing registries keep their old lists — add the entry by hand, or delete the route's entry
+from `outputs.json` and let `check-stale.sh` re-seed it.
+
 Also fixed: scripts no longer abort with `unbound variable` on bash 3.2 (the macOS default) when a
 dependency, input, or screenshot-deps array is empty; the mtime fallback treats equal timestamps as
 stale (`stat` has one-second resolution); `python3` is now optional in `check-stale.sh`.

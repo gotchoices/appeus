@@ -97,6 +97,11 @@ infer_depends_on_for_route() {
   if [ -d "${PROJECT_DIR}/design/stories/${target}" ]; then
     while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${PROJECT_DIR}/design/stories/${target}" -type f -name "*.md" -print0 2>/dev/null || true)
   fi
+  # The consolidation is what code is generated from. Listed unconditionally:
+  # it usually does not exist yet when a route is first seeded, and dependsOn
+  # is seeded only once.
+  deps+=("design/generated/${target}/screens/${route}.md")
+
   # Per-screen spec
   local kebab
   kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"

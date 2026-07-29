@@ -266,9 +266,11 @@ Still open:
   (SvelteKit); a NativeScript-Svelte target reports every route as `missing output` forever.
   Fix: honor the `output` field of `outputs.json` (documented in `reference/staleness.md`, never read),
   and let each `scripts/frameworks/*.sh` declare its output convention.
-- [ ] **Consolidations sit outside staleness.** `design/generated/<target>/screens/<Route>.md` is
-  neither input nor output in `check-stale.sh`, so spec → consolidation drift is invisible; only
-  spec → app-code is checked. `reference/staleness.md` lists consolidations as outputs.
+- [ ] **Consolidation → code is tracked; spec → consolidation is not.** Seeded `dependsOn` lists now
+  include `design/generated/<target>/screens/<Route>.md`, so editing a consolidation marks its code
+  stale. What remains: the consolidation itself has no staleness check of its own — a spec edit
+  followed by regenerating only the code (leaving the consolidation untouched) still reads as fresh.
+  Fix: treat each consolidation as its own output with its own `dependsOn`/`depHashes` entry.
 - [ ] **`update-dep-hashes.sh` never records an `output` field** when seeding entries, and silently
   drops the hash of a deleted `dependsOn` file (after one refresh, that deletion is undetectable).
 - [ ] **`android-screenshot.sh` return-value bug.** `launch_emulator_if_needed` prints log lines *and*
