@@ -148,6 +148,19 @@ Notes:
 - `<target>` is an app name like `mobile`, `web`, `desktop`, etc.
 - The root `AGENTS.md` may later be repointed from `bootstrap.md` to `project.md` after discovery.
 
+### Hosted (guest) install
+
+The layout above assumes Appeus owns the project root. When `init-project.sh` runs in a directory that already holds content Appeus does not own (a host `AGENTS.md`/`CLAUDE.md`, `package.json`, another tooling folder such as `tickets/`), it reports **hosted mode** and behaves as a guest:
+
+- `AGENTS.md` / `CLAUDE.md` — the marker-delimited section from `agent-rules/root.md` is appended (idempotent, keyed on `<!-- appeus -->`). Existing files are never replaced, and the phase flip (bootstrap → project) needs no file change because the section names both phases. A `CLAUDE.md` that already defers to `AGENTS.md` is left alone.
+- `.gitignore` — only Appeus's own symlink entries are added, one line at a time. Generic dev ignores (`node_modules/`, `dist/`, …) are written only when Appeus creates the file in a non-hosted project.
+- `git init` — skipped when the directory is already inside a git work tree.
+- `add-app.sh` — warns when the new `apps/<target>/` falls outside the host's workspace globs, and inherits the host `packageManager` unless `APPEUS_PM` is set.
+
+Appeus owns only `design/`, `apps/`, `mock/`, the `appeus` symlink, and its rules section. `detach-appeus.sh` reverses exactly that: it unlinks Appeus symlinks, strips the rules section, and removes only the `.gitignore` lines it added.
+
+A hosted install need not sit at the repo root: running `init-project.sh` from a subdirectory (e.g. `packages/<name>/` in a monorepo) makes that directory the Appeus project root. Scripts locate it by walking up for `design/` + `appeus`, so they work from anywhere inside it.
+
 ## Component Purposes
 
 ### For Developing Appeus (see `./README.md`)

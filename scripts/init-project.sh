@@ -48,6 +48,9 @@ PROJECT_DIR="$(pwd)"
 SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 
+# shellcheck source=lib/host-integration.sh
+source "${SCRIPT_DIR}/lib/host-integration.sh"
+
 # Tracking for report
 ADDED=()
 SKIPPED=()
@@ -111,6 +114,17 @@ write_if_missing() {
 echo "Appeus v2.1: Initializing project in $(pwd)"
 echo ""
 
+# Hosted mode: the project root already holds content Appeus does not own
+# (host AGENTS.md, package.json, other tooling). Appeus becomes a guest:
+# it appends its rules section instead of owning AGENTS.md, and touches
+# .gitignore only to add its own symlink entries.
+HOSTED=0
+if appeus_is_hosted_project "${PROJECT_DIR}"; then
+  HOSTED=1
+  echo "Hosted mode: existing project content detected; Appeus will not take over root files."
+  echo ""
+fi
+
 # Detect whether this looks like an existing Appeus-guided project with at least one target already present.
 HAS_EXISTING_TARGET=0
 if [ -d "${PROJECT_DIR}/apps" ]; then
@@ -135,32 +149,35 @@ fi
 # 1. Create appeus symlink
 ensure_symlink "$APPEUS_DIR" "${PROJECT_DIR}/appeus"
 
-# 2. Create/repair root AGENTS.md.
-# Default to bootstrap for truly-new projects, but if a target already exists then default to project rules.
-ROOT_RULE_TARGET="appeus/agent-rules/bootstrap.md"
+# 2. Ensure root AGENTS.md carries Appeus rules.
+# Greenfield: symlink it (bootstrap, or project rules when a target already exists).
+# Hosted: append the marker-delimited section from agent-rules/root.md; never overwrite.
+ROOT_RULE_MODE="bootstrap"
 if [ "${HAS_EXISTING_TARGET}" = "1" ]; then
-  ROOT_RULE_TARGET="appeus/agent-rules/project.md"
+  ROOT_RULE_MODE="project"
 fi
 
-if [ -L "${PROJECT_DIR}/AGENTS.md" ]; then
-  current="$(readlink "${PROJECT_DIR}/AGENTS.md" 2>/dev/null || true)"
-  if [ "${HAS_EXISTING_TARGET}" = "1" ] && [ "${current}" = "appeus/agent-rules/bootstrap.md" ]; then
-    ensure_symlink "${ROOT_RULE_TARGET}" "${PROJECT_DIR}/AGENTS.md"
-    echo "Note: Existing target(s) detected; root AGENTS.md set to project rules."
-    echo "  (If you want discovery mode, repoint it to appeus/agent-rules/bootstrap.md.)"
-    echo ""
-  else
-    log_skipped "${PROJECT_DIR}/AGENTS.md (exists)"
-  fi
-elif [ -e "${PROJECT_DIR}/AGENTS.md" ]; then
-  log_skipped "${PROJECT_DIR}/AGENTS.md (exists, not a symlink)"
-else
-  ensure_symlink "${ROOT_RULE_TARGET}" "${PROJECT_DIR}/AGENTS.md"
-  if [ "${HAS_EXISTING_TARGET}" = "1" ]; then
-    echo "Note: Existing target(s) detected; root AGENTS.md set to project rules."
-    echo "  (If you want discovery mode, repoint it to appeus/agent-rules/bootstrap.md.)"
-    echo ""
-  fi
+ROOT_RULE_RESULT="$(appeus_ensure_root_rules "${PROJECT_DIR}" "${APPEUS_DIR}" "${ROOT_RULE_MODE}")"
+case "${ROOT_RULE_RESULT}" in
+  linked) log_added "AGENTS.md → $(appeus_root_link_target "${ROOT_RULE_MODE}")" ;;
+  repointed) log_refreshed "AGENTS.md → $(appeus_root_link_target "${ROOT_RULE_MODE}")" ;;
+  appended) log_added "AGENTS.md (appended appeus section)" ;;
+  present) log_skipped "AGENTS.md (already carries appeus rules)" ;;
+esac
+
+CLAUDE_RULE_RESULT="$(appeus_ensure_claude_pointer "${PROJECT_DIR}" "${APPEUS_DIR}" "${ROOT_RULE_MODE}")"
+case "${CLAUDE_RULE_RESULT}" in
+  linked) log_added "CLAUDE.md → $(appeus_root_link_target "${ROOT_RULE_MODE}")" ;;
+  repointed) log_refreshed "CLAUDE.md → $(appeus_root_link_target "${ROOT_RULE_MODE}")" ;;
+  appended) log_added "CLAUDE.md (appended appeus section)" ;;
+  defers) log_skipped "CLAUDE.md (defers to AGENTS.md)" ;;
+  present) log_skipped "CLAUDE.md (already carries appeus rules)" ;;
+esac
+
+if [ "${HAS_EXISTING_TARGET}" = "1" ] && [ "${ROOT_RULE_RESULT}" = "repointed" ]; then
+  echo "Note: Existing target(s) detected; root AGENTS.md set to project rules."
+  echo "  (If you want discovery mode, repoint it to appeus/agent-rules/bootstrap.md.)"
+  echo ""
 fi
 
 # 3. Create design folder structure
@@ -203,11 +220,39 @@ ensure_dir "${PROJECT_DIR}/apps"
 ensure_dir "${PROJECT_DIR}/mock"
 ensure_dir "${PROJECT_DIR}/mock/data"
 
-# 12. Create .gitignore with appeus symlinks
-GITIGNORE_CONTENT="# Appeus symlinks (recreate with: path/to/appeus/scripts/init-project.sh)
-appeus
-AGENTS.md
-**/AGENTS.md
+# 12. Ignore the symlinks Appeus creates (they point into the toolkit checkout).
+# Only Appeus-owned entries are added, one line at a time. Generic dev ignores
+# (node_modules, dist, .env, …) are written only when creating a fresh .gitignore,
+# since a host project already has its own.
+GITIGNORE_PATH="${PROJECT_DIR}/.gitignore"
+GITIGNORE_EXISTED=0
+[ -f "${GITIGNORE_PATH}" ] && GITIGNORE_EXISTED=1
+
+if [ "${GITIGNORE_EXISTED}" = "0" ]; then
+  printf '%s\n' "${APPEUS_GITIGNORE_HEADER}" > "${GITIGNORE_PATH}"
+fi
+
+IGNORE_ADDED=0
+while IFS= read -r entry; do
+  [ -n "$entry" ] || continue
+  if appeus_add_gitignore_entry "${GITIGNORE_PATH}" "$entry"; then
+    IGNORE_ADDED=$((IGNORE_ADDED + 1))
+  fi
+done < <(appeus_ignore_entries)
+
+# Root rule files are only Appeus-owned when Appeus symlinked them.
+for rule_file in AGENTS.md CLAUDE.md; do
+  if appeus_is_toolkit_link "${PROJECT_DIR}/${rule_file}"; then
+    if appeus_add_gitignore_entry "${GITIGNORE_PATH}" "/${rule_file}"; then
+      IGNORE_ADDED=$((IGNORE_ADDED + 1))
+    fi
+  fi
+done
+
+# Generic dev ignores only for a project Appeus is creating from scratch —
+# a host repo already has its own.
+if [ "${GITIGNORE_EXISTED}" = "0" ] && [ "${HOSTED}" = "0" ]; then
+  cat >> "${GITIGNORE_PATH}" <<'EOF'
 
 # Dependencies
 node_modules/
@@ -231,28 +276,28 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-"
-
-if [ -f "${PROJECT_DIR}/.gitignore" ]; then
-  # Check if our marker comment exists
-  if grep -q "Appeus symlinks" "${PROJECT_DIR}/.gitignore"; then
-    log_skipped ".gitignore (already has appeus entries)"
-  else
-    # Append to existing .gitignore
-    echo "" >> "${PROJECT_DIR}/.gitignore"
-    echo "$GITIGNORE_CONTENT" >> "${PROJECT_DIR}/.gitignore"
-    log_added ".gitignore (appended appeus entries)"
-  fi
-else
-  echo "$GITIGNORE_CONTENT" > "${PROJECT_DIR}/.gitignore"
-  log_added ".gitignore"
+EOF
 fi
 
-# 13. Initialize git if not already initialized and not disabled
+if [ "${GITIGNORE_EXISTED}" = "0" ]; then
+  log_added ".gitignore"
+elif [ "${IGNORE_ADDED}" -gt 0 ]; then
+  log_added ".gitignore (added ${IGNORE_ADDED} appeus entr$([ "${IGNORE_ADDED}" = "1" ] && echo y || echo ies))"
+else
+  log_skipped ".gitignore (already has appeus entries)"
+fi
+
+# 13. Initialize git if not already initialized and not disabled.
+# Never nest a repo inside an existing work tree (e.g. Appeus living in a subdir
+# of a larger monorepo) — that would shadow the host repo's history.
 if [ "${INIT_GIT}" != "0" ]; then
   if [ ! -d "${PROJECT_DIR}/.git" ]; then
-    git init >/dev/null 2>&1 || true
-    log_added ".git/ (initialized)"
+    if git -C "${PROJECT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      log_skipped ".git/ (inside existing git work tree)"
+    else
+      git init >/dev/null 2>&1 || true
+      log_added ".git/ (initialized)"
+    fi
   fi
 fi
 

@@ -13,6 +13,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-root.sh
 source "${SCRIPT_DIR}/lib/project-root.sh"
+# shellcheck source=lib/host-integration.sh
+source "${SCRIPT_DIR}/lib/host-integration.sh"
 
 usage() {
   cat <<'EOF'
@@ -161,6 +163,81 @@ done < <(
     \) -prune -o \
     -type l -print0
 )
+
+# Remove the marker-delimited Appeus section from host-authored agent rules.
+# The section runs from `<!-- appeus -->` to the next HTML comment at start of line
+# (or end of file). Host content outside that range is untouched.
+strip_appeus_section() {
+  local file="$1"
+
+  [ -f "$file" ] || return 0
+  [ -L "$file" ] && return 0
+  grep -qF "${APPEUS_SECTION_MARKER}" "$file" || return 0
+
+  if [ "${DRY_RUN}" = "1" ]; then
+    echo "Would remove appeus section from: ${file}"
+    return 0
+  fi
+
+  local tmp
+  tmp="$(mktemp "${TMPDIR:-/tmp}/appeus-detach.XXXXXX")"
+  awk -v marker="${APPEUS_SECTION_MARKER}" '
+    $0 == marker { skip = 1; next }
+    skip && /^<!--/ && $0 != marker { skip = 0 }
+    !skip { print }
+  ' "$file" >"$tmp"
+
+  # Drop the blank lines that separated host content from the removed section.
+  awk '
+    { lines[NR] = $0 }
+    END {
+      last = NR
+      while (last > 0 && lines[last] ~ /^[[:space:]]*$/) last--
+      for (i = 1; i <= last; i++) print lines[i]
+    }
+  ' "$tmp" >"${tmp}.2"
+  mv "${tmp}.2" "$file"
+  rm -f "$tmp"
+  echo "Removed appeus section from: ${file}"
+}
+
+for rule_file in AGENTS.md CLAUDE.md; do
+  strip_appeus_section "${PROJECT_DIR}/${rule_file}"
+done
+
+# Remove only the .gitignore lines Appeus added.
+clean_gitignore() {
+  local file="${PROJECT_DIR}/.gitignore"
+  [ -f "$file" ] || return 0
+
+  local entries=() removed_lines=0 tmp
+  while IFS= read -r entry; do
+    [ -n "$entry" ] && entries+=("$entry")
+  done < <(appeus_ignore_entries)
+  entries+=("/AGENTS.md" "/CLAUDE.md" "${APPEUS_GITIGNORE_HEADER}")
+
+  tmp="$(mktemp "${TMPDIR:-/tmp}/appeus-gitignore.XXXXXX")"
+  cp "$file" "$tmp"
+  for entry in "${entries[@]}"; do
+    if grep -qxF "$entry" "$tmp"; then
+      grep -vxF "$entry" "$tmp" >"${tmp}.2" || true
+      mv "${tmp}.2" "$tmp"
+      removed_lines=$((removed_lines + 1))
+    fi
+  done
+
+  if [ "${removed_lines}" -gt 0 ]; then
+    if [ "${DRY_RUN}" = "1" ]; then
+      echo "Would remove ${removed_lines} appeus entr$([ "${removed_lines}" = "1" ] && echo y || echo ies) from .gitignore"
+    else
+      mv "$tmp" "$file"
+      echo "Removed ${removed_lines} appeus entr$([ "${removed_lines}" = "1" ] && echo y || echo ies) from .gitignore"
+    fi
+  fi
+  rm -f "$tmp" "${tmp}.2"
+}
+
+clean_gitignore
 
 echo ""
 echo "Done."

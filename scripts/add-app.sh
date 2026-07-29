@@ -28,6 +28,9 @@ PROJECT_DIR="$(pwd)"
 SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPEUS_DIR="$(cd -P "${SCRIPT_DIR}/.." && pwd)"
 
+# shellcheck source=lib/host-integration.sh
+source "${SCRIPT_DIR}/lib/host-integration.sh"
+
 # Defaults
 TARGET=""
 APP_NAME="" # internal alias: keep the rest of the script stable
@@ -214,8 +217,17 @@ mkdir -p "${PROJECT_DIR}/apps/${APP_NAME}"
 # Link AGENTS.md in the app folder
 ln -snf "../../appeus/agent-rules/src.md" "${PROJECT_DIR}/apps/${APP_NAME}/AGENTS.md"
 
-# Update root AGENTS.md to point to project.md (post-discovery)
-ln -snf "appeus/agent-rules/project.md" "${PROJECT_DIR}/AGENTS.md"
+# Move root rules out of discovery mode (post-discovery).
+# Only repoints a symlink Appeus owns; a host-authored AGENTS.md is left intact
+# (its appended appeus section already covers both phases).
+case "$(appeus_ensure_root_rules "${PROJECT_DIR}" "${APPEUS_DIR}" project)" in
+  repointed) echo "  Root AGENTS.md now points to appeus/agent-rules/project.md" ;;
+  appended) echo "  Appended appeus section to root AGENTS.md" ;;
+esac
+case "$(appeus_ensure_claude_pointer "${PROJECT_DIR}" "${APPEUS_DIR}" project)" in
+  repointed) echo "  Root CLAUDE.md now points to appeus/agent-rules/project.md" ;;
+  appended) echo "  Appended appeus section to root CLAUDE.md" ;;
+esac
 
 # Dispatch to framework-specific script (skip if refresh mode and app exists)
 if [ "$REFRESH_MODE" = "1" ] && [ "$APP_EXISTS" = "1" ]; then
@@ -230,6 +242,17 @@ if [ "$REFRESH_MODE" = "1" ] && [ "$APP_EXISTS" = "1" ]; then
   echo "  - Added any missing templates"
   echo ""
 else
+  # Host repo may be a monorepo: warn if the app lands outside its workspace globs,
+  # and inherit its package manager unless the caller chose one.
+  appeus_workspace_advice "${PROJECT_DIR}" "${PROJECT_DIR}/apps/${APP_NAME}"
+  if [ -z "${APPEUS_PM:-}" ]; then
+    if HOST_PM="$(appeus_host_package_manager "${PROJECT_DIR}")" && [ -n "${HOST_PM}" ]; then
+      export APPEUS_PM="${HOST_PM}"
+      echo "Using host package manager: ${HOST_PM} (override with APPEUS_PM)"
+      echo ""
+    fi
+  fi
+
   echo "Dispatching to framework scaffold: ${FRAMEWORK}"
   echo ""
 

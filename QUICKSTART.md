@@ -24,6 +24,17 @@ This creates:
 - `design/specs/project.md` — Decision document template
 - `.gitignore` — Ignores appeus symlinks
 
+### Existing repos (hosted mode)
+
+Init is also safe to run inside a repo that already has its own `AGENTS.md`, `.gitignore`, and packages. It then reports *hosted mode*, appends its rules as a marked section instead of taking over `AGENTS.md`, adds only its own `.gitignore` lines, and never runs `git init`. To keep Appeus in one corner of a monorepo, run init from that subdirectory — it becomes the Appeus project root:
+
+```bash
+cd packages/myapps
+/path/to/appeus/scripts/init-project.sh
+```
+
+See `docs/ARCHITECTURE.md` § Hosted (guest) install.
+
 ## Step 2: Discovery Phase
 
 Open the project in your IDE with an AI agent. The agent will guide you through completing `design/specs/project.md`:

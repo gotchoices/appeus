@@ -4,6 +4,18 @@ This changelog is intentionally practical: it focuses on changes that affect **p
 
 ## v2.1 (current, post-`v2` tag)
 
+### Hosted mode (co-tenant projects)
+
+Appeus can now be installed into a repo it does not own — including a subdirectory of a monorepo (run `init-project.sh` from there; that directory becomes the Appeus project root).
+
+- Root `AGENTS.md`/`CLAUDE.md`: when the file already exists, `init-project.sh` appends the marked section from `agent-rules/root.md` instead of skipping it (old behavior: Appeus rules never loaded), and `add-app.sh` no longer force-relinks the root file over host content.
+- `.gitignore`: only Appeus symlink entries are added, line by line. The old blanket `AGENTS.md` / `**/AGENTS.md` entries are gone — they hid host rule files from git.
+- `git init` is skipped inside an existing work tree.
+- `add-app.sh` warns when `apps/<target>/` falls outside the host's workspace globs, and inherits the host `packageManager` unless `APPEUS_PM` is set.
+- `detach-appeus.sh` also strips the rules section and removes the `.gitignore` lines Appeus added.
+
+Recovering a project created before this change: if the root `AGENTS.md` was replaced by a symlink into `appeus/agent-rules/`, restore the host file from git and re-run `init-project.sh` (it appends instead), then delete any stray `AGENTS.md` / `**/AGENTS.md` lines from `.gitignore`.
+
 ### Migration to v2.1 (from v1 or v2 projects)
 
 v2.1 standardizes on a **single canonical per-target layout**:
