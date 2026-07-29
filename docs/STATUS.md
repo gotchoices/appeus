@@ -251,6 +251,49 @@ These items were completed in v1 and carry forward:
 
 ## Remaining TODOs (uncompleted items kept near the bottom)
 
+#### script robustness / correctness (audit)
+
+Fixed: `check-stale.sh` now compares `depHashes` (hash-based detection was documented but never
+implemented, so `update-dep-hashes.sh` output was inert and mtime drift produced both false-fresh
+and false-stale results); empty-array expansions under `set -u` no longer abort on bash 3.2 (the
+macOS default) in `check-stale.sh`, `update-dep-hashes.sh`, and `build-images.sh`; the mtime
+fallback now treats equal timestamps as stale (one-second `stat` resolution).
+
+Still open:
+
+- [ ] **Output paths are hardcoded per framework.** `check-stale.sh` looks only for
+  `apps/<target>/src/screens/<Route>.tsx|.ts` (RN) and `apps/<target>/src/routes/<kebab>/+page.svelte`
+  (SvelteKit); a NativeScript-Svelte target reports every route as `missing output` forever.
+  Fix: honor the `output` field of `outputs.json` (documented in `reference/staleness.md`, never read),
+  and let each `scripts/frameworks/*.sh` declare its output convention.
+- [ ] **Consolidations sit outside staleness.** `design/generated/<target>/screens/<Route>.md` is
+  neither input nor output in `check-stale.sh`, so spec → consolidation drift is invisible; only
+  spec → app-code is checked. `reference/staleness.md` lists consolidations as outputs.
+- [ ] **`update-dep-hashes.sh` never records an `output` field** when seeding entries, and silently
+  drops the hash of a deleted `dependsOn` file (after one refresh, that deletion is undetectable).
+- [ ] **`android-screenshot.sh` return-value bug.** `launch_emulator_if_needed` prints log lines *and*
+  the serial to stdout while the caller captures stdout; its `SERIAL=` assignment happens inside a
+  command substitution (subshell) and is lost, so `adb_target` silently falls back to `adb -e`.
+  Works only with exactly one emulator and no attached device. `--app-id` is parsed but never used
+  (no force-stop, no check that the deep link opened the intended app).
+- [ ] **No iOS capture path** (simctl) to pair with the Android one.
+- [ ] **Tool preflight is inconsistent.** `check-stale.sh` treats `jq` as optional and silently
+  degrades to heuristic deps; `build-images.sh` requires mikefarah `yq`; node/npx/perl/adb are
+  assumed elsewhere. No single up-front check.
+- [ ] **`status.json` lands at `design/generated/<target>/status.json`** while all other metadata
+  lives under `meta/`.
+- [ ] **`publish-scenarios.sh` sed fallback** (used only when `perl` is absent) has an over-escaped
+  regex that cannot match.
+- [ ] **Screens-index parsing** assumes column 3 is the route with specific header text; any other
+  table in `screens/index.md` is read as routes.
+
+#### install modes
+
+- [ ] **Submodule / subtree install**, as tess does: detect a real `appeus/` directory, skip the
+  symlink and its `.gitignore` entries, and write committed stub rule files instead of symlinks.
+  Today a fresh clone of a host repo carries no appeus rules until someone re-runs
+  `init-project.sh`, and the `appeus` symlink it creates is an absolute, machine-specific path.
+
 #### framework adapters and stubs
 
 - [ ] Review implemented adapters: `scripts/frameworks/react-native.sh`, `scripts/frameworks/sveltekit.sh`, `scripts/frameworks/nativescript-svelte.sh`

@@ -103,8 +103,9 @@ infer_depends_on_for_route() {
   [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${kebab}.md" ] && deps+=("design/specs/${target}/screens/${kebab}.md")
   [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${route}.md" ] && deps+=("design/specs/${target}/screens/${route}.md")
 
-  # Unique + stable order
-  printf "%s\n" "${deps[@]}" | awk 'NF && !seen[$0]++'
+  # Unique + stable order.
+  # `${a[@]+"${a[@]}"}` keeps `set -u` happy on empty arrays (bash 3.2, macOS default).
+  printf "%s\n" ${deps[@]+"${deps[@]}"} | awk 'NF && !seen[$0]++'
 }
 
 ensure_outputs_registry_seeded() {

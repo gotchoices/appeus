@@ -205,7 +205,8 @@ for i in $(seq 0 $((screenshot_count - 1))); do
   fi
   
   if [[ "$FORCE" -eq 0 ]]; then
-    if ! is_stale "$output" "${dep_array[@]}"; then
+    # `${a[@]+"${a[@]}"}` keeps `set -u` happy on empty arrays (bash 3.2, macOS default).
+    if ! is_stale "$output" ${dep_array[@]+"${dep_array[@]}"}; then
       echo "fresh  ${file}"
       skipped=$((skipped+1))
       continue

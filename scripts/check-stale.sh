@@ -129,7 +129,8 @@ if command -v jq >/dev/null 2>&1; then
       if [ -d "${STORIES_DIR}" ]; then
         while IFS= read -r -d '' f; do deps+=("${f#${PROJECT_DIR}/}"); done < <(find "${STORIES_DIR}" -type f -name "*.md" -print0 2>/dev/null || true)
       fi
-      deps_json=$(printf "%s\n" "${deps[@]}" | awk 'NF && !seen[$0]++' | jq -R . | jq -s .)
+      # `${a[@]+"${a[@]}"}` keeps `set -u` happy on empty arrays (bash 3.2, macOS default).
+      deps_json=$(printf "%s\n" ${deps[@]+"${deps[@]}"} | awk 'NF && !seen[$0]++' | jq -R . | jq -s .)
       tmp=$(mktemp)
       jq --arg route "$ROUTE" --argjson deps "$deps_json" '
         .outputs += [{"route": $route, "dependsOn": $deps, "depHashes": {}}]
@@ -139,11 +140,68 @@ if command -v jq >/dev/null 2>&1; then
   done
 fi
 
-json_escape() { python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'; }
+json_escape() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  else
+    # Enough for the short, ASCII reasons this script emits.
+    printf '"%s"' "$(cat | tr -d '\n' | sed 's/\\/\\\\/g; s/"/\\"/g')"
+  fi
+}
+
+file_sha256() {
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | awk '{print $1}'
+  elif command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    return 1
+  fi
+}
+
+# Hash comparison needs both a registry reader and a digest tool.
+HASHING_AVAILABLE=0
+if command -v jq >/dev/null 2>&1 && file_sha256 "${SCREENS_PLAN}" >/dev/null 2>&1; then
+  HASHING_AVAILABLE=1
+fi
+
+# Compare each dependsOn file against its recorded depHashes entry.
+# Echoes a reason when stale, nothing when fresh; returns 1 when no usable hashes exist.
+hash_staleness_reason() { # $1 = route
+  local route="$1" recorded actual dep count
+
+  count="$(jq -r --arg r "$route" '[.outputs[] | select(.route==$r) | .depHashes // {} | keys[]] | length' "${META_FILE}" 2>/dev/null || echo 0)"
+  [ "${count:-0}" -gt 0 ] || return 1
+
+  while IFS= read -r dep; do
+    [ -n "$dep" ] || continue
+    recorded="$(jq -r --arg r "$route" --arg d "$dep" '.outputs[] | select(.route==$r) | .depHashes[$d] // ""' "${META_FILE}" 2>/dev/null || echo "")"
+    # Tolerate an explicit algorithm prefix, e.g. "sha256:abc…".
+    recorded="${recorded#sha256:}"
+
+    if [ ! -f "${PROJECT_DIR}/${dep}" ]; then
+      [ -n "$recorded" ] && { echo "dependency removed: ${dep}"; return 0; }
+      continue
+    fi
+    if [ -z "$recorded" ]; then
+      echo "no recorded hash: ${dep}"
+      return 0
+    fi
+    actual="$(file_sha256 "${PROJECT_DIR}/${dep}")"
+    if [ "$actual" != "$recorded" ]; then
+      echo "changed: ${dep}"
+      return 0
+    fi
+  done < <(jq -r --arg r "$route" '.outputs[] | select(.route==$r) | .dependsOn[]?' "${META_FILE}" 2>/dev/null || true)
+
+  return 0
+}
 
 SUMMARY_ROWS=()
 JSON_ENTRIES=()
 STALE_COUNT=0
+HASH_ROUTES=0
+MTIME_ROUTES=0
 
 for ROUTE in "${SCREENS[@]}"; do
   # Inputs: prefer precise registry from meta/outputs.json; fallback to heuristic
@@ -180,37 +238,59 @@ for ROUTE in "${SCREENS[@]}"; do
   KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
   [ -f "${SRC_DIR}/routes/${KEBAB}/+page.svelte" ] && OUTPUTS+=("${SRC_DIR}/routes/${KEBAB}/+page.svelte")
 
-  latest_in=0
-  for f in "${INPUTS[@]}"; do
-    if [ -f "$f" ]; then
-      ts=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo 0)
-      [ "$ts" -gt "$latest_in" ] && latest_in="$ts"
-    fi
-  done
-  
-  earliest_out=9999999999
-  if [ "${#OUTPUTS[@]:-0}" -gt 0 ]; then
-    for f in "${OUTPUTS[@]}"; do
-      ts=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo 0)
-      [ "$ts" -lt "$earliest_out" ] && earliest_out="$ts"
-    done
-  else
-    earliest_out=0
-  fi
-
   STALE="false"
   REASON=""
+  METHOD="mtime"
+
   if [ "${#OUTPUTS[@]}" -eq 0 ]; then
     STALE="true"
     REASON="missing output"
-  elif [ "$latest_in" -gt "$earliest_out" ]; then
-    STALE="true"
-    REASON="inputs newer than outputs"
+    METHOD="n/a"
+  else
+    # Hash-based (preferred): compare recorded depHashes to the files on disk.
+    # mtimes are unreliable — git rewrites them on clone/checkout, and stat has
+    # one-second resolution — so they are only the fallback.
+    HASH_REASON=""
+    if [ "${HASHING_AVAILABLE}" = "1" ]; then
+      if HASH_REASON="$(hash_staleness_reason "${ROUTE}")"; then
+        METHOD="hash"
+        if [ -n "${HASH_REASON}" ]; then
+          STALE="true"
+          REASON="${HASH_REASON}"
+        fi
+      fi
+    fi
+
+    if [ "${METHOD}" = "mtime" ]; then
+      latest_in=0
+      for f in ${INPUTS[@]+"${INPUTS[@]}"}; do
+        if [ -f "$f" ]; then
+          ts=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo 0)
+          [ "$ts" -gt "$latest_in" ] && latest_in="$ts"
+        fi
+      done
+
+      earliest_out=9999999999
+      for f in ${OUTPUTS[@]+"${OUTPUTS[@]}"}; do
+        ts=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null || echo 0)
+        [ "$ts" -lt "$earliest_out" ] && earliest_out="$ts"
+      done
+
+      if [ "$latest_in" -ge "$earliest_out" ]; then
+        STALE="true"
+        REASON="inputs not older than outputs (mtime; run update-dep-hashes.sh for exact detection)"
+      fi
+    fi
   fi
+
+  case "${METHOD}" in
+    hash) HASH_ROUTES=$((HASH_ROUTES+1)) ;;
+    mtime) MTIME_ROUTES=$((MTIME_ROUTES+1)) ;;
+  esac
   [ "$STALE" = "true" ] && STALE_COUNT=$((STALE_COUNT+1))
 
-  SUMMARY_ROWS+=("$(printf '%-22s | %-5s | %s' "${ROUTE}" "${STALE}" "${REASON}")")
-  JSON_ENTRIES+=("{\"route\":\"${ROUTE}\",\"stale\":${STALE},\"reason\":$(printf '%s' "${REASON}" | json_escape)}")
+  SUMMARY_ROWS+=("$(printf '%-22s | %-5s | %-5s | %s' "${ROUTE}" "${STALE}" "${METHOD}" "${REASON}")")
+  JSON_ENTRIES+=("{\"route\":\"${ROUTE}\",\"stale\":${STALE},\"method\":\"${METHOD}\",\"reason\":$(printf '%s' "${REASON}" | json_escape)}")
 done
 
 # Write JSON report
@@ -228,11 +308,22 @@ else
   echo "Staleness summary:"
 fi
 echo ""
-echo "Route                 | stale | reason"
-echo "----------------------+-------+---------------------------"
-for row in "${SUMMARY_ROWS[@]}"; do echo "${row}"; done
+echo "Route                 | stale | how   | reason"
+echo "----------------------+-------+-------+---------------------------"
+for row in ${SUMMARY_ROWS[@]+"${SUMMARY_ROWS[@]}"}; do echo "${row}"; done
 echo ""
 echo "Wrote JSON report to ${STATUS_FILE}"
+
+if [ "${MTIME_ROUTES}" -gt 0 ]; then
+  echo ""
+  if [ "${HASHING_AVAILABLE}" = "1" ]; then
+    echo "NOTE: ${MTIME_ROUTES} route(s) fell back to mtime comparison (no depHashes recorded)."
+    echo "  mtimes are unreliable after git clone/checkout. Record hashes with:"
+    echo "    appeus/scripts/update-dep-hashes.sh --target ${TARGET} --all"
+  else
+    echo "NOTE: hash comparison unavailable (needs jq and shasum/sha256sum); used mtimes for all routes."
+  fi
+fi
 
 echo ""
 if [ "${STALE_COUNT}" -gt 0 ]; then

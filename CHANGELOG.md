@@ -4,6 +4,20 @@ This changelog is intentionally practical: it focuses on changes that affect **p
 
 ## v2.1 (current, post-`v2` tag)
 
+### Staleness detection now uses hashes
+
+`check-stale.sh` compares the `depHashes` recorded by `update-dep-hashes.sh` before falling back to
+mtimes, and reports which method it used per route (`how` column, `method` field in `status.json`).
+Previously hashes were written but never read, so a content change with an older mtime (any git
+clone, checkout, or stash pop) read as fresh, and a touched-but-unchanged file read as stale.
+
+Recovery for existing projects: run `appeus/scripts/update-dep-hashes.sh --target <t> --all` once so
+routes have hashes to compare; until then they use the mtime fallback and say so.
+
+Also fixed: scripts no longer abort with `unbound variable` on bash 3.2 (the macOS default) when a
+dependency, input, or screenshot-deps array is empty; the mtime fallback treats equal timestamps as
+stale (`stat` has one-second resolution); `python3` is now optional in `check-stale.sh`.
+
 ### Hosted mode (co-tenant projects)
 
 Appeus can now be installed into a repo it does not own — including a subdirectory of a monorepo (run `init-project.sh` from there; that directory becomes the Appeus project root).
