@@ -104,7 +104,7 @@ infer_depends_on_for_route() {
 
   # Per-screen spec
   local kebab
-  kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+  kebab="$(echo "${route}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
   [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${kebab}.md" ] && deps+=("design/specs/${target}/screens/${kebab}.md")
   [ -f "${PROJECT_DIR}/design/specs/${target}/screens/${route}.md" ] && deps+=("design/specs/${target}/screens/${route}.md")
 

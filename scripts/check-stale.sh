@@ -122,7 +122,7 @@ if command -v jq >/dev/null 2>&1; then
       [ -f "${SPECS_NAV_FILE}" ] && deps+=("${SPECS_NAV_FILE#${PROJECT_DIR}/}")
       [ -f "${SCREENS_PLAN}" ] && deps+=("${SCREENS_PLAN#${PROJECT_DIR}/}")
       # Per-screen spec
-      KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+      KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
       [ -f "${SPECS_SCREENS_DIR}/${KEBAB}.md" ] && deps+=("${SPECS_SCREENS_DIR#${PROJECT_DIR}/}/${KEBAB}.md")
       [ -f "${SPECS_SCREENS_DIR}/${ROUTE}.md" ] && deps+=("${SPECS_SCREENS_DIR#${PROJECT_DIR}/}/${ROUTE}.md")
       # Target stories
@@ -229,7 +229,7 @@ for ROUTE in "${SCREENS[@]}"; do
     while IFS= read -r -d '' f; do INPUTS+=("$f"); done < <(find "${DESIGN_DIR}/specs/domain" -type f -print0 2>/dev/null || true)
     [ -f "${DESIGN_DIR}/specs/project.md" ] && INPUTS+=("${DESIGN_DIR}/specs/project.md")
     # Per-screen spec
-    KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+    KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
     [ -f "${SPECS_SCREENS_DIR}/${KEBAB}.md" ] && INPUTS+=("${SPECS_SCREENS_DIR}/${KEBAB}.md")
     [ -f "${SPECS_SCREENS_DIR}/${ROUTE}.md" ] && INPUTS+=("${SPECS_SCREENS_DIR}/${ROUTE}.md")
   fi
@@ -239,7 +239,7 @@ for ROUTE in "${SCREENS[@]}"; do
   [ -f "${SRC_DIR}/screens/${ROUTE}.tsx" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.tsx")
   [ -f "${SRC_DIR}/screens/${ROUTE}.ts" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.ts")
   # SvelteKit routes
-  KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' | tr '[:upper:]' '[:lower:]')"
+  KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
   [ -f "${SRC_DIR}/routes/${KEBAB}/+page.svelte" ] && OUTPUTS+=("${SRC_DIR}/routes/${KEBAB}/+page.svelte")
 
   STALE="false"
