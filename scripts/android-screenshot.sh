@@ -1,35 +1,31 @@
 #!/usr/bin/env bash
-# Wrapper name retained for clarity; identical to capture-android-screenshot.sh
 set -euo pipefail
 
-# Android deep-link screenshot helper
-# - Launches (or reuses) an emulator
-# - Opens a deep link in the target app
-# - Captures a PNG screenshot to the given path
+# android-screenshot.sh
+# Open a deep link on an Android emulator (starting one if needed) and capture a PNG.
+# Usually called by build-images.sh; the launch itself goes through open-deeplink.sh.
 #
 # Usage:
-#   appeus/scripts/android-screenshot.sh \
-#     --deeplink "myapp://screen/ItemList?variant=happy" \
-#     --output "./design/generated/<target>/images/item-list-happy.png" \
-#     --app-id "com.example.myapp" \
-#     --avd "Medium_Phone_API_34" \
-#     --delay 3 \
-#     --reuse
+#   appeus/scripts/android-screenshot.sh --deeplink "myapp://screen/ItemList?variant=happy" \
+#     [--output path.png] [--app-id com.example.app] [--serial emulator-5554] \
+#     [--avd Medium_Phone_API_34] [--delay 8] [--reuse] [--window]
 #
-# Environment defaults (can be overridden by flags):
-#   APPEUS_ANDROID_AVD   (default: Medium_Phone_API_34)
-#   APPEUS_APP_ID        (optional, currently unused but accepted for compatibility)
-#   APPEUS_SCREEN_DELAY  (default: 3)
+#   --serial   device to use; default: $APPEUS_DEVICE, else the first running emulator
+#   --reuse    never start an emulator (fail if none is running)
+#   --window   start the emulator with a window (default: headless)
+#   --delay    seconds between launching the link and capturing (default: $APPEUS_SCREEN_DELAY or 8).
+#              First paint after a cold start of a React Native release build can take 10–20 s;
+#              warm the app once before a capture run, or raise this.
 #
+# Env defaults: APPEUS_ANDROID_AVD (Medium_Phone_API_34), APPEUS_SCREEN_DELAY (8), APPEUS_APP_ID, APPEUS_DEVICE
+
+SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 AVD="${APPEUS_ANDROID_AVD:-Medium_Phone_API_34}"
 APP_ID="${APPEUS_APP_ID:-}"
-DELAY="${APPEUS_SCREEN_DELAY:-3}"
-DEEPLINK=""
-OUTPUT="screenshot.png"
-REUSE=0
-HEADLESS=1
-SERIAL=""
+DELAY="${APPEUS_SCREEN_DELAY:-8}"
+SERIAL="${APPEUS_DEVICE:-}"
+DEEPLINK="" OUTPUT="screenshot.png" REUSE=0 HEADLESS=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -38,131 +34,63 @@ while [[ $# -gt 0 ]]; do
     --app-id) APP_ID="${2:-}"; shift 2 ;;
     --avd) AVD="${2:-}"; shift 2 ;;
     --delay) DELAY="${2:-}"; shift 2 ;;
+    --serial) SERIAL="${2:-}"; shift 2 ;;
     --reuse) REUSE=1; shift ;;
     --window) HEADLESS=0; shift ;;
-    --serial) SERIAL="${2:-}"; shift 2 ;;
-    -h|--help)
-      echo "Usage: $0 --deeplink URL [--output PATH] [--app-id ID] [--avd NAME] [--delay SECONDS] [--reuse] [--window] [--serial emulator-5554]"
-      exit 0
-      ;;
-    *)
-      echo "Unknown flag: $1"
-      exit 1
-      ;;
+    -h|--help) sed -n '/^# Usage:/,/^# Env defaults/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
 done
+[[ -n "$DEEPLINK" ]] || { echo "Error: --deeplink is required" >&2; exit 1; }
+command -v adb >/dev/null 2>&1 || { echo "Error: adb not found on PATH" >&2; exit 1; }
 
-if [[ -z "$DEEPLINK" ]]; then
-  echo "Error: --deeplink is required"
-  exit 1
-fi
-
-ensure_output_dir() {
-  local dir
-  dir="$(dirname "$OUTPUT")"
-  if [[ ! -d "$dir" ]]; then
-    mkdir -p "$dir"
-  fi
+# First running emulator's serial, or empty.
+first_emulator() {
+  adb devices 2>/dev/null | awk 'NR>1 && $1 ~ /^emulator-/ && $2=="device" { print $1; exit }'
 }
 
-pick_emulator_serial() {
-  # Returns first emulator serial or empty
-  local s
-  s="$(adb devices | sed -n '2,$p' | awk '/\tdevice$/{print $1; exit}')"
-  # Trim CR/LF and spaces just in case
-  printf "%s" "$s" | tr -d '\r\n[:space:]'
-}
-
-adb_target() {
-  if [[ -n "$SERIAL" ]]; then
-    adb -s "$SERIAL" "$@"
-  else
-    # target first emulator
-    adb -e "$@"
-  fi
-}
-
-wait_for_boot() {
-  # Wait until a device/emulator is up and booted
-  adb_target wait-for-device || true
+wait_for_boot() { # $1 = serial
+  adb -s "$1" wait-for-device >/dev/null 2>&1 || true
   local tries=0
-  while [[ "$(adb_target shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != "1" ]]; do
+  while [[ "$(adb -s "$1" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" != "1" ]]; do
     sleep 1
-    tries=$((tries+1)); if [[ $tries -gt 180 ]]; then echo "Timeout waiting for boot_completed"; exit 1; fi
+    tries=$((tries + 1))
+    [[ $tries -le 180 ]] || { echo "Error: timeout waiting for $1 to boot" >&2; exit 1; }
   done
 }
 
-launch_emulator_if_needed() {
-  local serial=""
-  if [[ -z "$SERIAL" ]]; then
-    serial="$(pick_emulator_serial || true)"
-  else
-    serial="$SERIAL"
-  fi
-  if [[ -n "$serial" ]]; then
-    echo "Using running emulator: $serial"
-    SERIAL="$serial"
-    echo "$SERIAL"
-    return 0
-  fi
-  if [[ "$REUSE" -eq 1 ]]; then
-    echo "No running emulator found and --reuse specified. Exiting."
-    exit 1
+start_emulator() {
+  local emu=""
+  if command -v emulator >/dev/null 2>&1; then emu="emulator"
+  elif [[ -n "${ANDROID_HOME:-}" && -x "$ANDROID_HOME/emulator/emulator" ]]; then emu="$ANDROID_HOME/emulator/emulator"
+  elif [[ -n "${ANDROID_SDK_ROOT:-}" && -x "$ANDROID_SDK_ROOT/emulator/emulator" ]]; then emu="$ANDROID_SDK_ROOT/emulator/emulator"
+  else echo "Error: emulator binary not found in PATH, ANDROID_HOME or ANDROID_SDK_ROOT." >&2; exit 1
   fi
   echo "Starting emulator: $AVD"
-  if command -v emulator >/dev/null 2>&1; then
-    if [[ "$HEADLESS" -eq 1 ]]; then
-      nohup emulator -avd "$AVD" -no-snapshot-load -no-window >/dev/null 2>&1 &
-    else
-      nohup emulator -avd "$AVD" -no-snapshot-load >/dev/null 2>&1 &
-    fi
-  else
-    # Try ANDROID_HOME/ANDROID_SDK_ROOT fallback
-    EMU=""
-    if [[ -n "${ANDROID_HOME:-}" && -x "$ANDROID_HOME/emulator/emulator" ]]; then
-      EMU="$ANDROID_HOME/emulator/emulator"
-    elif [[ -n "${ANDROID_SDK_ROOT:-}" && -x "$ANDROID_SDK_ROOT/emulator/emulator" ]]; then
-      EMU="$ANDROID_SDK_ROOT/emulator/emulator"
-    fi
-    if [[ -z "$EMU" ]]; then
-      echo "Error: emulator binary not found in PATH, ANDROID_HOME or ANDROID_SDK_ROOT."
-      exit 1
-    fi
-    if [[ "$HEADLESS" -eq 1 ]]; then
-      nohup "$EMU" -avd "$AVD" -no-snapshot-load -no-window >/dev/null 2>&1 &
-    else
-      nohup "$EMU" -avd "$AVD" -no-snapshot-load >/dev/null 2>&1 &
-    fi
+  if [[ "$HEADLESS" = "1" ]]; then nohup "$emu" -avd "$AVD" -no-snapshot-load -no-window >/dev/null 2>&1 &
+  else nohup "$emu" -avd "$AVD" -no-snapshot-load >/dev/null 2>&1 &
   fi
-  # Allow process to start and then wait
-  sleep 2
-  wait_for_boot
-  SERIAL="$(pick_emulator_serial || true)"
-  echo "$SERIAL"
+  local tries=0
+  while [[ -z "$(first_emulator)" ]]; do
+    sleep 2
+    tries=$((tries + 1))
+    [[ $tries -le 60 ]] || { echo "Error: emulator did not appear in 'adb devices'" >&2; exit 1; }
+  done
 }
 
-main() {
-  ensure_output_dir
-  local serial=""
-  serial="$(launch_emulator_if_needed)"
-  if [[ -n "$serial" ]]; then
-    wait_for_boot
-    echo "Deep-linking on $serial: $DEEPLINK"
-    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" >/dev/null
-    sleep "$DELAY"
-    echo "Capturing screenshot to $OUTPUT"
-    adb_target exec-out screencap -p > "$OUTPUT"
-  else
-    wait_for_boot
-    echo "Deep-linking: $DEEPLINK"
-    adb_target shell am start -W -a android.intent.action.VIEW -d "$DEEPLINK" >/dev/null
-    sleep "$DELAY"
-    echo "Capturing screenshot to $OUTPUT"
-    adb_target exec-out screencap -p > "$OUTPUT"
+# Choose the device in this shell — no subshell, so SERIAL survives.
+if [[ -z "$SERIAL" ]]; then
+  SERIAL="$(first_emulator)"
+  if [[ -z "$SERIAL" ]]; then
+    [[ "$REUSE" = "0" ]] || { echo "Error: no running emulator and --reuse given." >&2; exit 1; }
+    start_emulator
+    SERIAL="$(first_emulator)"
   fi
-  echo "Done: $OUTPUT"
-}
+fi
+wait_for_boot "$SERIAL"
 
-main "$@"
-
-
+mkdir -p "$(dirname "$OUTPUT")"
+"${SCRIPT_DIR}/open-deeplink.sh" --link "$DEEPLINK" --device "$SERIAL" --wait ${APP_ID:+--app-id "$APP_ID"}
+sleep "$DELAY"
+adb -s "$SERIAL" exec-out screencap -p > "$OUTPUT"
+echo "Captured $OUTPUT from $SERIAL"

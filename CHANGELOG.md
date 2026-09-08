@@ -4,6 +4,36 @@ This changelog is intentionally practical: it focuses on changes that affect **p
 
 ## v2.1 (current, post-`v2` tag)
 
+### Live storyboards: scenario links open the app
+
+Scenario docs always linked each screenshot to its deep link, but Markdown renderers refuse custom
+schemes, so the links did nothing. Now:
+
+- `preview-scenarios.sh` serves the pages itself (no markserv): clicking a `<scheme>://` link opens
+  that state on the emulator/simulator chosen in the page header, via a new `/open` endpoint. It also
+  serves `/states`, a page of every registered state. `--host 0.0.0.0` reaches a phone on the LAN,
+  where the links open the installed app directly.
+- New `open-deeplink.sh` opens any state from the command line (`--route/--variant/--params`, `--id`,
+  or `--link`) on Android or a booted iOS simulator; agents use it to show a freshly generated slice.
+  With several devices connected it requires `--device <id>` (or `APPEUS_DEVICE`).
+- `images/index.md` is the single **state registry**: entries may be `capture: false` (worth opening,
+  not worth a screenshot). `build-images.sh` skips those, gains `--dry-run`, and no longer needs `yq`.
+- A bare `![alt](../images/f.png)` in a scenario doc is linked from the registry entry that owns
+  `f.png`; explicit links that disagree with the registry are reported when publishing.
+- New `check-variants.sh` reports spec-declared variants with no fixture behind them (they render the
+  default fixture and look correct). It joins the spec's `variants:` with the consolidation's new
+  `mocks:` frontmatter (falling back to `mock/data/*` paths in registry `deps`). `check-stale.sh`
+  prints its one-line summary.
+- `publish-scenarios.sh` renders through the same code as the preview (raw links, plus `states.html`);
+  the perl/sed link fixing is gone.
+- `android-screenshot.sh` now launches through `open-deeplink.sh`: the device serial is no longer lost
+  in a subshell and `--app-id` is honored. Default `APPEUS_SCREEN_DELAY` is 8 s (was 3).
+- `scripts/lib/scenarios.js` (run via `npx -p marked -p yaml`) is the one reader of the registry and
+  the one owner of the deep-link formula; `scripts/lib/project-root.sh` gained shared target resolution.
+
+Existing projects need no changes. To use the fixture check fully, add `mocks: [<namespace>]` to each
+consolidation's frontmatter.
+
 ### Staleness detection now uses hashes
 
 `check-stale.sh` compares the `depHashes` recorded by `update-dep-hashes.sh` before falling back to

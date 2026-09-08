@@ -47,4 +47,33 @@ appeus_find_project_dir() {
   return 1
 }
 
+# Target folders under design/specs/ (everything except project.md and the
+# shared domain contract; legacy v2.0 shared folders are excluded too).
+appeus_list_targets() { # $1 = project dir
+  find "${1}/design/specs" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "domain" ! -name "schema" ! -name "api" \
+    ! -name "global" ! -name "screens" ! -name "components" \
+    -exec basename {} \; 2>/dev/null | sort
+}
 
+# Echo the target to operate on: the one given, else the only one that exists.
+# Fails (with the list on stderr) when there are several and none was named.
+appeus_resolve_target() { # $1 = project dir, $2 = requested target (may be empty)
+  local project_dir="$1" target="${2:-}" targets count
+  if [[ -n "$target" ]]; then echo "$target"; return 0; fi
+  targets="$(appeus_list_targets "$project_dir" || true)"
+  if [[ -z "$targets" ]]; then
+    echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
+    return 1
+  fi
+  count="$(printf '%s\n' "$targets" | wc -l | tr -d ' ')"
+  if [[ "$count" != "1" ]]; then
+    echo "Error: Multiple targets detected. --target is required." >&2
+    echo "" >&2
+    echo "Available targets:" >&2
+    printf '%s\n' "$targets" >&2
+    return 1
+  fi
+  echo "NOTE: Defaulting --target to '${targets}' (only target found)" >&2
+  echo "$targets"
+}

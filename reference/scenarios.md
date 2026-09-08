@@ -1,189 +1,111 @@
 # Scenarios and Screenshots
 
-Appeus methodology for creating reviewable scenario documents with clickable screenshots.
-
-Scenarios are a storyboard layer for review and testing: screenshots are embedded in markdown and link to deep links that open the app in a specific UI state (typically via mock variants; see [Mock Variants](mock-variants.md)).
+Scenarios are storyboards for review: each step embeds a screenshot that links to the deep link that produced it. The screenshot is evidence; the link is the review. Locally the preview server makes those links open the running app; published pages keep them raw. Variant semantics: [Mock Variants](mock-variants.md).
 
 ## Paths
 
 | Content | Canonical Path |
-|---------|------------------------|
-| Images config | `design/generated/<target>/images/index.md` |
+|---------|----------------|
+| State registry | `design/generated/<target>/images/index.md` |
 | Screenshots | `design/generated/<target>/images/*.png` |
-| Scenario docs | `design/generated/<target>/scenarios/*.md` |
-| Published HTML | `design/generated/<target>/site/` |
+| Scenario docs | `design/generated/<target>/scenarios/*.md` (+ `index.md`) |
+| Published site | `design/generated/<target>/site/` |
 
-## Images Configuration
+## State Registry
 
-### Frontmatter Schema
-
-In `images/index.md`:
+`images/index.md` frontmatter is the one list of reviewable **states** — (route, params, variant) — for the target. Every script and page reads it through `scripts/lib/scenarios.js`, which also owns the deep-link formula.
 
 ```yaml
 ---
-appId: com.example.myapp        # Android/iOS bundle ID
-scheme: myapp                   # Deep link scheme
-
+appId: com.example.myapp          # Android package / iOS bundle id
+scheme: myapp                     # deep-link scheme
 screenshots:
-  - route: ItemList             # Screen route name
-    variant: happy              # Mock data variant (optional)
-    locale: en                  # Locale (optional, default: en)
-    params:                     # Additional URL params (optional)
-      category: books
-    file: item-list-happy.png   # Output filename
-    deps:                       # Files that trigger recapture (optional)
+  - route: ItemList               # route; may carry path segments: ItemDetail/item%3A42
+    variant: happy                # fixture variant (optional)
+    locale: en                    # optional; omitted from the link when "en"
+    params: { category: books }   # extra query params (optional)
+    file: item-list-happy.png     # output image
+    deps:                         # files whose change makes the image stale (optional)
       - apps/mobile/src/screens/ItemList.tsx
-
-  - route: ItemList
-    variant: empty
-    file: item-list-empty.png
-
-  - route: UserProfile
-    variant: happy
-    params:
-      id: "123"
-    file: user-profile-happy.png
+      - mock/data/items.happy.json
+  - route: ItemDetail
+    params: { id: "item:new" }
+    capture: false                # a state worth opening, not worth a committed PNG
+    note: a new item — zero history, explained
 ---
 ```
 
-### Deep Link Construction
+Link formula: `{scheme}://screen/{route}[?variant=…][&locale=…][&k=v…]`; values are percent-encoded unless already encoded. An entry's `id` defaults to the file's stem (or `route-variant-params` for `capture: false`).
 
-The capture script builds links as:
-```
-{scheme}://screen/{route}?variant={variant}&locale={locale}&{params}
-```
+Variants name fixtures (`mock/data/<namespace>.<variant>.json`). A scene reached through different params — another item, an empty account — is a registry entry, not a variant.
 
-Example: `myapp://screen/ItemList?variant=happy&category=books`
-
-Variant semantics are described in [Mock Variants](mock-variants.md); deep link structure is described in `reference/codegen.md` under “Deep Links”.
-
-## Capture Scripts
-
-### Batch Capture
+## Opening a State
 
 ```bash
-appeus/scripts/build-images.sh [--reuse] [--window] [--force] [--target <target>]
+appeus/scripts/open-deeplink.sh [--target <t>] --route ItemList --variant empty [--params k=v]...
+appeus/scripts/open-deeplink.sh --id item-list-empty | --file item-list-empty.png | --link "myapp://screen/…"
+appeus/scripts/open-deeplink.sh --list          # connected devices: kind, id, label
 ```
 
-Options:
-- `--reuse` — Use existing emulator if running
-- `--window` — Show emulator window (not headless)
-- `--force` — Recapture even if fresh
-- `--target` — Target name (defaults when only one target exists)
+Launches via `adb` (Android) or `xcrun simctl openurl` (booted iOS simulator). With one device connected it is used; with several, name one with `--device <id>` or `APPEUS_DEVICE` (exit 3 otherwise). `--dry-run` prints the command. Use it after generating a slice to show it, and to verify a link before capturing.
 
-### Android Helper
+## Capturing Screenshots
 
 ```bash
-appeus/scripts/android-screenshot.sh \
-  --deeplink "myapp://screen/ItemList?variant=happy" \
-  --output "./design/generated/<target>/images/item-list-happy.png" \
-  --app-id "com.example.myapp"
+appeus/scripts/build-images.sh [--target <t>] [--reuse] [--window] [--force] [--dry-run]
 ```
 
-Environment defaults:
-- `APPEUS_ANDROID_AVD` — AVD name (default: Medium_Phone_API_34)
-- `APPEUS_SCREEN_DELAY` — Seconds to wait before capture (default: 3)
-- `APPEUS_APP_ID` — App bundle ID (required or via --app-id)
+Captures every registry entry (skipping `capture: false`) whose image is missing, older than a `deps` file, or older than the screen's source. `--dry-run` lists what would be captured and why. Android only; each capture goes through `android-screenshot.sh`, which starts an emulator when none is running (`APPEUS_ANDROID_AVD`), opens the link via `open-deeplink.sh`, waits `APPEUS_SCREEN_DELAY` seconds (default 8 — a cold React Native release build can take 10–20 s to first paint; warm the app first), and captures.
 
-### iOS (Manual)
-
-```bash
-xcrun simctl openurl booted "myapp://screen/ItemList?variant=happy"
-xcrun simctl io booted screenshot "item-list-happy.png"
-```
-
-## Staleness
-
-An image is stale if:
-- Missing from disk
-- Older than any file in its `deps` array
-- Older than the screen's source file
+iOS: open the state with `open-deeplink.sh`, then `xcrun simctl io booted screenshot <file>`.
 
 ## Scenario Documents
 
-### Location
-
-`design/generated/<target>/scenarios/<story-id>.md`
-
-### Structure
+`design/generated/<target>/scenarios/<story-id>.md`, one per story, citing its source:
 
 ```markdown
 # Scenario: Browsing Items
 
-Source: [01-browsing.md](../../stories/01-browsing.md)
+Source: [01-browsing.md](../../stories/mobile/01-browsing.md)
 
-## Persona
-Regular user with existing account.
-
-## Preconditions
-- User is logged in
-- Items exist in the system
-
-## Steps
-
-### Step 1: View Item List
-
+## Step 1: View Item List
 User opens the app and sees a list of items.
 
 [![Item list](../images/item-list-happy.png)](myapp://screen/ItemList?variant=happy)
 
-### Step 2: Empty State
-
-When no items exist, user sees empty state.
-
-[![Empty list](../images/item-list-empty.png)](myapp://screen/ItemList?variant=empty)
-
-### Step 3: Select Item
-
-User taps an item to view details.
-
-[![Item detail](../images/item-detail-happy.png)](myapp://screen/ItemDetail?variant=happy&id=123)
+## Step 2: Empty State
+![Empty list](../images/item-list-empty.png)
 
 ## Alternates
-
-### Error State
-
-When loading fails, user sees error message.
-
-[![Error](../images/item-list-error.png)](myapp://screen/ItemList?variant=error)
+A new item: [open it](myapp://screen/ItemDetail?id=item%3Anew)
 ```
 
-### Image Embed Format
+Two image forms are equivalent: the explicit `[![alt](../images/f.png)](deep link)`, and the bare `![alt](../images/f.png)`, which the renderer links to the registry entry owning `f.png`. Prefer the bare form — it cannot drift. When an explicit link disagrees with the registry, or names an image not in it, `publish-scenarios.sh` prints a note.
 
-```markdown
-[![alt text](../images/filename.png)](scheme://screen/Route?variant=name)
-```
+One link opens one state. A multi-step flow is several links; a scenario does not replay taps.
 
-The image is clickable, linking to the app deep link.
+`scenarios/index.md` lists the docs in review order.
 
-## Scenario Index
-
-Location: `design/generated/<target>/scenarios/index.md`
-
-Purpose: Linear path for stakeholders to review the app end-to-end.
-
-```markdown
-# Scenarios
-
-1. [Browsing Items](01-browsing.md)
-2. [Managing Profile](02-profile.md)
-3. [Error Handling](03-errors.md)
-```
-
-## Preview and Publish
-
-### Local Preview
+## Preview
 
 ```bash
-appeus/scripts/preview-scenarios.sh --port 8080
+appeus/scripts/preview-scenarios.sh [--target <t>] [--port 8080] [--host 127.0.0.1] [--no-open]
 ```
 
-Opens scenarios rendered via markserv; images appear inline.
+Renders the docs live (registry re-read per request) and adds `/states` — every registry entry, thumbnail if captured. Clicking a `<scheme>://` link opens that state on the device selected in the page header (choice remembered in the browser); the server calls `open-deeplink.sh`. `--host 0.0.0.0` also serves the LAN: on a phone's browser the page does not intercept clicks, so a phone with the app installed resolves the link itself.
 
-### Publish to Web
+## Publish
 
 ```bash
-appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/myapp/scenarios
+appeus/scripts/publish-scenarios.sh [--target <t>] [--dest user@host:/path] [--dry-run]
 ```
 
-Generates static HTML in `design/generated/<target>/site/` and syncs to destination.
+Writes `site/` — `scenarios/*.html`, `states.html`, `images/`, `index.html` — rendered with the same template as the preview, then rsyncs it when `--dest` (or `APPEUS_PUBLISH_DEST`) is given. Deep links stay raw: inert on a desktop browser, live on a phone that has the app.
+
+## Fixture Check
+
+```bash
+appeus/scripts/check-variants.sh [--target <t>] [--summary]
+```
+
+Reports every spec-declared variant with no fixture behind it (the screen would render the default fixture and look correct), every fixture-backed variant with no registry entry (not reviewable), and routes whose fixture namespaces are unknown. Namespaces come from the consolidation's `mocks:` frontmatter, else from `mock/data/*` paths in the entry's `deps`. `check-stale.sh` prints the summary line.

@@ -329,6 +329,12 @@ if [ "${MTIME_ROUTES}" -gt 0 ]; then
   fi
 fi
 
+# Fixture coverage in one line; the full report is check-variants.sh.
+if [ -x "${SCRIPT_DIR}/check-variants.sh" ]; then
+  echo ""
+  "${SCRIPT_DIR}/check-variants.sh" --target "${TARGET}" --summary 2>/dev/null || true
+fi
+
 echo ""
 if [ "${STALE_COUNT}" -gt 0 ]; then
   echo "Next: pick a stale slice and regenerate it (agents typically use check-stale output + the screens index to choose)."

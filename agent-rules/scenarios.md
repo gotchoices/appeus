@@ -1,48 +1,24 @@
 # Agent Rules: Scenarios
 
-You are in scenario generation. Screenshots with deep links for review.
+You are in scenario generation: storyboards whose screenshots link to the deep link that produced them. Locally those links open the running app.
 
 ## Canonical paths
 
-- Images config: `design/generated/<target>/images/index.md`
+- State registry: `design/generated/<target>/images/index.md` (frontmatter: `appId`, `scheme`, `screenshots:`)
 - Screenshots: `design/generated/<target>/images/*.png`
-- Scenario docs: `design/generated/<target>/scenarios/*.md`
-- Scenario index: `design/generated/<target>/scenarios/index.md`
-
-## When to Generate
-
-After screens stabilize and mock variants are defined.
+- Scenario docs + review order: `design/generated/<target>/scenarios/*.md`, `index.md`
 
 ## What to confirm first
 
-- Target is explicit (`--target <target>` when multiple targets exist).
-- Deep links are wired for the target (deep link structure: `appeus/reference/codegen.md` → “Deep Links”).
-- Variants are mock-only and selected via deep links (method: `appeus/reference/mock-variants.md`).
+- Target is explicit (`--target <target>` when several exist); deep links are wired in the app (`appeus/reference/codegen.md` → “Deep Links”).
+- Every variant a spec declares has a fixture: `appeus/scripts/check-variants.sh --target <target>`.
 
 ## Method (index)
 
-1. Configure screenshots in `design/generated/<target>/images/index.md`.
-2. Run `appeus/scripts/build-images.sh --target <target>` to capture missing/stale images.
-3. Write scenario docs in `design/generated/<target>/scenarios/` with embedded images and deep links.
-4. Maintain `design/generated/<target>/scenarios/index.md` as a stakeholder review order.
+1. Register each reviewable state in `images/index.md` — `route`, `variant`, `params`, `file`, `deps`; `capture: false` + `note` for states to open but not photograph.
+2. `appeus/scripts/open-deeplink.sh --target <target> --id <entry>` to verify a link on the device (`--device <id>` when several are connected).
+3. `appeus/scripts/build-images.sh --target <target> --reuse` to capture missing/stale images (`--dry-run` to see what and why).
+4. Write scenario docs: cite the story; embed `![alt](../images/file.png)` — the renderer links it from the registry. Keep `scenarios/index.md` in review order.
+5. `appeus/scripts/preview-scenarios.sh --target <target>` — click links to open states on the device; `publish-scenarios.sh` for a static site (raw links).
 
-## Screenshot Config
-
-```yaml
----
-appId: com.example.myapp
-scheme: myapp
-screenshots:
-  - route: ItemList
-    variant: happy
-    file: item-list-happy.png
----
-```
-
-## Image Embed Format
-
-```markdown
-[![alt](../images/file.png)](scheme://screen/Route?variant=name)
-```
-
-For the detailed scenario document format and screenshot methodology, see `appeus/reference/scenarios.md`. For the lane workflow, see `appeus/reference/scenarios-agent-workflow.md`.
+Formats, options and the deep-link formula: `appeus/reference/scenarios.md`. Lane workflow: `appeus/reference/scenarios-agent-workflow.md`.

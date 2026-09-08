@@ -46,7 +46,7 @@ When a screen or component “needs” domain behavior, express the need in term
 ---
 id: item-list                 # kebab-case identifier (matches filename)
 route: ItemList               # PascalCase route/component name
-variants: [happy, empty, error]  # Mock variants for testing/scenarios (see `reference/mock-variants.md`)
+variants: [happy, empty, error]  # fixture names (mock/data/<ns>.<variant>.json), not scenes — see `reference/mock-variants.md`
 ---
 ```
 

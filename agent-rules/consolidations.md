@@ -30,6 +30,7 @@ Include dependency tracking in each consolidation frontmatter:
 
 ```yaml
 ---
+mocks: [items]                 # fixture namespaces this slice reads: mock/data/items.<variant>.json
 dependsOn:
   - design/stories/<target>/01-browsing.md
   - design/specs/project.md
@@ -42,7 +43,7 @@ depHashes:
 ---
 ```
 
-Scripts can seed/repair `design/generated/<target>/meta/outputs.json`, but you should ensure the `dependsOn` list reflects what you actually used.
+Scripts can seed/repair `design/generated/<target>/meta/outputs.json`, but you should ensure the `dependsOn` list reflects what you actually used. `mocks` lets `appeus/scripts/check-variants.sh` confirm each spec-declared variant has a fixture.
 
 ## What a consolidation must contain (digest)
 

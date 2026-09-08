@@ -33,7 +33,8 @@ Each scenario step embeds a screenshot and links it to a deep link:
 ```
 
 - The image is what the reviewer sees.
-- Clicking it opens the app to that screen and state.
+- Clicking it opens the app to that screen and state — on your emulator when viewing the local preview, or on a phone that has the app when viewing the published site. (Desktop renderers such as GitHub ignore `myapp://` links; the preview server is what makes them live.)
+- The **States** page lists every registered state, including ones worth opening that have no screenshot.
 
 The scenario should cite the source story (so reviewers can relate the UI to user intent).
 
@@ -58,13 +59,15 @@ You typically write stories and refine specs while the agent generates screen sl
 - “Generate screenshots for the current scenarios”
 - “Refresh scenarios after the last slice”
 - “Preview scenarios locally”
+- “Show me the `<screen>` in its empty state” (opens it on the emulator)
 - “Publish scenarios to a public server”
 
 ### What you should review
 
 - The scenarios reflect the **intent** of your stories (not new requirements invented by the agent).
 - The screenshot set covers important states (happy/empty/error where relevant).
-- Deep links open the right screen and show the expected state.
+- Deep links open the right screen and show the expected state — click them in the preview.
+- Every variant a spec declares has real fixture data behind it (the agent runs `check-variants.sh`); otherwise the screen shows the default data and looks fine when it should not.
 - The scenario index order (`scenarios/index.md`) matches how you want reviewers to walk the app.
 
 ## Preview
@@ -75,7 +78,7 @@ You can preview scenarios locally (or ask the agent to do it):
 appeus/scripts/preview-scenarios.sh --port 8080
 ```
 
-This renders the scenario markdown as a small local website (with images inline).
+This renders the scenario markdown as a small local website with images inline. Pick your emulator or simulator in the page header, then click any screenshot or deep link to open that state on it. Add `--host 0.0.0.0` to open the same pages on a phone on your network; there the links open the installed app directly.
 
 ## Share / publish (to a public HTTP server)
 
@@ -85,4 +88,4 @@ You can publish scenarios to your destination (or ask the agent to do it):
 appeus/scripts/publish-scenarios.sh --dest user@host:/path
 ```
 
-This generates static HTML (per target) and syncs it to the destination you provide (e.g. an Nginx/Apache-served folder).
+This generates static HTML (per target) — the scenario pages plus a States page — and syncs it to the destination you provide (e.g. an Nginx/Apache-served folder). Published links cannot reach your emulator; on a phone with the app installed they still open the state.

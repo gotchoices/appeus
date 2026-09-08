@@ -273,33 +273,31 @@ Still open:
   Fix: treat each consolidation as its own output with its own `dependsOn`/`depHashes` entry.
 - [ ] **`update-dep-hashes.sh` never records an `output` field** when seeding entries, and silently
   drops the hash of a deleted `dependsOn` file (after one refresh, that deletion is undetectable).
-- [ ] **`android-screenshot.sh` return-value bug.** `launch_emulator_if_needed` prints log lines *and*
-  the serial to stdout while the caller captures stdout; its `SERIAL=` assignment happens inside a
-  command substitution (subshell) and is lost, so `adb_target` silently falls back to `adb -e`.
-  Works only with exactly one emulator and no attached device. `--app-id` is parsed but never used
-  (no force-stop, no check that the deep link opened the intended app).
-- [ ] **No iOS capture path** (simctl) to pair with the Android one.
+- [x] **`android-screenshot.sh` return-value bug** — fixed: device chosen in the main shell, launch
+  through `open-deeplink.sh`, `--app-id` honored (see live storyboards below).
+- [ ] **No iOS capture path** (simctl) to pair with the Android one (opening iOS states works).
 - [ ] **Tool preflight is inconsistent.** `check-stale.sh` treats `jq` as optional and silently
-  degrades to heuristic deps; `build-images.sh` requires mikefarah `yq`; node/npx/perl/adb are
-  assumed elsewhere. No single up-front check.
+  degrades to heuristic deps; node/npx/adb are assumed elsewhere (the `yq` requirement is gone). No
+  single up-front check.
 - [ ] **`status.json` lands at `design/generated/<target>/status.json`** while all other metadata
   lives under `meta/`.
-- [ ] **`publish-scenarios.sh` sed fallback** (used only when `perl` is absent) has an over-escaped
-  regex that cannot match.
+- [x] **`publish-scenarios.sh` sed fallback** — gone; rendering moved to `scripts/lib/scenarios.js`.
 - [ ] **Screens-index parsing** assumes column 3 is the route with specific header text; any other
   table in `screens/index.md` is read as routes.
 
 #### live storyboards (scenario links that open the app)
 
-- [ ] `scripts/lib/scenarios.js` — single owner of registry parsing, deep-link formula, scenario rendering, preview server
-- [ ] `open-deeplink.sh` — open a registered state on Android (`adb`) or iOS simulator (`simctl`); explicit device when several are connected
-- [ ] `preview-scenarios.sh` — replace markserv; `/open` endpoint, live link handling, states index, `--host` for LAN
-- [ ] `publish-scenarios.sh` — same renderer, static output, raw links, states page; drop perl/sed link fixing
-- [ ] `build-images.sh` — read the registry through `scenarios.js` (drop `yq`); honor `capture: false`
-- [ ] `android-screenshot.sh` — launch via `open-deeplink.sh` (fixes lost serial + unused `--app-id`)
-- [ ] `check-variants.sh` — report spec variants with no fixture; consolidation `mocks:` frontmatter as join key, registry `deps` as fallback; trailer in `check-stale.sh`
-- [ ] Bare `![img](../images/f.png)` embeds auto-linked from the registry entry owning the file (preview + publish)
-- [ ] Docs: reference/scenarios.md, mock-variants.md, spec-schema.md, agent-rules/scenarios.md + src.md, user-guides/scenarios.md, templates/generated/images-index.md, CHANGELOG
+- [x] `scripts/lib/scenarios.js` — single owner of registry parsing, deep-link formula, scenario rendering, preview server
+- [x] `open-deeplink.sh` — open a registered state on Android (`adb`) or iOS simulator (`simctl`); explicit device when several are connected
+- [x] `preview-scenarios.sh` — replace markserv; `/open` endpoint, live link handling, states index, `--host` for LAN
+- [x] `publish-scenarios.sh` — same renderer, static output, raw links, states page; drop perl/sed link fixing
+- [x] `build-images.sh` — read the registry through `scenarios.js` (drop `yq`); honor `capture: false`; `--dry-run`
+- [x] `android-screenshot.sh` — launch via `open-deeplink.sh` (fixes lost serial + unused `--app-id`)
+- [x] `check-variants.sh` — report spec variants with no fixture; consolidation `mocks:` frontmatter as join key, registry `deps` as fallback; trailer in `check-stale.sh`
+- [x] Bare `![img](../images/f.png)` embeds auto-linked from the registry entry owning the file (preview + publish)
+- [x] Docs: reference/scenarios.md, mock-variants.md, spec-schema.md, agent-rules/scenarios.md + src.md, user-guides/scenarios.md, templates/generated/images-index.md, CHANGELOG
+- [ ] QR code per state on the published pages (read on a desktop, scan to open on a phone)
+- [ ] iOS capture in `build-images.sh` (`simctl io screenshot`); `open-deeplink.sh` already opens simulator states
 
 #### install modes
 

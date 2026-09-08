@@ -12,6 +12,7 @@ Variants allow scenarios to deep link into the app and select different mock dat
 2. **Selected only via deep links** — Parse variant from the deep link URL; do not select via other channels
 3. **Not part of data interfaces** — Do not add `variant` parameters to standard data access functions
 4. **Isolate mock logic** — Keep variant branching at the data adapter boundary (not in UI components)
+5. **Variants name fixtures** — A spec's `variants:` are the `mock/data/<namespace>.<variant>.json` files that exist; `appeus/scripts/check-variants.sh` reports any that do not. A scene reached through different params (another item, an empty account) is a state-registry entry (`design/generated/<target>/images/index.md`), not a variant.
 
 ## Deep Link Format
 

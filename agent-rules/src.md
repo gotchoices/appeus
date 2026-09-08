@@ -25,10 +25,11 @@ You are in an app's source tree (`apps/<target>/`).
 1. Ensure `design/generated/<target>/meta/outputs.json` reflects the slice’s `dependsOn`
 2. Run `appeus/scripts/update-dep-hashes.sh --target <target> --route <Route>`
 3. Optionally verify with `appeus/scripts/check-stale.sh --target <target>`
+4. Show it: `appeus/scripts/open-deeplink.sh --target <target> --route <Route> [--variant <v>]` opens the slice on the connected device/emulator
 
 ## Mock Variants
 
-Variants come via deep links/URL params. Branch in data adapters, not UI.
+Variants come via deep links/URL params. Branch in data adapters, not UI. Every variant a spec declares needs a fixture (`appeus/scripts/check-variants.sh`); name the fixture namespaces a slice reads as `mocks:` in its consolidation frontmatter.
 
 See [mock-variants.md](appeus/reference/mock-variants.md)
 

@@ -137,7 +137,7 @@ Use deep links to test specific screens with mock variants.
 
 - Edit stories or specs
 - Ask agent to regenerate affected screens
-- For mobile: Generate scenarios (screenshots) for stakeholder review
+- For mobile: Generate scenarios (screenshots) for stakeholder review; `./appeus/scripts/preview-scenarios.sh` serves them with links that open each state on your emulator
 - Commit working slices regularly
 
 ## Adding More Apps Later

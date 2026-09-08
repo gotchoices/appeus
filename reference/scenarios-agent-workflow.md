@@ -1,166 +1,22 @@
 # Scenarios Agent Workflow
 
-How to generate scenario documents with screenshots.
+How to produce scenario documents with screenshots and live links. Formats and script options: [Scenarios](scenarios.md); variants: [Mock Variants](mock-variants.md).
 
-For scenario structure and screenshot methodology, see `reference/scenarios.md`. Variant semantics are described in `reference/mock-variants.md`. Deep link structure is described in `reference/codegen.md` under “Deep Links”.
+## When
 
-## When to Generate
-
-- After screen/navigation are stable for the feature
-- After mock data variants are defined
-- When preparing for stakeholder review
-
-## Paths
-
-| Content | Canonical Path |
-|---------|------------------------|
-| Images config | `design/generated/<target>/images/index.md` |
-| Screenshots | `design/generated/<target>/images/*.png` |
-| Scenario docs | `design/generated/<target>/scenarios/*.md` |
-| Screen code | `apps/<target>/src/screens/*.tsx` (framework-specific) |
-
-## Prerequisites
-
-- Screens generated and working
-- Deep linking configured in app
-- Mock data variants in place
-- Android emulator running (or iOS simulator)
+- Screens and navigation are stable for the feature; deep linking works in the app
+- Mock variants are in place — run `appeus/scripts/check-variants.sh --target <target>` first and fix what it reports
+- Stakeholder review is coming
 
 ## Workflow
 
-### 1. Configure Screenshots
+1. **Register states** in `design/generated/<target>/images/index.md` frontmatter: one entry per (route, params, variant) worth reviewing. Add `deps` (screen source, fixture files) so images go stale when they should. States worth opening but not photographing get `capture: false` and a `note`.
+2. **Verify a link** before capturing: `appeus/scripts/open-deeplink.sh --target <target> --id <entry id>` (choose `--device` when several are connected).
+3. **Capture**: `appeus/scripts/build-images.sh --target <target> --reuse [--dry-run]`. Check the images are not splash screens; raise `APPEUS_SCREEN_DELAY` if they are.
+4. **Write scenario docs** in `design/generated/<target>/scenarios/<story-id>.md`: cite the story, one section per step, one image per state. Use the bare `![alt](../images/f.png)` form — the renderer links it from the registry. Link `capture: false` states as plain text links with their deep link.
+5. **Maintain `scenarios/index.md`** in review order.
+6. **Preview**: `appeus/scripts/preview-scenarios.sh --target <target>`; click through every link with a device selected. **Publish** with `publish-scenarios.sh` when the user asks; read its drift notes.
 
-Edit `design/generated/<target>/images/index.md` frontmatter:
+## Cross-Target
 
-```yaml
----
-appId: com.example.myapp
-scheme: myapp
-
-screenshots:
-  - route: ItemList
-    variant: happy
-    file: item-list-happy.png
-    deps:
-      - apps/mobile/src/screens/ItemList.tsx
-
-  - route: ItemList
-    variant: empty
-    file: item-list-empty.png
-
-  - route: ItemDetail
-    variant: happy
-    params:
-      id: "123"
-    file: item-detail-happy.png
----
-```
-
-### 2. Capture Screenshots
-
-Run the capture script:
-
-```bash
-appeus/scripts/build-images.sh --reuse --window [--target <target>]
-```
-
-Options:
-- `--reuse` — Use running emulator
-- `--window` — Show emulator (not headless)
-- `--force` — Recapture even if fresh
-- `--target` — Target name (defaults when only one target exists)
-
-The script:
-- Reads config from `images/index.md`
-- Builds deep links from route/variant/params
-- Captures PNGs via `android-screenshot.sh`
-- Skips fresh images unless `--force`
-
-### 3. Write Scenario Docs
-
-For each story, create scenario doc:
-
-**Location:** `design/generated/<target>/scenarios/<story-id>.md`
-
-**Structure:**
-
-```markdown
-# Scenario: Browsing Items
-
-Source: [01-browsing.md](../../stories/01-browsing.md)
-
-## Persona
-
-Regular user with existing account.
-
-## Preconditions
-
-- User is logged in
-- Items exist in the system
-
-## Steps
-
-### Step 1: View Item List
-
-User opens the app and sees available items.
-
-[![Item list](../images/item-list-happy.png)](myapp://screen/ItemList?variant=happy)
-
-### Step 2: Empty State
-
-When no items exist, user sees empty state message.
-
-[![Empty list](../images/item-list-empty.png)](myapp://screen/ItemList?variant=empty)
-
-### Step 3: View Details
-
-User taps an item to see its details.
-
-[![Item detail](../images/item-detail-happy.png)](myapp://screen/ItemDetail?variant=happy&id=123)
-
-## Alternates
-
-### Error Loading
-
-When loading fails, user sees error message with retry option.
-
-[![Error state](../images/item-list-error.png)](myapp://screen/ItemList?variant=error)
-```
-
-### 4. Update Scenario Index
-
-Maintain `design/generated/<target>/scenarios/index.md`:
-
-```markdown
-# Scenarios
-
-Review order for stakeholders:
-
-1. [Browsing Items](01-browsing.md) — Core browsing flow
-2. [Managing Cart](02-cart.md) — Add/remove items
-3. [Checkout](03-checkout.md) — Purchase flow
-4. [Error Handling](04-errors.md) — Error states
-```
-
-## Output Artifacts
-
-| Artifact | Path |
-|----------|------|
-| Screenshots | `design/generated/<target>/images/*.png` |
-| Image config | `design/generated/<target>/images/index.md` |
-| Scenario docs | `design/generated/<target>/scenarios/*.md` |
-| Scenario index | `design/generated/<target>/scenarios/index.md` |
-
-## Preview and Publish
-
-### Local Preview
-
-```bash
-appeus/scripts/preview-scenarios.sh --port 8080
-```
-
-### Publish to Web
-
-```bash
-appeus/scripts/publish-scenarios.sh --dest user@host:/var/www/scenarios
-```
+Registry, images, scenarios and site are per target. `mock/data/` is shared, so a fixture added for one target's variant serves the others.

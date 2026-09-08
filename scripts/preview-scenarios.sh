@@ -2,109 +2,57 @@
 set -euo pipefail
 
 # preview-scenarios.sh
-# Serve the scenarios folder with Markdown rendering.
-# Appeus v2.1 canonical: per-target layout only.
+# Serve a target's scenarios locally with live deep links: clicking a `<scheme>://` link
+# on a page opens that state on the connected device/emulator (through open-deeplink.sh).
+# Also serves /states — every registry entry, captured or not.
 #
 # Usage:
-#   appeus/scripts/preview-scenarios.sh [--target <name>] [--port 8080]
+#   appeus/scripts/preview-scenarios.sh [--target <name>] [--port 8080] [--host 127.0.0.1] [--no-open]
 #
-# If exactly one target exists, --target defaults to it. If multiple targets exist, --target is required.
+#   --host 0.0.0.0   also reachable on the LAN: a phone with the app installed resolves the
+#                    links itself (the page does not intercept clicks on a mobile browser)
+#   --no-open        do not open a browser tab
 #
-# Requires node + npx. Uses markserv to render Markdown in-place.
-# Falls back to a plain static server if markserv is unavailable (MD not rendered).
+# If exactly one target exists, --target defaults to it. Requires node/npx
+# (scripts/lib/scenarios.js renders the pages). publish-scenarios.sh renders the same
+# pages statically, with raw links.
 
 SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-root.sh
 source "${SCRIPT_DIR}/lib/project-root.sh"
+# shellcheck source=lib/scenarios.sh
+source "${SCRIPT_DIR}/lib/scenarios.sh"
+
+TARGET="" PORT=8080 HOST=127.0.0.1 OPEN=1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target) TARGET="${2:-}"; shift 2 ;;
+    --port) PORT="${2:-8080}"; shift 2 ;;
+    --host) HOST="${2:-127.0.0.1}"; shift 2 ;;
+    --no-open) OPEN=0; shift ;;
+    -h|--help) sed -n '/^# Usage:/,/^# If exactly/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
 PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
   echo "Error: Could not find project root. Run from inside your project (with design/ and appeus/ at the root), or set APPEUS_PROJECT_DIR." >&2
   exit 1
 }
-DESIGN_DIR="${PROJECT_DIR}/design"
+TARGET="$(appeus_resolve_target "$PROJECT_DIR" "$TARGET")" || exit 1
+GEN_DIR="${PROJECT_DIR}/design/generated/${TARGET}"
+[[ -d "$GEN_DIR" ]] || { echo "Error: ${GEN_DIR} does not exist (run add-app.sh for this target)." >&2; exit 1; }
+[[ -f "${GEN_DIR}/images/index.md" ]] || echo "Note: no ${GEN_DIR#${PROJECT_DIR}/}/images/index.md yet; links cannot be opened until it names a scheme."
 
-TARGET=""
-PORT=8080
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --target) TARGET="$2"; shift 2 ;;
-    --port) PORT="${2:-8080}"; shift 2 ;;
-    -h|--help)
-      echo "Usage: $0 [--target <name>] [--port <port>]"
-      echo "  --target  App target (required if multiple targets exist)"
-      echo "  --port    Port to serve on (default: 8080)"
-      exit 0
-      ;;
-    *) echo "Unknown arg: $1"; exit 1 ;;
-  esac
-done
-
-list_targets() {
-  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
-    ! -name "domain" \
-    ! -name "schema" \
-    ! -name "api" \
-    ! -name "global" \
-    ! -name "screens" \
-    ! -name "components" \
-    -exec basename {} \; 2>/dev/null
-}
-
-if [ -z "$TARGET" ]; then
-  targets="$(list_targets || true)"
-  if [ -z "${targets}" ]; then
-    echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
-    exit 1
-  fi
-  target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
-  if [ "${target_count}" = "1" ]; then
-    TARGET=$(printf "%s\n" "${targets}" | head -n 1)
-    echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
-  else
-    echo "Error: Multiple targets detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    printf "%s\n" "${targets}"
-    exit 1
-  fi
-fi
-
-GEN_DIR="${DESIGN_DIR}/generated/${TARGET}"
-
-SCEN_DIR="${GEN_DIR}/scenarios"
-IMG_DIR="${GEN_DIR}/images"
-
-if [[ ! -d "${SCEN_DIR}" ]]; then
-  echo "Scenarios directory not found: ${SCEN_DIR}"
-  exit 1
-fi
-
-if [[ ! -d "${IMG_DIR}" ]]; then
-  mkdir -p "${IMG_DIR}"
-fi
-
-echo "Previewing scenarios from ${GEN_DIR}"
-
-if command -v npx >/dev/null 2>&1; then
-  echo "Starting markserv on http://localhost:${PORT}"
-  cd "${GEN_DIR}"
-  # Serve the generated root so /scenarios and /images resolve correctly
-  # Try to open the index automatically
+URL="http://$([[ "$HOST" = "0.0.0.0" ]] && echo localhost || echo "$HOST"):${PORT}/"
+if [[ "$OPEN" = "1" ]]; then
   (
-    sleep 1
-    if command -v open >/dev/null 2>&1; then
-      open "http://localhost:${PORT}/scenarios/index.md" >/dev/null 2>&1 || true
-    elif command -v xdg-open >/dev/null 2>&1; then
-      xdg-open "http://localhost:${PORT}/scenarios/index.md" >/dev/null 2>&1 || true
+    sleep 1.5
+    if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true
+    elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
     fi
   ) &
-  npx --prefix="${GEN_DIR}" --yes markserv "scenarios/index.md" --port "${PORT}"
-else
-  echo "npx not found. Falling back to a simple HTTP server (Markdown will not be rendered)."
-  cd "${GEN_DIR}"
-  if command -v python3 >/dev/null 2>&1; then
-    python3 -m http.server "${PORT}"
-  else
-    python -m SimpleHTTPServer "${PORT}"
-  fi
 fi
+
+appeus_scenarios_js serve --project "$PROJECT_DIR" --target "$TARGET" \
+  --port "$PORT" --host "$HOST" --open-script "${SCRIPT_DIR}/open-deeplink.sh"

@@ -2,140 +2,59 @@
 set -euo pipefail
 
 # publish-scenarios.sh
-# Package scenarios site and optionally rsync to a remote destination.
-# Appeus v2.1 canonical: per-target layout only.
+# Render a target's scenarios to a static site and optionally rsync it to a destination.
 #
 # Usage:
 #   appeus/scripts/publish-scenarios.sh [--target <name>] [--dest user@host:/path] [--dry-run]
 #
-# If exactly one target exists, --target defaults to it. If multiple targets exist, --target is required.
+# Output: design/generated/<target>/site/ — scenarios/*.html, states.html (every registry
+# entry), images/, index.html. Deep links are left raw: a published page has no device to
+# talk to, but a phone with the app installed resolves them itself.
 #
-# Env:
-#   APPEUS_PUBLISH_DEST can provide the default destination
+# If exactly one target exists, --target defaults to it. Requires node/npx.
+# Env: APPEUS_PUBLISH_DEST provides the default destination.
 
 SCRIPT_DIR="$(cd -L "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/project-root.sh
 source "${SCRIPT_DIR}/lib/project-root.sh"
+# shellcheck source=lib/scenarios.sh
+source "${SCRIPT_DIR}/lib/scenarios.sh"
+
+TARGET="" DEST="${APPEUS_PUBLISH_DEST:-}" DRYRUN=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target) TARGET="${2:-}"; shift 2 ;;
+    --dest) DEST="${2:-}"; shift 2 ;;
+    --dry-run) DRYRUN=1; shift ;;
+    -h|--help) sed -n '/^# Usage:/,/^# Env:/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
 PROJECT_DIR="$(appeus_find_project_dir "$SCRIPT_DIR")" || {
   echo "Error: Could not find project root. Run from inside your project (with design/ and appeus/ at the root), or set APPEUS_PROJECT_DIR." >&2
   exit 1
 }
-DESIGN_DIR="${PROJECT_DIR}/design"
+TARGET="$(appeus_resolve_target "$PROJECT_DIR" "$TARGET")" || exit 1
+GEN_DIR="${PROJECT_DIR}/design/generated/${TARGET}"
+SITE_DIR="${GEN_DIR}/site"
 
-TARGET=""
-DEST="${APPEUS_PUBLISH_DEST:-}"
-DRYRUN=0
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --target) TARGET="$2"; shift 2 ;;
-    --dest) DEST="${2:-}"; shift 2 ;;
-    --dry-run) DRYRUN=1; shift ;;
-    -h|--help)
-      echo "Usage: $0 [--target <name>] [--dest user@host:/path] [--dry-run]"
-      echo "  --target  App target (required if multiple targets exist)"
-      echo "  --dest    rsync destination"
-      echo "  --dry-run Print rsync command without executing"
-      exit 0
-      ;;
-    *) echo "Unknown arg: $1"; exit 1 ;;
-  esac
-done
-
-list_targets() {
-  find "${DESIGN_DIR}/specs" -mindepth 1 -maxdepth 1 -type d \
-    ! -name "domain" \
-    ! -name "schema" \
-    ! -name "api" \
-    ! -name "global" \
-    ! -name "screens" \
-    ! -name "components" \
-    -exec basename {} \; 2>/dev/null
+[[ -d "${GEN_DIR}/scenarios" || -f "${GEN_DIR}/images/index.md" ]] || {
+  echo "Error: nothing to publish under ${GEN_DIR#${PROJECT_DIR}/} (no scenarios/ and no images/index.md)." >&2
+  exit 1
 }
 
-if [ -z "$TARGET" ]; then
-  targets="$(list_targets || true)"
-  if [ -z "${targets}" ]; then
-    echo "Error: No targets found under design/specs/. Add an app first (scripts/add-app.sh)." >&2
-    exit 1
-  fi
-  target_count=$(printf "%s\n" "${targets}" | wc -l | tr -d ' ')
-  if [ "${target_count}" = "1" ]; then
-    TARGET=$(printf "%s\n" "${targets}" | head -n 1)
-    echo "NOTE: Defaulting --target to '${TARGET}' (only target found)"
-  else
-    echo "Error: Multiple targets detected. --target is required." >&2
-    echo ""
-    echo "Available targets:"
-    printf "%s\n" "${targets}"
-    exit 1
-  fi
-fi
+appeus_scenarios_js build --project "$PROJECT_DIR" --target "$TARGET" --out "$SITE_DIR"
 
-GEN_DIR="${DESIGN_DIR}/generated/${TARGET}"
-
-SCEN_DIR="${GEN_DIR}/scenarios"
-IMG_DIR="${GEN_DIR}/images"
-SITE_DIR="${GEN_DIR}/site"
-TPL_PAGE="${SCRIPT_DIR}/../templates/scenarios/page.html"
-
-if [[ ! -d "${SCEN_DIR}" ]]; then
-  echo "Scenarios directory not found: ${SCEN_DIR}"
-  exit 1
-fi
-
-mkdir -p "${SITE_DIR}/scenarios" "${SITE_DIR}/images"
-cp -f "${IMG_DIR}"/*.png "${SITE_DIR}/images/" 2>/dev/null || true
-
-# If marked is available, export Markdown → HTML; otherwise copy Markdown as-is
-if command -v npx >/dev/null 2>&1; then
-  echo "Rendering Markdown to HTML..."
-  for f in "${SCEN_DIR}"/*.md; do
-    [[ -f "$f" ]] || continue
-    name="$(basename "$f" .md)"
-    html_content="$(npx --yes marked -i "$f")"
-    if [[ -f "${TPL_PAGE}" ]]; then
-      # Wrap with template
-      page="$(cat "${TPL_PAGE}")"
-      page="${page//'{{title}}'/${name}}"
-      # Use printf %s to preserve newlines properly
-      printf "%s" "${page//'{{content}}'/${html_content}}" > "${SITE_DIR}/scenarios/${name}.html"
-    else
-      printf "<!doctype html><meta charset=\"utf-8\"><title>%s</title>%s" "${name}" "${html_content}" > "${SITE_DIR}/scenarios/${name}.html"
-    fi
-  done
-  # Root index redirect to rendered scenarios index
-  echo "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=scenarios/index.html\">" > "${SITE_DIR}/index.html"
-  # Fix links in all rendered pages from .md → .html
-  for html in "${SITE_DIR}/scenarios/"*.html; do
-    [[ -f "$html" ]] || continue
-    if command -v perl >/dev/null 2>&1; then
-      perl -0777 -pe 's/href="([^"]+)\.md"/href="$1.html"/g' -i "$html"
-    else
-      sed -i '' -e 's/href=\"\\([^"]*\\)\\.md\"/href=\"\\1.html\"/g' "$html" 2>/dev/null || sed -i -e 's/href=\"\([^"]*\)\.md\"/href=\"\1.html\"/g' "$html"
-    fi
-  done
-else
-  echo "npx not found; publishing raw Markdown."
-  cp -f "${SCEN_DIR}"/*.md "${SITE_DIR}/scenarios/" 2>/dev/null || true
-  echo "<!doctype html><meta http-equiv=\"refresh\" content=\"0; url=scenarios/index.md\">" > "${SITE_DIR}/index.html"
-fi
-
-echo "Packaged site at ${SITE_DIR}"
-
-if [[ -n "$DEST" ]]; then
-  echo "Publishing to ${DEST} …"
-  if [[ "$DRYRUN" -eq 1 ]]; then
-    echo "rsync -avz --delete \"${SITE_DIR}/\" \"${DEST}/\""
-    exit 0
-  fi
-  if command -v rsync >/dev/null 2>&1; then
-    rsync -avz --delete "${SITE_DIR}/" "${DEST}/"
-    echo "Publish complete."
-  else
-    echo "rsync not found. Please copy ${SITE_DIR}/ to ${DEST} manually."
-    exit 2
-  fi
-else
+if [[ -z "$DEST" ]]; then
   echo "No destination provided. Set APPEUS_PUBLISH_DEST or pass --dest user@host:/path"
+  exit 0
 fi
+echo "Publishing to ${DEST} …"
+if [[ "$DRYRUN" -eq 1 ]]; then
+  echo "rsync -avz --delete \"${SITE_DIR}/\" \"${DEST}/\""
+  exit 0
+fi
+command -v rsync >/dev/null 2>&1 || { echo "rsync not found. Copy ${SITE_DIR}/ to ${DEST} manually." >&2; exit 2; }
+rsync -avz --delete "${SITE_DIR}/" "${DEST}/"
+echo "Publish complete."
