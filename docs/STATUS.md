@@ -289,6 +289,18 @@ Still open:
 - [ ] **Screens-index parsing** assumes column 3 is the route with specific header text; any other
   table in `screens/index.md` is read as routes.
 
+#### live storyboards (scenario links that open the app)
+
+- [ ] `scripts/lib/scenarios.js` — single owner of registry parsing, deep-link formula, scenario rendering, preview server
+- [ ] `open-deeplink.sh` — open a registered state on Android (`adb`) or iOS simulator (`simctl`); explicit device when several are connected
+- [ ] `preview-scenarios.sh` — replace markserv; `/open` endpoint, live link handling, states index, `--host` for LAN
+- [ ] `publish-scenarios.sh` — same renderer, static output, raw links, states page; drop perl/sed link fixing
+- [ ] `build-images.sh` — read the registry through `scenarios.js` (drop `yq`); honor `capture: false`
+- [ ] `android-screenshot.sh` — launch via `open-deeplink.sh` (fixes lost serial + unused `--app-id`)
+- [ ] `check-variants.sh` — report spec variants with no fixture; consolidation `mocks:` frontmatter as join key, registry `deps` as fallback; trailer in `check-stale.sh`
+- [ ] Bare `![img](../images/f.png)` embeds auto-linked from the registry entry owning the file (preview + publish)
+- [ ] Docs: reference/scenarios.md, mock-variants.md, spec-schema.md, agent-rules/scenarios.md + src.md, user-guides/scenarios.md, templates/generated/images-index.md, CHANGELOG
+
 #### install modes
 
 - [ ] **Submodule / subtree install**, as tess does: detect a real `appeus/` directory, skip the

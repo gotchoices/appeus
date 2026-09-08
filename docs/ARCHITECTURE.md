@@ -17,12 +17,13 @@ appeus/
 ├── agent-rules/             # Brief rules for agents, linked via AGENTS.md
 │   ├── bootstrap.md         # Discovery phase (pre-decision)
 │   ├── project.md           # Post-discovery project rules
-│   ├── schema.md            # Shared schema derivation
+│   ├── root.md              # Section appended to a host AGENTS.md (hosted mode)
+│   ├── design-root.md       # Design surface overview
+│   ├── domain.md            # Shared domain contract
 │   ├── stories.md           # Story authoring
 │   ├── specs.md             # Spec authoring
 │   ├── consolidations.md    # AI consolidations
 │   ├── scenarios.md         # Scenario generation
-│   ├── api.md               # API specs
 │   └── src.md               # App source rules (links to framework references)
 │
 ├── reference/               # Detailed docs, accessed via agent-rules links
@@ -60,12 +61,20 @@ appeus/
 ├── scripts/                 # Automation scripts
 │   ├── init-project.sh      # Bootstrap new project
 │   ├── add-app.sh           # Add app scaffold to project
+│   ├── detach-appeus.sh     # Remove Appeus symlinks/rules from a project
 │   ├── check-stale.sh       # Staleness detection
 │   ├── update-dep-hashes.sh # Refresh dependency hashes
+│   ├── check-variants.sh    # Spec variants without fixtures
+│   ├── open-deeplink.sh     # Open a registered state on a device/emulator
 │   ├── android-screenshot.sh # Android screenshot capture
 │   ├── build-images.sh      # Batch screenshot capture
-│   ├── preview-scenarios.sh # Local scenario preview
-│   └── publish-scenarios.sh # Publish scenarios as HTML
+│   ├── preview-scenarios.sh # Local scenario preview (live links)
+│   ├── publish-scenarios.sh # Publish scenarios as static HTML
+│   ├── frameworks/          # Framework adapters (called by add-app.sh)
+│   └── lib/
+│       ├── project-root.sh  # Project-root detection
+│       ├── host-integration.sh # Hosted-mode helpers
+│       └── scenarios.js     # Registry parsing, deep-link formula, rendering, preview server
 │
 ├── QUICKSTART.md            # Getting started guide
 └── README.md                # Toolkit overview
@@ -234,23 +243,35 @@ Note: Appeus v2.1 intentionally does **not** ship “pick next slice” / “reg
     - It does **not** “freshen” other stale slices by itself; staleness is driven by input/output timestamps (and by whether `dependsOn` is complete).
     - If `outputs.json` is missing or empty/template-like (no routes registered), this script will not infer routes; it will print “No outputs registered” and exit.
 
+#### Fixtures
+
+- **`check-variants.sh` — spec variants with no fixture**
+  - **Who runs it**: agent (also summarized at the end of `check-stale.sh`)
+  - **What it does**: joins each screen spec's `variants:` with the fixture namespaces its consolidation declares (`mocks:` frontmatter; inferred from registry `deps` when absent) and reports any `mock/data/<namespace>.<variant>.json` that does not exist. Report only.
+
 #### Scenarios and images
+
+The registry `design/generated/<target>/images/index.md` is the one list of reviewable states. `scripts/lib/scenarios.js` is the single reader of that registry and the single owner of the deep-link formula and scenario rendering; the scripts below wrap it.
+
+- **`open-deeplink.sh` — open one state on a connected device**
+  - **Who runs it**: agent (to show a slice), human, or the preview server
+  - **What it does**: builds the deep link for `--route/--variant/--params` (or takes `--link`) and launches it via `adb` (Android) or `simctl` (iOS simulator). Requires an explicit device when more than one is connected.
 
 - **`build-images.sh` — capture missing/stale scenario images**
   - **Who runs it**: agent
-  - **What it does**: iterates scenario definitions and captures screenshots where needed (mobile-first).
+  - **What it does**: iterates registry entries (skipping `capture: false`) and captures screenshots where needed (Android).
 
 - **`android-screenshot.sh` — capture a screenshot from an Android emulator**
   - **Who runs it**: agent (usually indirectly via `build-images.sh`)
-  - **What it does**: performs a deep-link + screenshot capture for an Android target.
+  - **What it does**: launches the deep link through `open-deeplink.sh`, waits, and captures a PNG.
 
 - **`preview-scenarios.sh` — local scenario preview**
-  - **Who runs it**: human
-  - **What it does**: serves the scenarios folder locally for review.
+  - **Who runs it**: human or agent
+  - **What it does**: serves rendered scenarios plus a states index. Clicking a deep link on a page opens that state on the connected device via the server's `/open` endpoint; on a phone's own browser the link is left to the OS.
 
 - **`publish-scenarios.sh` — publish scenarios site**
   - **Who runs it**: human
-  - **What it does**: packages scenarios and optionally syncs them to a destination.
+  - **What it does**: renders the same pages to static HTML (deep links left raw) and optionally syncs them to a destination.
 
 #### Framework adapters and shared script libraries
 

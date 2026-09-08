@@ -44,8 +44,10 @@ An Appeus project consists of [several phases](./DESIGN.md#design-phases). Some 
   - This optional phase is helpful if other team members will be reviewing the proposed screens and navigation.
   - It is possible that the screens so far are prototypical and data is still mocked.
   - Variants apply to mock data only and are selected via deep links to present the UI in specific sample states (screenshots/testing), without polluting production data interfaces.
-  - A local review may be generated for the user using `scripts/preview-scenarios.sh`.
-  - Or a review may be made available more publicly as HTML using `scripts/publish-scenarios.sh`, assuming an available web server.
+  - The per-target registry `design/generated/<target>/images/index.md` lists the reviewable states, captured or not (`capture: false`); scenario docs link into it.
+  - A local review may be generated for the user using `scripts/preview-scenarios.sh`; its pages launch each linked state on a connected device or emulator. `scripts/open-deeplink.sh` opens one state directly.
+  - Or a review may be made available more publicly as HTML using `scripts/publish-scenarios.sh`, assuming an available web server. Published pages keep raw deep links (no device to talk to).
+  - `scripts/check-variants.sh` reports any spec-declared variant with no fixture behind it; such a state renders the default fixture and looks correct.
   - Based on review, the user may iterate back to stories/navigation/specs and repeat phases to refine the app; further refinements should be tracked in the target checklist.
 - **Final wiring**
   Agent generated code based on stories, specs:
@@ -123,7 +125,7 @@ Generate/update framework code under `apps/<target>/src/` (screen/page + any nec
 
 ### Step 5: Validate and iterate
 
-- Prompt the user to run/reload the target app and validate the slice behavior against the spec.
+- Prompt the user to run/reload the target app and validate the slice behavior against the spec. The agent may open the slice on a running device/emulator (`scripts/open-deeplink.sh --route <Route> [--variant <v>]`) so the user reviews it live.
 - If behavior is wrong, the user should iterate by updating **stories/specs** (human lane) and then prompt the agent to regenerate the slice
 - The agent should not “fix the spec by writing programmer structure into it” (that belongs in consolidations).
 
@@ -210,6 +212,8 @@ This section summarizes the scripts involved in generation and staleness trackin
 |--------|---------|-------|
 | `scripts/check-stale.sh` | Compute per-target staleness report | Primary input to deciding what to (re)generate next |
 | `scripts/update-dep-hashes.sh --route <Route>` | Update dependency hashes for one route | Should not imply `--all` unless explicitly requested |
+| `scripts/check-variants.sh` | Report spec-declared variants with no fixture | Report only; also summarized by `check-stale.sh` |
+| `scripts/open-deeplink.sh` | Open one registered state on a connected device/emulator | Used by agents to show a slice, and by the preview server |
 | `scripts/build-images.sh` | Capture missing/stale scenario images | Optional; used during Scenario / Peer Review |
 | `scripts/preview-scenarios.sh` | Local scenario preview | Optional (human-facing) |
 | `scripts/publish-scenarios.sh` | Publish scenarios as HTML | Optional; requires a publication destination |
@@ -228,6 +232,7 @@ Consolidations are the regenerable translator layer. They should include depende
 ---
 provides: ["screen:mobile:LogHistory"]
 needs: ["domain:Op:LogEntries.list", "domain:Entity:Entry"]
+mocks: ["entries"]          # fixture namespaces read in mock mode: mock/data/<namespace>.<variant>.json
 dependsOn:
   - design/stories/mobile/02-daily.md
   - design/specs/project.md
@@ -242,6 +247,8 @@ depHashes:
   design/specs/mobile/navigation.md: "sha256:..."
 ---
 ```
+
+`mocks` is the join key for `scripts/check-variants.sh`: each variant the screen spec declares must have a `mock/data/<namespace>.<variant>.json` for a namespace listed here.
 
 ### Per-target metadata registries (JSON)
 
@@ -290,4 +297,6 @@ Users may issue short commands. Agent workflows should map these to concrete act
 - **“generate” / “generate a slice” / "generate next"**: identify target → identify candidate slice → refresh consolidations/specs as needed → generate code → update dependency metadata → (optional) scenarios.
 - **“generate scenarios”**: identify target → select slice(s) → generate/refresh scenario docs under `design/generated/<target>/scenarios/` → (optionally) preview/publish.
 - **“generate screenshots”**: identify target → build/refresh scenario images for missing/stale scenarios (optionally using `scripts/build-images.sh`) → confirm scenarios are no longer stale.
+- **“show me `<Route>`” / “open it on the emulator”**: identify target → `scripts/open-deeplink.sh --route <Route> [--variant <v>] [--params k=v]`.
+- **“preview scenarios”**: identify target → `scripts/preview-scenarios.sh --target <target>`; the pages open linked states on the connected device.
 

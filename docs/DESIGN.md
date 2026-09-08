@@ -34,6 +34,8 @@ Built to accommodate multiple apps (“targets”) in one project. The user init
    - a reusable component (invoked by a screen)
    - a user-observable data flow
 
+   A slice is reviewed on the running app, not in the editor: the agent can open it on a connected device or emulator by deep link so the user sees it as a user would.
+
 6. **Artifact lanes (anti–spec creep)** —
    - Stories: user narrative (“what happens”)
    - Specs: user-observable UX contract (“how it behaves”), human-readable
@@ -47,13 +49,18 @@ Built to accommodate multiple apps (“targets”) in one project. The user init
 
 8. **Iteration** — At any point, the user can modify stories/specs and ask the agent to regenerate one or more slices.
 
-9. **Peer review** — Stories can be developed into scenarios: storyboards like the original stories, augmented with screenshots from the app in various (mock) data states.
+9. **Peer review** — Stories can be developed into scenarios: storyboards like the original stories, augmented with screenshots from the app in various (mock) data states. The screenshot is evidence; the deep link behind it is the review. A storyboard is an index into the running app, not a substitute for it.
 
    Mocking and variants are a UI validation mechanism:
    - A target app should have a single “mock mode” switch (mock vs production).
    - Variants apply to mock data only and are selected via deep links (primarily for screenshots/testing).
    - Screens/components should not accept `variant` parameters or otherwise know whether data is mock vs production.
    - The data layer decides mock vs production; in mock mode, it may consult the selected variant “on the side” (global/context) to load the appropriate `mock/data/<namespace>.<variant>.json`.
+
+   Reviewable states:
+   - A **state** is a (route, params, variant) triple, registered per target in `design/generated/<target>/images/index.md` whether or not a screenshot is captured. Variants name fixtures; a scene reached through different params is a registry entry, not a variant.
+   - Scenario links are honest deep links (`<scheme>://…`). Markdown renderers will not resolve them, so the toolkit does: the local preview server launches them on a connected device, and published pages leave them raw for a device’s own browser to resolve.
+   - A storyboard cannot reveal a state that does not exist. A variant declared in a spec must have a fixture behind it; tooling reports when it does not, because the alternative is a screen that renders the default fixture and looks correct.
 
 ## Design Phases
 The user and agent will work in various phases of the project, some phases are specific to a particular target.  Others are shared across all targets of the project.
@@ -63,7 +70,7 @@ The user and agent will work in various phases of the project, some phases are s
   - Navigation Planning (per target): if no navigation spec exists yet, the agent infers a minimal navigation layout from stories (screen/component list + starter navigation template). The user reviews and updates the navigation spec before proceeding.
   - Domain Contract (shared): if no shared domain specs exist yet, the agent proposes them based on the project decisions and target stories/specs. If domain specs do exist, this might not be the first app on the project. In any case, the agent should help review the domain specifications to make sure they are compatible with the present target and without losing compatibility with other previously generated targets. The user should review updates before proceeding.
   - Screen/Component Slicing (per target): under user direction, the agent implements the UI one slice at a time, giving the user a chance to test and commit at each stable milestone. This phase typically uses mock data so the UI can be validated in multiple states.
-  - Scenario / Peer Review (per target, optional): the agent can generate storyboard-like scenarios with screenshots to support review and iteration.
+  - Scenario / Peer Review (per target, optional): the agent can generate storyboard-like scenarios with screenshots to support review and iteration, and open any registered state on a running device.
   - Final wiring (target): after screen/UI approval, slices are finished and tested against the production data model.
 
 
@@ -102,5 +109,6 @@ Appeus should be safe to adopt early, and easy to remove later:
 - **Non-destructive adoption**: Appeus should be usable inside an existing repo by adding only what’s missing and never clobbering existing project files.
 - **Detachable**: a finished project should be able to remove Appeus symlinks and agent scaffolding while keeping the resulting app code and human-authored design artifacts intact (stories/specs).
 - **Self-checking guidance**: agents should be generally aware of the expected scaffold layout and be able to detect older/malformed project structure or generated artifacts, then advise and assist the user in reorganizing to the current layout.
+- **One owner per formula**: deep-link construction, registry parsing, and scenario rendering each live in one place under `scripts/lib/`, shared by the scripts and the preview server, so they cannot drift apart.
 
 Framework adapter details, version-control guidance, and migration notes are intentionally documented in `docs/ARCHITECTURE.md` rather than here.
