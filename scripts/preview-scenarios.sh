@@ -17,6 +17,8 @@ set -euo pipefail
 #   --host 0.0.0.0   also reachable on the LAN: a phone with the app installed resolves the
 #                    links itself (the page does not intercept clicks on a mobile browser)
 #   --no-open        do not open a browser tab
+#   --verbose        log every request and the exact launch command (each link open is
+#                    logged either way); also $APPEUS_VERBOSE=1
 #
 # If exactly one target exists, --target defaults to it. Requires node/npx
 # (scripts/lib/scenarios.js renders the pages). publish-scenarios.sh renders the same
@@ -29,6 +31,7 @@ source "${SCRIPT_DIR}/lib/project-root.sh"
 source "${SCRIPT_DIR}/lib/scenarios.sh"
 
 TARGET="" PORT="${APPEUS_PORT:-8080}" HOST=127.0.0.1 OPEN=1 DEVICE="${APPEUS_DEVICE:-}"
+VERBOSE=0; [[ "${APPEUS_VERBOSE:-0}" != "0" ]] && VERBOSE=1
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="${2:-}"; shift 2 ;;
@@ -36,6 +39,7 @@ while [[ $# -gt 0 ]]; do
     --port) PORT="${2:-${APPEUS_PORT:-8080}}"; shift 2 ;;
     --host) HOST="${2:-127.0.0.1}"; shift 2 ;;
     --no-open) OPEN=0; shift ;;
+    --verbose|-v) VERBOSE=1; shift ;;
     -h|--help) sed -n '/^# Usage:/,/^# If exactly/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
@@ -70,4 +74,4 @@ fi
 
 appeus_scenarios_js serve --project "$PROJECT_DIR" --target "$TARGET" \
   --port "$PORT" --host "$HOST" --open-script "${SCRIPT_DIR}/open-deeplink.sh" \
-  ${DEVICE:+--device "$DEVICE"}
+  ${DEVICE:+--device "$DEVICE"} $([[ "$VERBOSE" = "1" ]] && echo --verbose)

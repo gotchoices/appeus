@@ -89,10 +89,12 @@ One link opens one state. A multi-step flow is several links; a scenario does no
 ## Preview
 
 ```bash
-appeus/scripts/preview-scenarios.sh [--target <t>] [--device <id>] [--port 8080] [--host 127.0.0.1] [--no-open]
+appeus/scripts/preview-scenarios.sh [--target <t>] [--device <id>] [--port 8080] [--host 127.0.0.1] [--no-open] [--verbose]
 ```
 
-Renders the docs live (registry re-read per request) and adds `/states` — every registry entry, thumbnail if captured. Clicking a `<scheme>://` link opens that state on the server's device; the server calls `open-deeplink.sh`. The device is fixed when the server starts — `--device`, else `APPEUS_DEVICE`, else the only connected one — and shown in the page header; the page only says which state. Run one server per project when several emulators are up, giving each its own `--port` (or `APPEUS_PORT`). `--host 0.0.0.0` also serves the LAN: on a phone's browser the page does not intercept clicks, so a phone with the app installed resolves the link itself.
+Renders the docs live (registry re-read per request) and adds `/states` — every registry entry, thumbnail if captured. Clicking a `<scheme>://` link opens that state on the server's device; the server calls `open-deeplink.sh`. The device is fixed when the server starts — `--device`, else `APPEUS_DEVICE`, else the only connected one — and shown in the page header; the page only says which state. Run one server per project when several emulators are up, giving each its own `--port` (or `APPEUS_PORT`).
+
+The server logs every link it opens — the link, the device, and whether the launch succeeded — so a click that does nothing can be diagnosed from its stdout rather than the toast. `--verbose` (or `APPEUS_VERBOSE=1`) adds every request and the exact `open-deeplink.sh` command. `--host 0.0.0.0` also serves the LAN: on a phone's browser the page does not intercept clicks, so a phone with the app installed resolves the link itself.
 
 ## Publish
 

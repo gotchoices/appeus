@@ -13,7 +13,8 @@ schemes, so the links did nothing. Now:
   that state on the server's emulator/simulator via a new `/open` endpoint. The device is fixed per
   server (`--device`, `APPEUS_DEVICE`, or the only one connected) and shown in the page header, so one
   preview per project works with several emulators up (give each its own `--port`, or `APPEUS_PORT`).
-  It also serves `/states`, a page of every registered state. `--host 0.0.0.0` reaches a phone on the LAN, where the links open the installed
+  It also serves `/states`, a page of every registered state, and logs every link it opens
+  (`--verbose` adds each request and the launch command). `--host 0.0.0.0` reaches a phone on the LAN, where the links open the installed
   app directly.
 - New `open-deeplink.sh` opens any state from the command line (`--route/--variant/--params`, `--id`,
   or `--link`) on Android or a booted iOS simulator; agents use it to show a freshly generated slice.

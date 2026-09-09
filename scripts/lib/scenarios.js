@@ -13,7 +13,7 @@
 //                             id route variant file capture(1|0) link deps(comma-separated)
 //   link  --route R [--variant V] [--locale L] [--params k=v]...   print link 0x1f appId 0x1f scheme
 //   link  --id ID | --file F                                        link of a registry entry
-//   serve --port N [--host H] [--device ID] --open-script <path>    preview server
+//   serve --port N [--host H] [--device ID] [--verbose] --open-script <path>   preview server
 //   build --out <dir>                                               static site
 //
 // Needs the `yaml` package (all commands) and `marked` (serve/build). Run it as
@@ -42,12 +42,15 @@ function req(name) {
 
 // ---------- arguments ----------
 
+const FLAGS = new Set(['verbose']); // valueless options
+
 function parseArgs(argv) {
   const a = { params: [] };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (!k.startsWith('--')) { a.command = a.command || k; continue; }
     const key = k.slice(2);
+    if (FLAGS.has(key)) { a[key] = 'true'; continue; }
     if (key === 'params') { a.params.push(argv[++i]); continue; }
     a[key] = argv[++i];
   }
@@ -256,15 +259,27 @@ function runScript(script, args, env, cb) {
 }
 
 function serve(opts) {
-  const { genDir, project, target, port, host, openScript, template, device } = opts;
+  const { genDir, project, target, port, host, openScript, template, device, verbose } = opts;
   const scenDir = path.join(genDir, 'scenarios');
   const env = { APPEUS_PROJECT_DIR: project };
-  const send = (res, code, type, body) => { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' }); res.end(body); };
+
+  // The server is where a click becomes a launch, so it is where the trace belongs.
+  // Opens are always logged (one line per click, and the step that can fail);
+  // --verbose adds every request and the command actually run.
+  const stamp = () => new Date().toTimeString().slice(0, 8);
+  const log = (msg) => process.stdout.write(`[${stamp()}] ${msg}\n`);
+  const vlog = (msg) => { if (verbose) log(msg); };
+
+  const send = (res, code, type, body) => {
+    res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
+    res.end(body);
+  };
   const json = (res, code, obj) => send(res, code, 'application/json', JSON.stringify(obj));
 
   const server = http.createServer((req, res) => {
     const u = new URL(req.url, 'http://x');
     const p = decodeURIComponent(u.pathname);
+    if (verbose) res.on('finish', () => vlog(`${req.method} ${req.url} → ${res.statusCode}`));
     const reg = loadRegistry(genDir); // re-read per request: the registry is edited while previewing
 
     if (p === '/' || p === '/index.html') {
@@ -274,15 +289,26 @@ function serve(opts) {
     if (p === '/open') {
       const link = u.searchParams.get('link') || '';
       if (!reg.scheme || !link.startsWith(reg.scheme + '://')) {
-        return json(res, 400, { ok: false, message: `refusing to open '${link}': not a ${reg.scheme || '<scheme>'}:// link` });
+        const message = `refusing to open '${link}': not a ${reg.scheme || '<scheme>'}:// link`;
+        log(`open  REFUSED  ${message}`);
+        return json(res, 400, { ok: false, message });
       }
       const args = ['--target', target, '--link', link];
       if (reg.appId) args.push('--app-id', reg.appId);
       if (device) args.push('--device', device);
+      log(`open  ${link}${device ? `  → ${device}` : ''}`);
+      vlog(`  run: ${openScript} ${args.join(' ')}`);
+      const started = Date.now();
       return runScript(openScript, args, env, (code, out, err) => {
-        if (code === 0) return json(res, 200, { ok: true, message: out.trim() || `opened ${link}` });
+        const ms = Date.now() - started;
+        if (code === 0) {
+          log(`  ok (${ms}ms) ${out.trim()}`);
+          return json(res, 200, { ok: true, message: out.trim() || `opened ${link}` });
+        }
         let message = (err.trim() || out.trim() || `open-deeplink exited ${code}`).split('\n')[0];
         if (code === 3) message = 'Several devices connected; restart the preview with --device <id> (or set APPEUS_DEVICE)';
+        log(`  FAILED (${ms}ms, exit ${code}) ${message}`);
+        if (verbose && err.trim()) for (const l of err.trim().split('\n')) vlog(`    ${l}`);
         json(res, 200, { ok: false, message });
       });
     }
@@ -322,6 +348,7 @@ function serve(opts) {
   server.listen(port, host, () => {
     process.stdout.write(`Previewing ${path.relative(process.cwd(), genDir) || genDir} at http://${host === '0.0.0.0' ? 'localhost' : host}:${port}/\n`);
     if (host === '0.0.0.0') process.stdout.write('Bound to all interfaces: open the same URL with this machine\'s LAN address on a phone that has the app installed.\n');
+    if (verbose) process.stdout.write('Verbose: logging every request and launch command.\n');
     // Say now, not on the first click, where links will go.
     if (device) return process.stdout.write(`Links open on: ${device}\n`);
     runScript(openScript, ['--list'], env, (_c, out) => {
@@ -408,7 +435,7 @@ function main() {
     }
     case 'serve':
       if (!a['open-script']) fail('serve needs --open-script <path to open-deeplink.sh>');
-      serve({ genDir, project, target: a.target, port: Number(a.port || 8080), host: a.host || '127.0.0.1', openScript: a['open-script'], template, device: a.device || '' });
+      serve({ genDir, project, target: a.target, port: Number(a.port || 8080), host: a.host || '127.0.0.1', openScript: a['open-script'], template, device: a.device || '', verbose: a.verbose === 'true' });
       break;
     case 'build':
       if (!a.out) fail('build needs --out <dir>');
