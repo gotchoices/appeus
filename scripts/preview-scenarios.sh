@@ -20,6 +20,9 @@ set -euo pipefail
 #   --verbose        log every request and the exact launch command (each link open is
 #                    logged either way); also $APPEUS_VERBOSE=1
 #
+# The browser opened is the OS default; $APPEUS_BROWSER (or $BROWSER) names a different
+# command. Nothing is opened over SSH/headless or with --no-open — the URL is printed either way.
+#
 # If exactly one target exists, --target defaults to it. Requires node/npx
 # (scripts/lib/scenarios.js renders the pages). publish-scenarios.sh renders the same
 # pages statically, with raw links.
@@ -55,6 +58,60 @@ GEN_DIR="${PROJECT_DIR}/design/generated/${TARGET}"
 [[ -f "${GEN_DIR}/images/index.md" ]] || echo "Note: no ${GEN_DIR#${PROJECT_DIR}/}/images/index.md yet; links cannot be opened until it names a scheme."
 
 URL="http://$([[ "$HOST" = "0.0.0.0" ]] && echo localhost || echo "$HOST"):${PORT}/"
+
+# Hand a URL to whatever the OS uses to open one. Never names a browser: the point is
+# the user's default. Dispatch is by OS *first* — a bare `command -v open` would match
+# util-linux's `open` (an alias for openvt, a virtual-terminal tool) on some Linux boxes.
+open_browser() {
+  local url="$1" opener
+
+  # Explicit choice wins. $BROWSER is the long-standing convention; it may carry a %s.
+  for opener in "${APPEUS_BROWSER:-}" "${BROWSER:-}"; do
+    [[ -n "$opener" ]] || continue
+    if [[ "$opener" == *%s* ]]; then
+      ${opener//%s/$url} >/dev/null 2>&1 && return 0
+    else
+      $opener "$url" >/dev/null 2>&1 && return 0
+    fi
+    echo "Note: \$APPEUS_BROWSER/\$BROWSER ('${opener}') did not open the page." >&2
+    return 1
+  done
+
+  case "$(uname -s)" in
+    Darwin)
+      command -v open >/dev/null 2>&1 && open "$url" >/dev/null 2>&1 && return 0
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      # `start` is a cmd builtin, not an executable; the empty title arg is required.
+      command -v cmd.exe >/dev/null 2>&1 && cmd.exe /c start "" "$url" >/dev/null 2>&1 && return 0
+      command -v powershell.exe >/dev/null 2>&1 && powershell.exe -NoProfile -Command Start-Process "$url" >/dev/null 2>&1 && return 0
+      command -v explorer.exe >/dev/null 2>&1 && explorer.exe "$url" >/dev/null 2>&1 && return 0
+      ;;
+    Linux|*BSD|DragonFly)
+      # WSL: hand it to Windows, which has the browser.
+      if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+        for opener in wslview explorer.exe; do
+          command -v "$opener" >/dev/null 2>&1 && "$opener" "$url" >/dev/null 2>&1 && return 0
+        done
+        command -v powershell.exe >/dev/null 2>&1 && powershell.exe -NoProfile -Command Start-Process "$url" >/dev/null 2>&1 && return 0
+      fi
+      # No display means no browser to open (SSH, headless CI, a bare tty).
+      if [[ -z "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+        return 1
+      fi
+      for opener in xdg-open gio gnome-open kde-open5 kde-open sensible-browser x-www-browser www-browser; do
+        command -v "$opener" >/dev/null 2>&1 || continue
+        if [[ "$opener" = "gio" ]]; then
+          gio open "$url" >/dev/null 2>&1 && return 0
+        else
+          "$opener" "$url" >/dev/null 2>&1 && return 0
+        fi
+      done
+      ;;
+  esac
+  return 1
+}
+
 if [[ "$OPEN" = "1" ]]; then
   (
     # Wait for *this* server to answer before opening a tab: on a port collision the
@@ -62,9 +119,7 @@ if [[ "$OPEN" = "1" ]]; then
     for _ in $(seq 1 40); do
       kill -0 "$$" 2>/dev/null || exit 0   # parent gone: startup failed
       if curl -sf -o /dev/null --max-time 1 "${URL}states" 2>/dev/null; then
-        if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true
-        elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
-        fi
+        open_browser "$URL" || echo "Could not open a browser automatically — visit ${URL} (or set APPEUS_BROWSER)."
         exit 0
       fi
       sleep 0.5

@@ -94,6 +94,8 @@ appeus/scripts/preview-scenarios.sh [--target <t>] [--device <id>] [--port 8080]
 
 Renders the docs live (registry re-read per request) and adds `/states` — every registry entry, thumbnail if captured. Clicking a `<scheme>://` link opens that state on the server's device; the server calls `open-deeplink.sh`. The device is fixed when the server starts — `--device`, else `APPEUS_DEVICE`, else the only connected one — and shown in the page header; the page only says which state. Run one server per project when several emulators are up, giving each its own `--port` (or `APPEUS_PORT`).
 
+A browser tab opens once the server answers (`--no-open` to skip). It is the OS default browser — macOS `open`, Linux `xdg-open`/`gio`/…, WSL `wslview`, Git Bash `start` — never a named one; `APPEUS_BROWSER` or `BROWSER` (a `%s` placeholder is honored) overrides. On a headless or SSH session nothing is opened and the URL is printed instead.
+
 The server logs every link it opens — the link, the device, and whether the launch succeeded — so a click that does nothing can be diagnosed from its stdout rather than the toast. `--verbose` (or `APPEUS_VERBOSE=1`) adds every request and the exact `open-deeplink.sh` command. `--host 0.0.0.0` also serves the LAN: on a phone's browser the page does not intercept clicks, so a phone with the app installed resolves the link itself.
 
 ## Publish

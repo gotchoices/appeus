@@ -31,6 +31,10 @@ schemes, so the links did nothing. Now:
   the perl/sed link fixing is gone.
 - `android-screenshot.sh` now launches through `open-deeplink.sh`: the device serial is no longer lost
   in a subshell and `--app-id` is honored. Default `APPEUS_SCREEN_DELAY` is 8 s (was 3).
+- The preview's browser tab now opens on macOS, Linux, WSL and Git Bash (it was macOS/`xdg-open`
+  only), honors `APPEUS_BROWSER`/`BROWSER`, stays out of the way on a headless/SSH session, and says
+  so when it cannot open one. Dispatch is by OS, so a Linux `/usr/bin/open` (util-linux's `openvt`)
+  is no longer mistaken for a browser.
 - `scripts/lib/scenarios.js` (run via `npx -p marked -p yaml`) is the one reader of the registry and
   the one owner of the deep-link formula; `scripts/lib/project-root.sh` gained shared target resolution.
 
