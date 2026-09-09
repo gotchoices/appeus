@@ -78,7 +78,7 @@ You can preview scenarios locally (or ask the agent to do it):
 appeus/scripts/preview-scenarios.sh --port 8080
 ```
 
-This renders the scenario markdown as a small local website with images inline. Pick your emulator or simulator in the page header, then click any screenshot or deep link to open that state on it. Add `--host 0.0.0.0` to open the same pages on a phone on your network; there the links open the installed app directly.
+This renders the scenario markdown as a small local website with images inline. Click any screenshot or deep link to open that state on your emulator or simulator. The server decides which device — `--device <id>`, or `APPEUS_DEVICE`, or the only one running — and the page header says which; with several projects and emulators, run one preview per project. Add `--host 0.0.0.0` to open the same pages on a phone on your network; there the links open the installed app directly.
 
 ## Share / publish (to a public HTTP server)
 

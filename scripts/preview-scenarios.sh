@@ -7,8 +7,13 @@ set -euo pipefail
 # Also serves /states — every registry entry, captured or not.
 #
 # Usage:
-#   appeus/scripts/preview-scenarios.sh [--target <name>] [--port 8080] [--host 127.0.0.1] [--no-open]
+#   appeus/scripts/preview-scenarios.sh [--target <name>] [--device <id>] [--port 8080] [--host 127.0.0.1] [--no-open]
 #
+#   --device <id>    emulator serial / simulator udid this server sends links to (default:
+#                    $APPEUS_DEVICE, else the only connected device). The page never chooses a
+#                    device: run one server per project, each bound to its own emulator.
+#   --port <n>       port to listen on (default: $APPEUS_PORT, else 8080). Give each project its
+#                    own port when previewing several at once.
 #   --host 0.0.0.0   also reachable on the LAN: a phone with the app installed resolves the
 #                    links itself (the page does not intercept clicks on a mobile browser)
 #   --no-open        do not open a browser tab
@@ -23,11 +28,12 @@ source "${SCRIPT_DIR}/lib/project-root.sh"
 # shellcheck source=lib/scenarios.sh
 source "${SCRIPT_DIR}/lib/scenarios.sh"
 
-TARGET="" PORT=8080 HOST=127.0.0.1 OPEN=1
+TARGET="" PORT="${APPEUS_PORT:-8080}" HOST=127.0.0.1 OPEN=1 DEVICE="${APPEUS_DEVICE:-}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target) TARGET="${2:-}"; shift 2 ;;
-    --port) PORT="${2:-8080}"; shift 2 ;;
+    --device) DEVICE="${2:-}"; shift 2 ;;
+    --port) PORT="${2:-${APPEUS_PORT:-8080}}"; shift 2 ;;
     --host) HOST="${2:-127.0.0.1}"; shift 2 ;;
     --no-open) OPEN=0; shift ;;
     -h|--help) sed -n '/^# Usage:/,/^# If exactly/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
@@ -47,12 +53,21 @@ GEN_DIR="${PROJECT_DIR}/design/generated/${TARGET}"
 URL="http://$([[ "$HOST" = "0.0.0.0" ]] && echo localhost || echo "$HOST"):${PORT}/"
 if [[ "$OPEN" = "1" ]]; then
   (
-    sleep 1.5
-    if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true
-    elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
-    fi
+    # Wait for *this* server to answer before opening a tab: on a port collision the
+    # answer would come from the other project's preview.
+    for _ in $(seq 1 40); do
+      kill -0 "$$" 2>/dev/null || exit 0   # parent gone: startup failed
+      if curl -sf -o /dev/null --max-time 1 "${URL}states" 2>/dev/null; then
+        if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true
+        elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
+        fi
+        exit 0
+      fi
+      sleep 0.5
+    done
   ) &
 fi
 
 appeus_scenarios_js serve --project "$PROJECT_DIR" --target "$TARGET" \
-  --port "$PORT" --host "$HOST" --open-script "${SCRIPT_DIR}/open-deeplink.sh"
+  --port "$PORT" --host "$HOST" --open-script "${SCRIPT_DIR}/open-deeplink.sh" \
+  ${DEVICE:+--device "$DEVICE"}

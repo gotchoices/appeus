@@ -13,7 +13,7 @@
 //                             id route variant file capture(1|0) link deps(comma-separated)
 //   link  --route R [--variant V] [--locale L] [--params k=v]...   print link 0x1f appId 0x1f scheme
 //   link  --id ID | --file F                                        link of a registry entry
-//   serve --port N [--host H] --open-script <path>                  preview server
+//   serve --port N [--host H] [--device ID] --open-script <path>    preview server
 //   build --out <dir>                                               static site
 //
 // Needs the `yaml` package (all commands) and `marked` (serve/build). Run it as
@@ -182,13 +182,12 @@ function renderDoc(mdText, { reg, mode, root, template, title, nav, extra }) {
   });
 }
 
-function navHtml(root, mode) {
+// In serve mode the header states where links go; the server, not the page, owns that.
+function navHtml(root, mode, device) {
   const ext = mode === 'build' ? '.html' : '.md';
   const states = mode === 'build' ? 'states.html' : 'states';
-  const picker = mode === 'serve'
-    ? ' <label class="appeus-device">device <select id="appeus-device"></select></label>'
-    : '';
-  return `<nav class="appeus-nav"><a href="${root}scenarios/index${ext}">Scenarios</a> · <a href="${root}${states}">States</a>${picker}</nav>`;
+  const where = mode === 'serve' ? `<span class="appeus-device">links open on: <code>${esc(device || 'auto')}</code></span>` : '';
+  return `<nav class="appeus-nav"><a href="${root}scenarios/index${ext}">Scenarios</a> · <a href="${root}${states}">States</a>${where}</nav>`;
 }
 
 function statesHtml(reg, genDir, mode) {
@@ -208,47 +207,34 @@ function statesHtml(reg, genDir, mode) {
     ? `<table class="states"><thead><tr><th></th><th>Screen</th><th>Variant</th><th>Note</th><th>Link</th></tr></thead><tbody>${rows.join('\n')}</tbody></table>`
     : `<p>No states registered. Add entries under <code>screenshots:</code> in <code>images/index.md</code>.</p>`;
   const intro = `<h1>States</h1><p>Every reviewable state registered for this target (${reg.entries.length}). ` +
-    (mode === 'serve' ? 'Click a screenshot or <em>open</em> to launch it on the selected device.' : 'Open a link on a device that has the app installed.') +
+    (mode === 'serve' ? 'Click a screenshot or <em>open</em> to launch it on the preview\'s device.' : 'Open a link on a device that has the app installed.') +
     ` Scenarios: <a href="scenarios/index${ext}">index</a>.</p>`;
   return intro + body;
 }
 
-// The client side of live links. On the device itself the OS resolves the scheme,
-// so the script stands aside there.
+// The client side of live links: the page says which state, the server knows which
+// device. On a phone's own browser the OS resolves the scheme, so the script stands aside.
 function liveScript(scheme) {
   return `<div id="appeus-toast" class="appeus-toast" hidden></div>
 <script>
 (function () {
   var scheme = ${JSON.stringify(scheme)};
   if (/Android|iPhone|iPad/i.test(navigator.userAgent)) return;
-  var key = 'appeus.device', sel = document.getElementById('appeus-device'), toast = document.getElementById('appeus-toast');
-  function store(v) { try { localStorage.setItem(key, v); } catch (e) {} }
-  function stored() { try { return localStorage.getItem(key) || ''; } catch (e) { return ''; } }
+  var toast = document.getElementById('appeus-toast');
   function say(msg, ok) {
     toast.textContent = msg; toast.className = 'appeus-toast ' + (ok ? 'ok' : 'err'); toast.hidden = false;
     clearTimeout(say.t); say.t = setTimeout(function () { toast.hidden = true; }, ok ? 2500 : 10000);
   }
-  function fill(devices) {
-    if (!sel) return;
-    sel.innerHTML = '';
-    devices.forEach(function (d) { var o = document.createElement('option'); o.value = d.id; o.textContent = d.label ? d.label + ' (' + d.id + ')' : d.id; sel.appendChild(o); });
-    if (!devices.length) { var o = document.createElement('option'); o.value = ''; o.textContent = 'no device connected'; sel.appendChild(o); }
-    var saved = stored();
-    if (devices.some(function (d) { return d.id === saved; })) sel.value = saved;
-    sel.onchange = function () { store(sel.value); };
-  }
-  fetch('/devices').then(function (r) { return r.json(); }).then(function (j) { fill(j.devices || []); }).catch(function () {});
   document.addEventListener('click', function (e) {
     var a = e.target.closest ? e.target.closest('a[href]') : null;
     if (!a) return;
     var href = a.getAttribute('href') || '';
     if (!scheme || href.indexOf(scheme + '://') !== 0) return;
     e.preventDefault();
-    var dev = sel ? sel.value : '';
     say('Opening…', true);
-    fetch('/open?link=' + encodeURIComponent(href) + '&device=' + encodeURIComponent(dev))
+    fetch('/open?link=' + encodeURIComponent(href))
       .then(function (r) { return r.json(); })
-      .then(function (j) { say(j.message, j.ok); if (j.devices) fill(j.devices); })
+      .then(function (j) { say(j.message, j.ok); })
       .catch(function (err) { say('preview server unreachable: ' + err, false); });
   });
 })();
@@ -269,15 +255,8 @@ function runScript(script, args, env, cb) {
   });
 }
 
-function parseDevices(text) {
-  return text.split('\n').filter(Boolean).map((l) => {
-    const [kind, id, label] = l.split('\t');
-    return { kind, id, label: label || '' };
-  });
-}
-
 function serve(opts) {
-  const { genDir, project, target, port, host, openScript, template } = opts;
+  const { genDir, project, target, port, host, openScript, template, device } = opts;
   const scenDir = path.join(genDir, 'scenarios');
   const env = { APPEUS_PROJECT_DIR: project };
   const send = (res, code, type, body) => { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' }); res.end(body); };
@@ -292,12 +271,8 @@ function serve(opts) {
       const to = fs.existsSync(path.join(scenDir, 'index.md')) ? '/scenarios/index.md' : '/states';
       res.writeHead(302, { Location: to }); return res.end();
     }
-    if (p === '/devices') {
-      return runScript(openScript, ['--list'], env, (code, out) => json(res, 200, { devices: parseDevices(out) }));
-    }
     if (p === '/open') {
       const link = u.searchParams.get('link') || '';
-      const device = u.searchParams.get('device') || '';
       if (!reg.scheme || !link.startsWith(reg.scheme + '://')) {
         return json(res, 400, { ok: false, message: `refusing to open '${link}': not a ${reg.scheme || '<scheme>'}:// link` });
       }
@@ -306,22 +281,20 @@ function serve(opts) {
       if (device) args.push('--device', device);
       return runScript(openScript, args, env, (code, out, err) => {
         if (code === 0) return json(res, 200, { ok: true, message: out.trim() || `opened ${link}` });
-        const message = (err.trim() || out.trim() || `open-deeplink exited ${code}`).split('\n')[0];
-        if (code === 3) {
-          return runScript(openScript, ['--list'], env, (_c, list) => json(res, 200, { ok: false, message: message + ' — pick a device above and click again', devices: parseDevices(list) }));
-        }
+        let message = (err.trim() || out.trim() || `open-deeplink exited ${code}`).split('\n')[0];
+        if (code === 3) message = 'Several devices connected; restart the preview with --device <id> (or set APPEUS_DEVICE)';
         json(res, 200, { ok: false, message });
       });
     }
     if (p === '/states' || p === '/states.html') {
-      const page = fillTemplate(template, { title: 'States', content: statesHtml(reg, genDir, 'serve'), nav: navHtml('', 'serve'), extra: liveScript(reg.scheme), root: '' });
+      const page = fillTemplate(template, { title: 'States', content: statesHtml(reg, genDir, 'serve'), nav: navHtml('', 'serve', device), extra: liveScript(reg.scheme), root: '' });
       return send(res, 200, MIME['.html'], page);
     }
     const mdMatch = /^\/scenarios\/([^/]+)\.(md|html)$/.exec(p);
     if (mdMatch) {
       const file = path.join(scenDir, mdMatch[1] + '.md');
       if (!fs.existsSync(file)) return send(res, 404, 'text/plain', `not found: ${p}`);
-      const page = renderDoc(fs.readFileSync(file, 'utf8'), { reg, mode: 'serve', root: '../', template, nav: navHtml('../', 'serve'), extra: liveScript(reg.scheme) });
+      const page = renderDoc(fs.readFileSync(file, 'utf8'), { reg, mode: 'serve', root: '../', template, nav: navHtml('../', 'serve', device), extra: liveScript(reg.scheme) });
       return send(res, 200, MIME['.html'], page);
     }
     // Static files under the generated dir only.
@@ -332,9 +305,31 @@ function serve(opts) {
     send(res, 200, MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', fs.readFileSync(file));
   });
 
+  // One preview per project means collisions are ordinary; say so plainly.
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      process.stderr.write(`Error: port ${port} is already in use (another preview server?).\n` +
+        `  Choose another with --port <n>, or set APPEUS_PORT for this project.\n`);
+      process.exit(4);
+    }
+    if (err.code === 'EACCES') {
+      process.stderr.write(`Error: not allowed to listen on port ${port}; use --port with a value above 1023.\n`);
+      process.exit(4);
+    }
+    throw err;
+  });
+
   server.listen(port, host, () => {
     process.stdout.write(`Previewing ${path.relative(process.cwd(), genDir) || genDir} at http://${host === '0.0.0.0' ? 'localhost' : host}:${port}/\n`);
     if (host === '0.0.0.0') process.stdout.write('Bound to all interfaces: open the same URL with this machine\'s LAN address on a phone that has the app installed.\n');
+    // Say now, not on the first click, where links will go.
+    if (device) return process.stdout.write(`Links open on: ${device}\n`);
+    runScript(openScript, ['--list'], env, (_c, out) => {
+      const rows = out.split('\n').filter(Boolean);
+      if (rows.length === 1) process.stdout.write(`Links open on: ${rows[0].split('\t')[1]} (the only connected device)\n`);
+      else if (rows.length === 0) process.stdout.write('No device connected; links will fail until one is (or restart with --device <id>).\n');
+      else process.stdout.write(`${rows.length} devices connected; links will fail until you restart with --device <id> or set APPEUS_DEVICE:\n` + rows.map((r) => '  ' + r.replace(/\t/g, '  ')).join('\n') + '\n');
+    });
   });
 }
 
@@ -413,7 +408,7 @@ function main() {
     }
     case 'serve':
       if (!a['open-script']) fail('serve needs --open-script <path to open-deeplink.sh>');
-      serve({ genDir, project, target: a.target, port: Number(a.port || 8080), host: a.host || '127.0.0.1', openScript: a['open-script'], template });
+      serve({ genDir, project, target: a.target, port: Number(a.port || 8080), host: a.host || '127.0.0.1', openScript: a['open-script'], template, device: a.device || '' });
       break;
     case 'build':
       if (!a.out) fail('build needs --out <dir>');

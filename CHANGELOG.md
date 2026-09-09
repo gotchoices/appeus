@@ -10,9 +10,11 @@ Scenario docs always linked each screenshot to its deep link, but Markdown rende
 schemes, so the links did nothing. Now:
 
 - `preview-scenarios.sh` serves the pages itself (no markserv): clicking a `<scheme>://` link opens
-  that state on the emulator/simulator chosen in the page header, via a new `/open` endpoint. It also
-  serves `/states`, a page of every registered state. `--host 0.0.0.0` reaches a phone on the LAN,
-  where the links open the installed app directly.
+  that state on the server's emulator/simulator via a new `/open` endpoint. The device is fixed per
+  server (`--device`, `APPEUS_DEVICE`, or the only one connected) and shown in the page header, so one
+  preview per project works with several emulators up (give each its own `--port`, or `APPEUS_PORT`).
+  It also serves `/states`, a page of every registered state. `--host 0.0.0.0` reaches a phone on the LAN, where the links open the installed
+  app directly.
 - New `open-deeplink.sh` opens any state from the command line (`--route/--variant/--params`, `--id`,
   or `--link`) on Android or a booted iOS simulator; agents use it to show a freshly generated slice.
   With several devices connected it requires `--device <id>` (or `APPEUS_DEVICE`).
