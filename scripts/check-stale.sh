@@ -236,11 +236,28 @@ for ROUTE in "${SCREENS[@]}"; do
 
   # Outputs: generated screen file
   OUTPUTS=()
-  [ -f "${SRC_DIR}/screens/${ROUTE}.tsx" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.tsx")
-  [ -f "${SRC_DIR}/screens/${ROUTE}.ts" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.ts")
-  # SvelteKit routes
-  KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
-  [ -f "${SRC_DIR}/routes/${KEBAB}/+page.svelte" ] && OUTPUTS+=("${SRC_DIR}/routes/${KEBAB}/+page.svelte")
+  # An explicit `output` in the registry entry (a project-relative path, or a list of them)
+  # names where the route's code lives. It is needed wherever the route name does not map to
+  # a file by convention: a web app's root page, nested routes, routes with parameters
+  # (`routes/ledger/[accountId]/+page.svelte`). When present, it is used instead of the
+  # convention, so a route whose recorded files are all gone reads as "missing output".
+  RECORDED_OUTPUTS=()
+  if [ -f "${META_FILE}" ] && command -v jq >/dev/null 2>&1; then
+    while IFS= read -r f; do
+      [ -n "$f" ] && RECORDED_OUTPUTS+=("$f")
+    done < <(jq -r --arg r "$ROUTE" '.outputs[]? | select(.route == $r) | .output // empty | if type == "array" then .[] else . end' "${META_FILE}" 2>/dev/null || true)
+  fi
+  if [ "${#RECORDED_OUTPUTS[@]}" -gt 0 ]; then
+    for f in "${RECORDED_OUTPUTS[@]}"; do
+      [ -f "${PROJECT_DIR}/${f}" ] && OUTPUTS+=("${PROJECT_DIR}/${f}")
+    done
+  else
+    [ -f "${SRC_DIR}/screens/${ROUTE}.tsx" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.tsx")
+    [ -f "${SRC_DIR}/screens/${ROUTE}.ts" ] && OUTPUTS+=("${SRC_DIR}/screens/${ROUTE}.ts")
+    # SvelteKit routes
+    KEBAB="$(echo "${ROUTE}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]')"
+    [ -f "${SRC_DIR}/routes/${KEBAB}/+page.svelte" ] && OUTPUTS+=("${SRC_DIR}/routes/${KEBAB}/+page.svelte")
+  fi
 
   STALE="false"
   REASON=""

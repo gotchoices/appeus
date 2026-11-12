@@ -57,6 +57,13 @@ Per target, `design/generated/<target>/meta/outputs.json` tracks outputs and the
 A route with no generated output is always stale (`missing output`). Otherwise `check-stale.sh`
 picks one of two methods per route and reports which one it used in the `how` column.
 
+**Finding a route's output.** When the route's registry entry has `output` (a project-relative
+path, or a list of paths), those files are the route's output. Otherwise `check-stale.sh`
+falls back to the naming convention: `src/screens/<Route>.tsx` (or `.ts`), or for SvelteKit
+`src/routes/<kebab-route>/+page.svelte`. Record `output` whenever the code does not sit where
+the convention expects: a web app's root page, nested routes, routes with parameters. A
+route whose recorded files are all gone reads as `missing output`.
+
 ### Hash-based (preferred, used whenever `depHashes` exists)
 
 1. Compute sha256 for each file in `dependsOn`

@@ -4,6 +4,15 @@ This changelog is intentionally practical: it focuses on changes that affect **p
 
 ## v2.1 (current, post-`v2` tag)
 
+### Staleness honors a route's recorded `output`
+
+`check-stale.sh` found a route's code only by naming convention (`src/screens/<Route>.tsx`, or
+`src/routes/<kebab-route>/+page.svelte`), so a web app's root page, nested routes and routes with
+parameters always read as `missing output`, however fresh. It now uses the `output` field of the
+route's entry in `design/generated/<target>/meta/outputs.json` (a path or a list of paths,
+project-relative) when present, and the convention otherwise. Projects without `output` fields
+see no change. To fix a route stuck at `missing output`, add its file as `output` and rerun.
+
 ### Live storyboards: scenario links open the app
 
 Scenario docs always linked each screenshot to its deep link, but Markdown renderers refuse custom

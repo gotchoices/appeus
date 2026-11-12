@@ -44,3 +44,9 @@ Appeus screen routes map to SvelteKit file paths:
 | `UserProfile` | `src/routes/profile/+page.svelte` |
 | `Settings` | `src/routes/settings/+page.svelte` |
 
+URLs come from the target's `navigation.md`, so a route's file often does not follow from its
+name (`ItemDetail` above, a root page, anything nested). Record the file as `output` in the
+route's entry in `design/generated/<target>/meta/outputs.json`; `check-stale.sh` uses it, and
+falls back to `src/routes/<kebab-route>/+page.svelte` only when it is absent
+([staleness](../staleness.md)).
+
